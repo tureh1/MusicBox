@@ -18,5 +18,5 @@
         android:layout_marginBottom="50dp"
         android:textColor="#FFFFFFFF"
         android:textSize="90dp"></TextView>
-
+git s
 </androidx.appcompat.widget.LinearLayoutCompat>
