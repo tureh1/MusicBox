@@ -7,11 +7,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
-
+    Button b1,b2;
     private TextView messageText;   // define message textview variable
 
     @Override
@@ -22,5 +24,9 @@ public class MainActivity extends AppCompatActivity {
         /* initialize UI elements */
         messageText = findViewById(R.id.main_msg_txt);      // link to message textview in the Main activity XML
         messageText.setText("Hello World this is team 3_swarna_1!");
+
+
+
     }
+
 }
