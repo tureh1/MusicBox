@@ -11,22 +11,31 @@
         android:id="@+id/main_msg_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Intent Example"
         android:layout_gravity="center"
         android:layout_marginTop="200dp"
-        android:textSize="30dp"
-        android:textColor="#3F51B5">
-    </TextView>
+        android:text="Intent Example"
+        android:textColor="#3F51B5"
+        android:textColorLink="#00BCD4"
+        android:textSize="30dp"></TextView>
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:rotation="0"
+        android:text="Click 4 times to start"
+        android:layout_gravity="center"
+        />
 
     <Button
         android:id="@+id/main_counter_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
         android:layout_gravity="center"
+        android:layout_marginTop="100dp"
         android:text="To the Counter Activity"
-        android:textSize="20sp"
-        android:textColor="#ffffff">
-    </Button>
+        android:textColor="#ffffff"
+        android:textColorLink="#00BCD4"
+        android:textSize="20sp"></Button>
 
 </androidx.appcompat.widget.LinearLayoutCompat>

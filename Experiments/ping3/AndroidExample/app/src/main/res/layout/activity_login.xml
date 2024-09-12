@@ -5,19 +5,28 @@
     tools:context=".MainActivity"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/color">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login Example"
+        android:text="MUSICLY"
         android:layout_gravity="center"
         android:layout_marginTop="100dp"
-        android:layout_marginBottom="150dp"
+        android:layout_marginBottom="50dp"
         android:textSize="30dp"
-        android:textColor="#fc0303">
+        android:textColor="@color/black"
+        android:fontFamily="cursive">
     </TextView>
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:src="@drawable/profile"
+        android:layout_marginBottom="30dp">
 
+    </ImageView>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,7 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="username: "
+            android:text="Username: "
             android:textSize="20dp"
             android:textColor="#000000">
         </TextView>
@@ -51,9 +60,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="password: "
+            android:text="Password: "
             android:textSize="20dp"
-            android:textColor="#000000">
+            android:textColor="#000000"
+           >
         </TextView>
 
         <EditText
@@ -80,7 +90,8 @@
             android:layout_marginRight="10dp"
             android:text="Login"
             android:textSize="20sp"
-            android:textColor="#ffffff">
+            android:textColor="#ffffff"
+            android:backgroundTint="@color/black">
         </Button>
 
         <Button
@@ -90,10 +101,11 @@
             android:layout_marginLeft="10dp"
             android:text="Signup"
             android:textSize="20sp"
-            android:textColor="#ffffff">
+            android:textColor="#ffffff"
+            android:backgroundTint="@color/black">
         </Button>
-
     </LinearLayout>
+
 
 
 </androidx.appcompat.widget.LinearLayoutCompat>
