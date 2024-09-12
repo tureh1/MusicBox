@@ -14,7 +14,16 @@ class WelcomeController {
 
     @GetMapping("/")
     public String welcome() {
-        return "Hello and welcomes to COMS 309";
+        return " / \\__\n" +
+                "(    @\\___\n" +
+                " /         O\n" +
+                "/   (_____/\n" +
+                "/_____/ U\n"+
+                "Hello Cats and Dogs\n"+
+                "/\\_/\\  \n" +
+                "( o.o ) \n" +
+                " > ^ <"
+        ;
     }
 
     @GetMapping("/help")
