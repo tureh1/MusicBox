@@ -18,5 +18,11 @@
         android:layout_marginBottom="50dp"
         android:textColor="#FFFFFFFF"
         android:textSize="90dp"></TextView>
-git s
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/black"
+        android:layout_margin="150dp"
+        android:text="Button"/>
+
 </androidx.appcompat.widget.LinearLayoutCompat>
