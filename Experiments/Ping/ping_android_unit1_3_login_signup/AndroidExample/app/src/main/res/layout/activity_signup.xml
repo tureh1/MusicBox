@@ -110,7 +110,9 @@
             android:layout_marginRight="10dp"
             android:text="Login"
             android:textSize="20sp"
-            android:textColor="#ffffff">
+            android:textColor="#ffffff"
+            android:backgroundTint="@color/black">
+
         </Button>
 
         <Button
@@ -120,7 +122,8 @@
             android:layout_marginLeft="10dp"
             android:text="Signup"
             android:textSize="20sp"
-            android:textColor="#ffffff">
+            android:textColor="#ffffff"
+            android:backgroundTint="@color/black">
         </Button>
 
     </LinearLayout>
