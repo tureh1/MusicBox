@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/button"
+    android:id="@+id/button1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B67373"
+    android:background="#FFEB3B"
     android:orientation="vertical"
-    android:textAlignment="center"
+    android:visibility="visible"
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/h"
+        android:id="@+id/main_msg_txt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="100dp"
         android:layout_marginBottom="50dp"
-        android:textColor="#FFFFFFFF"
-        android:textSize="90dp"></TextView>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/black"
-        android:layout_margin="150dp"
-        android:text="Button"/>
+        android:textColor="@color/purple"
+        android:textSize="50dp"
+        android:fontFamily="monospace"
+
+        ></TextView>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/pic"
+        ></ImageView>
 
 </androidx.appcompat.widget.LinearLayoutCompat>
