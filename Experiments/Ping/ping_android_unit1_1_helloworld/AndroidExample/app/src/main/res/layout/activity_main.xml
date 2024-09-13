@@ -21,6 +21,10 @@
         android:fontFamily="monospace"
 
         ></TextView>
-
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/pic"
+        ></ImageView>
 
 </androidx.appcompat.widget.LinearLayoutCompat>
