@@ -17,6 +17,8 @@ public class Person {
 
     private String telephone;
 
+    private String socialSecurity;
+
     public Person(){
         
     }
@@ -26,6 +28,7 @@ public class Person {
         this.lastName = lastName;
         this.address = address;
         this.telephone = telephone;
+        this.socialSecurity = socialSecurity;
     }
 
     public String getFirstName() {
@@ -60,11 +63,18 @@ public class Person {
         this.telephone = telephone;
     }
 
+    public String getSocialSecurity() {return this.socialSecurity;}
+
+    public void setSocialSecurity(String socialSecurity) {
+        this.socialSecurity = socialSecurity;
+    }
+
     @Override
     public String toString() {
         return firstName + " " 
                + lastName + " "
                + address + " "
-               + telephone;
+               + telephone + " "
+               + socialSecurity;
     }
 }
