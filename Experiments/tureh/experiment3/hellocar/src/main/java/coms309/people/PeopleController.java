@@ -34,7 +34,7 @@ public class PeopleController {
     // Springboot automatically converts the list to JSON format 
     // in this case because of @ResponseBody
     // Note: To LIST, we use the GET method
-    @GetMapping("/people")
+    @GetMapping("/car")
     public  HashMap<String,Person> getAllPersons() {
         return peopleList;
     }
@@ -45,11 +45,11 @@ public class PeopleController {
     // It returns a string message in THIS example.
     // in this case because of @ResponseBody
     // Note: To CREATE we use POST method
-    @PostMapping("/people")
+    @PostMapping("/car")
     public  String createPerson(@RequestBody Person person) {
         System.out.println(person);
-        peopleList.put(person.getFirstName(), person);
-        return "New person "+ person.getFirstName() + " Saved";
+        peopleList.put(person.getCarName(), person);
+        return "New person "+ person.getCarName() + " Saved";
     }
 
     // THIS IS THE READ OPERATION
@@ -58,9 +58,9 @@ public class PeopleController {
     // springboot automatically converts Person to JSON format when we return it
     // in this case because of @ResponseBody
     // Note: To READ we use GET method
-    @GetMapping("/people/{firstName}")
-    public Person getPerson(@PathVariable String firstName) {
-        Person p = peopleList.get(firstName);
+    @GetMapping("/car/{carName}")
+    public Person getPerson(@PathVariable String carName) {
+        Person p = peopleList.get(carName);
         return p;
     }
 
@@ -73,10 +73,10 @@ public class PeopleController {
     // Here we are returning what we sent to the method
     // in this case because of @ResponseBody
     // Note: To UPDATE we use PUT method
-    @PutMapping("/people/{firstName}")
-    public Person updatePerson(@PathVariable String firstName, @RequestBody Person p) {
-        peopleList.replace(firstName, p);
-        return peopleList.get(firstName);
+    @PutMapping("/car/{carName}")
+    public Person updatePerson(@PathVariable String carName, @RequestBody Person p) {
+        peopleList.replace(carName, p);
+        return peopleList.get(carName);
     }
 
     // THIS IS THE DELETE OPERATION
@@ -85,9 +85,9 @@ public class PeopleController {
     // in this case because of @ResponseBody
     // Note: To DELETE we use delete method
     
-    @DeleteMapping("/people/{firstName}")
-    public HashMap<String, Person> deletePerson(@PathVariable String firstName) {
-        peopleList.remove(firstName);
+    @DeleteMapping("/car/{carName}")
+    public HashMap<String, Person> deletePerson(@PathVariable String carName) {
+        peopleList.remove(carName);
         return peopleList;
     }
 }
