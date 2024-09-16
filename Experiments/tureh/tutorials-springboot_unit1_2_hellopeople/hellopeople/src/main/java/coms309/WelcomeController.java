@@ -19,7 +19,7 @@ class WelcomeController {
                 " /         O\n" +
                 "/   (_____/\n" +
                 "/_____/ U\n"+
-                "Hello Cats and Dogs\n"+
+                "Hello Cats and Dogs, use directory '/help' for Command List\n"+
                 "/\\_/\\  \n" +
                 "( o.o ) \n" +
                 " > ^ <"
