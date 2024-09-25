@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/color">
+    android:background="@drawable/purple">
 
     <TextView
         android:layout_width="wrap_content"
@@ -39,14 +39,18 @@
             android:layout_height="wrap_content"
             android:text="Username: "
             android:textSize="20dp"
-            android:textColor="#000000">
+            android:textColor="#000000"
+            android:background="@color/black"
+            android:textColor="@color/white">
         </TextView>
 
         <EditText
             android:id="@+id/login_username_edt"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:hint="Enter Username Here">
+            android:hint="Enter Username"
+
+            android:textColor="@color/white">
         </EditText>
 
     </LinearLayout>
@@ -62,8 +66,9 @@
             android:layout_height="wrap_content"
             android:text="Password: "
             android:textSize="20dp"
-            android:textColor="#000000"
-           >
+            android:background="@color/black"
+            android:textColor="@color/white"
+            android:layout_marginBottom="40">
         </TextView>
 
         <EditText
@@ -71,7 +76,9 @@
             android:layout_width="wrap_content"
             android:inputType="textPassword"
             android:layout_height="50dp"
-            android:hint="Enter Password Here">
+            android:hint="Enter Password"
+
+            android:textColor="@color/white">
         </EditText>
 
     </LinearLayout>
