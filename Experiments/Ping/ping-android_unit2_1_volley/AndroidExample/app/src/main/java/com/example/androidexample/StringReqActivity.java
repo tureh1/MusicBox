@@ -24,7 +24,7 @@ public class StringReqActivity extends AppCompatActivity {
 
    // private static final String URL_STRING_REQ = "https://jsonplaceholder.typicode.com/users/1";
        public static final String URL_STRING_REQ = "https://f6384102-5cb7-4682-85c4-db51e831979a.mock.pstmn.io/Ping";
-      //public static final String URL_STRING_REQ = "http://10.0.2.2:8080/users/1";
+      // public static final String URL_STRING_REQ = "http://coms-3090-048.class.las.iastate.edu:8080/users/1";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
