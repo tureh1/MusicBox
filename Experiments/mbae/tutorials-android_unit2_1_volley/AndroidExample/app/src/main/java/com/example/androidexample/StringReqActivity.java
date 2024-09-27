@@ -23,7 +23,7 @@ public class StringReqActivity extends AppCompatActivity {
     private TextView msgResponse;
 
    // private static final String URL_STRING_REQ = "https://jsonplaceholder.typicode.com/users/1";
-       public static final String URL_STRING_REQ = "https://3a70a283-4918-4bc4-a5d3-7eccffe3dde5.mock.pstmn.io/helloworld";
+       public static final String URL_STRING_REQ = "https://87ec7542-7140-4d4d-9388-3813a059485d.mock.pstmn.io/test/users";
     //   public static final String URL_STRING_REQ = "http://10.0.2.2:8080/users/1";
 
     @Override
