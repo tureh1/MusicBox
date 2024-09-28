@@ -26,7 +26,7 @@ public class JsonObjReqActivity extends AppCompatActivity {
     private Button btnJsonObjReq;
     private TextView tvName, tvEmail, tvPhone;
 
-    private static final String URL_JSON_OBJECT = "http://coms-3090-048.class.las.iastate.edu:8080/users";
+    private static final String URL_JSON_OBJECT = "https://d1f9a305-ec1e-4421-95c4-f6cbd4aac0e8.mock.pstmn.io/Me";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
