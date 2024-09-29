@@ -18,6 +18,7 @@ public class LoginActivity extends AppCompatActivity {
     TextView forgotPassword;
     TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
+    private static final String URL_STRING_REQ ="37c895cd8d87345b/users";
 
 
     @Override
@@ -78,8 +79,9 @@ public class LoginActivity extends AppCompatActivity {
                 if (username.getText().toString().equals("user") && password.getText().toString().equals("password")) {
                     Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(LoginActivity.this, "The User and Password do not match. Try again or Try Forgot Password/Sign Up .", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "The User and Password do not match.  .", Toast.LENGTH_SHORT).show();
                 }
+
                 //Clears after log in attempt
                 username.setText("");
                 password.setText("");
