@@ -48,7 +48,7 @@ public class JsonObjReqActivity extends AppCompatActivity {
      */
     private void makeJsonObjReq() {
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(
-                Request.Method.GET,
+                Request.Method.POST,
                 URL_JSON_OBJECT,
                 null, // Pass null as the request body since it's a GET request
                 new Response.Listener<JSONObject>() {
