@@ -25,11 +25,13 @@ public class Laptop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private double cpuClock;
-    private int cpuCores;
-    private int ram;
-    private String manufacturer;
-    private int cost;
+   // private double cpuClock;
+    private String email;
+   // private int cpuCores;
+    private String password;
+    //private int ram;
+    //private String manufacturer;
+    //private int cost;
 
     /*
      * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
@@ -39,12 +41,12 @@ public class Laptop {
     @JsonIgnore
     private Person Person;
 
-    public Laptop( double cpuClock, int cpuCores, int ram, String manufacturer, int cost) {
-        this.cpuClock = cpuClock;
-        this.cpuCores = cpuCores;
-        this.ram = ram;
-        this.manufacturer = manufacturer;
-        this.cost = cost;
+    public Laptop( String email, String password) {
+        this.email = email;
+        this.password = password;
+      //  this.ram = ram;
+       // this.manufacturer = manufacturer;
+       // this.cost = cost;
     }
 
     public Laptop() {
@@ -60,23 +62,23 @@ public class Laptop {
         this.id = id;
     }
 
-    public double getCpuClock(){
-        return cpuClock;
+    public String getEmail(){
+        return email;
     }
 
-    public void setCpuClock(double cpuClock){
-        this.cpuClock = cpuClock;
+    public void setEmail(String email){
+        this.email = email;
     }
 
-    public int getCpuCores(){
-        return cpuCores;
+    public String getPassword(){
+        return password;
     }
 
-    public void setCpuCores(int cpuCores){
-        this.cpuCores = cpuCores;
+    public void setPassword(String password){
+        this.password = password;
     }
 
-    public String getManufacturer(){
+   /* public String getManufacturer(){
         return manufacturer;
     }
 
@@ -107,5 +109,5 @@ public class Laptop {
     public void setRam(int ram){
         this.ram = ram;
     }
-
+*/
 }
