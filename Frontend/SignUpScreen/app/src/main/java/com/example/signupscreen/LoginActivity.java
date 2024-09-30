@@ -17,7 +17,7 @@ public class LoginActivity extends AppCompatActivity {
     Button loginButton;
     TextView forgotPassword;
     TextView signUpLink;
-    private boolean isFirstClick = true; // Flag to check if it's the first click
+    private boolean isFirstClick = true;
     private static final String URL_STRING_REQ ="37c895cd8d87345b/users";
 
 
@@ -64,9 +64,9 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (hasFocus && isFirstClick) {
-                    username.setText("");  // Clear the default text from username
-                    password.setText("");  // Clear the default text from password
-                    isFirstClick = false;  // Ensure this only happens once for both fields
+                    username.setText("");
+                    password.setText("");
+                    isFirstClick = false;
                 }
             }
         };

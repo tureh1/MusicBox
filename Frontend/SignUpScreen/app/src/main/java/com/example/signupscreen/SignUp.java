@@ -1,63 +1,100 @@
 package com.example.signupscreen;
 
+import android.os.StrictMode;
+import android.widget.EditText;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class SignUp extends AppCompatActivity {
 
-    // Declare your UI components
-    private EditText username, password, confirm;
-    private Button signUpButton;
-    private TextView forgotPassword;
+    private EditText email, password, confirm;
+    private OkHttpClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.signup); // Ensure this matches your XML file name
+        setContentView(R.layout.signup);
 
-        // Initialize UI components
-        username = findViewById(R.id.username);
+        email = findViewById(R.id.email);
         password = findViewById(R.id.password);
         confirm = findViewById(R.id.confirm);
-        signUpButton = findViewById(R.id.SignUpButton);
-        forgotPassword = findViewById(R.id.forgotPassword);
+        Button signUpButton = findViewById(R.id.SignUpButton);
 
-        // Set up click listener for the sign-up button
+
+        client = new OkHttpClient();
+
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                handleSignUp();
-                Intent intent = new Intent(SignUp.this, LoginActivity.class);
-
-                startActivity(intent);
+                if (handleSignUp()) {
+                    // Send email and password to the backend
+                    sendSignUpRequest(email.getText().toString().trim(), password.getText().toString().trim());
+                }
             }
         });
+
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
     }
 
-    private void handleSignUp() {
-        String usernameInput = username.getText().toString().trim();
+    private boolean handleSignUp() {
+        String usernameInput = email.getText().toString().trim();
         String passwordInput = password.getText().toString().trim();
         String confirmInput = confirm.getText().toString().trim();
 
-        // Basic validation
         if (usernameInput.isEmpty() || passwordInput.isEmpty() || confirmInput.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
+            return false;
         }
 
         if (!passwordInput.equals(confirmInput)) {
             Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
-            return;
+            return false;
         }
 
-        // Simulate sign-up logic (this is where you'd handle backend communication)
-        Toast.makeText(this, "Sign Up Successful for " + usernameInput, Toast.LENGTH_SHORT).show();
-        // You can also start a new activity here if needed
+        return true;
+    }
+
+    private void sendSignUpRequest(String email, String password) {
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+
+        String json = "{ \"emailId\":\"" + email + "\", \"password\":\"" + password + "\" }";
+
+
+        RequestBody body = RequestBody.create(JSON, json);
+
+
+        Request request = new Request.Builder()
+                .url("http://coms-3090-048.class.las.iastate.edu:8080/add") // Replace with your backend URL
+                .post(body)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful()) {
+
+                Toast.makeText(SignUp.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(SignUp.this, LoginActivity.class);
+                startActivity(intent);
+            } else {
+
+                Toast.makeText(SignUp.this, "Sign Up Failed", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(SignUp.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
