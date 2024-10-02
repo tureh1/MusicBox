@@ -78,6 +78,14 @@ public class Laptop {
         this.password = password;
     }
 
+    public Person getPerson(){
+        return Person;
+    }
+
+    public void setPerson(Person Person){
+        this.Person = Person;
+    }
+
    /* public String getManufacturer(){
         return manufacturer;
     }
