@@ -76,7 +76,7 @@ public class PersonController {
         return PersonRepository.findById(id);
     }
 
-    @PutMapping("/Persons/{PersonId}/laptops/{laptopId}")
+    @PutMapping("/Persons/{PersonId}/Users/{laptopId}")
     String assignLaptopToPerson(@PathVariable int PersonId,@PathVariable int laptopId){
         Person Person = PersonRepository.findById(PersonId);
         Laptop laptop = laptopRepository.findById(laptopId);
