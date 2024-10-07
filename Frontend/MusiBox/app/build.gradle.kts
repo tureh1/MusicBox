@@ -41,5 +41,9 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+<<<<<<< HEAD
 }
 
+=======
+}
+>>>>>>> 781aa96 (update)
