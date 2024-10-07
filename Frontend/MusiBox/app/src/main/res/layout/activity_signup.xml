@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".SignUp">
+    tools:context=".SignupActivity">
 
     <TextView
         android:id="@+id/SignUpText"
