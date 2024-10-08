@@ -34,12 +34,14 @@ class Main {
     @Bean
     CommandLineRunner initPerson(PersonRepository PersonRepository, LaptopRepository laptopRepository) {
         return args -> {
-            Person Person1 = new Person("John", "john@somemail.com");
-            Person Person2 = new Person("Jane", "jane@somemail.com");
-            Person Person3 = new Person("Justin", "justin@somemail.com");
-            Laptop laptop1 = new Laptop( 2.5, 4, 8, "Lenovo", 300);
-            Laptop laptop2 = new Laptop( 4.1, 8, 16, "Hp", 800);
-            Laptop laptop3 = new Laptop( 3.5, 32, 32, "Dell", 2300);  
+            Person Person1 = new Person("Haris", "Haris@gmail.com");
+            Person Person2 = new Person("Tu", "Tu@aol.com");
+            Person Person3 = new Person("Ping", "Ping@hotmail.com");
+            Person Person4 = new Person("Bae", "Bae@outlook.com");
+            Laptop laptop1 = new Laptop( "Haris@gmail.com", "Haris123");
+            Laptop laptop2 = new Laptop("Tu@aol.com" , "Tu123");
+            Laptop laptop3 = new Laptop( "Ping@hotmail.com", "Ping123");
+            Laptop laptop4 = new Laptop( "Bae@outlook.com", "Bae123");
             Person1.setLaptop(laptop1);
             Person2.setLaptop(laptop2);
             Person3.setLaptop(laptop3);            

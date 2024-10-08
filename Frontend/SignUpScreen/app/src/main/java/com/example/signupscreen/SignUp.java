@@ -1,23 +1,26 @@
 package com.example.signupscreen;
 
-import android.os.StrictMode;
-import android.widget.EditText;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class SignUp extends AppCompatActivity {
 
     private EditText email, password, confirm;
-    private OkHttpClient client;
+    private RequestQueue requestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +32,8 @@ public class SignUp extends AppCompatActivity {
         confirm = findViewById(R.id.confirm);
         Button signUpButton = findViewById(R.id.SignUpButton);
 
-
-        client = new OkHttpClient();
+        // Initialize the Volley request queue
+        requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,10 +44,6 @@ public class SignUp extends AppCompatActivity {
                 }
             }
         });
-
-
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
     }
 
     private boolean handleSignUp() {
@@ -56,7 +55,10 @@ public class SignUp extends AppCompatActivity {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return false;
         }
-
+        if (passwordInput.length() < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
         if (!passwordInput.equals(confirmInput)) {
             Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
             return false;
@@ -66,35 +68,39 @@ public class SignUp extends AppCompatActivity {
     }
 
     private void sendSignUpRequest(String email, String password) {
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/add";
 
-        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
-
-        String json = "{ \"emailId\":\"" + email + "\", \"password\":\"" + password + "\" }";
-
-
-        RequestBody body = RequestBody.create(JSON, json);
-
-
-        Request request = new Request.Builder()
-                .url("http://coms-3090-048.class.las.iastate.edu:8080/add") // Replace with your backend URL
-                .post(body)
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-
-                Toast.makeText(SignUp.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(SignUp.this, LoginActivity.class);
-                startActivity(intent);
-            } else {
-
-                Toast.makeText(SignUp.this, "Sign Up Failed", Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
+        // Create a JSON object with the email and password
+        JSONObject requestData = new JSONObject();
+        try {
+            requestData.put("emailId", email);
+            requestData.put("password", password);
+        } catch (JSONException e) {
             e.printStackTrace();
-            Toast.makeText(SignUp.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+
+        // Create the JsonObjectRequest for the POST request
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        // Handle the success response here
+                        Toast.makeText(SignUp.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
+
+                        // Navigate to LoginActivity
+                        Intent intent = new Intent(SignUp.this, LoginActivity.class);
+                        startActivity(intent);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Handle the error here
+                        Toast.makeText(SignUp.this, "Sign Up Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        // Add the request to the Volley queue
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 }
