@@ -28,7 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     TextView forgotPassword;
     TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
-    private static final String URL_STRING_REQ ="37c895cd8d87345b/users";
+    private static final String URL_STRING_REQ = "37c895cd8d87345b/users";
 
 
     @Override
@@ -49,8 +49,8 @@ public class LoginActivity extends AppCompatActivity {
                 // Navigate to ForgotPasswordActivity or show a Toast for now
                 Toast.makeText(LoginActivity.this, "Forgot Password clicked", Toast.LENGTH_SHORT).show();
 
-                 Intent intent = new Intent(LoginActivity.this, ForgotActivity.class);
-                 startActivity(intent);
+                Intent intent = new Intent(LoginActivity.this, ForgotActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -59,10 +59,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Navigate to SignUpActivity or show a Toast for now
-             
 
-                 Intent intent = new Intent(LoginActivity.this, SignUp.class);
-                 startActivity(intent);
+
+                Intent intent = new Intent(LoginActivity.this, SignUp.class);
+                startActivity(intent);
             }
         });
 
@@ -154,6 +154,42 @@ public class LoginActivity extends AppCompatActivity {
 
         // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+    }
+
+    private void fetchUserData(String userId) {
+        String url = "http://10.90.72.167:8080/user/" + userId;
+
+        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    // Handle the response
+                    try {
+                        //fetched user data
+                        String email = response.getString("emailId");
+
+
+                        // Store the fetched data for later use.
+                        getSharedPreferences("user_data", MODE_PRIVATE)
+                                .edit()
+                                .putString("userId", userId)
+                                .putString("email", email)
+                                .apply();
+
+                        // Navigate to the next activity
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Error parsing user data", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    // Handle error
+                    Toast.makeText(LoginActivity.this, "Failed to fetch user data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+        // Add the GET request to the Volley queue
+        VolleySingleton.getInstance(this).addToRequestQueue(getRequest);
     }
     
 }
