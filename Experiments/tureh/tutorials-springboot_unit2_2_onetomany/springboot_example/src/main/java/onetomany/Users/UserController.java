@@ -1,6 +1,7 @@
 package onetomany.Users;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,8 @@ public class UserController {
     private String signupFailure = "{\"message\":\"email already registered\"}";
     private String passwordChangeSuccess = "{\"message\":\"password reset successfully\"}";
     private String passwordChangeFailure = "{\"message\":\"password reset unsuccessfully\"}";
+    private String loginSuccess = "{\"message\":\"login successful\"}";
+    private String loginFailure = "{\"message\":\"invalid email or password\"}";
 
     @GetMapping(path = "/users")
     List<User> getAllUsers() {
@@ -50,17 +53,24 @@ public class UserController {
         return signupSuccess; // Signup successful
     }
 
-    @GetMapping(path = "/users/{emailId}")
-    User getUserById(@PathVariable String emailId) {
-        return userRepository.findByEmailId(emailId); // Updated to use emailId as String
+    @GetMapping(path = "/users/{id}")
+    User getUserById(@PathVariable int id) {
+        return userRepository.findById(id);
     }
 
-    @PostMapping(path = "/users")
-    String createUser(@RequestBody User user) {
-        if (user == null || user.getEmailId() == null || user.getPassword() == null)
-            return failure;
-        userRepository.save(user);
-        return success;
+    @PostMapping(path = "/login")
+    public String loginUser(@RequestBody User user) {
+        if (user == null || user.getEmailId() == null || user.getPassword() == null ||
+                user.getEmailId().trim().isEmpty() || user.getPassword().trim().isEmpty()) {
+            return loginFailure; // Invalid input
+        }
+
+        User existingUser = userRepository.findByEmailId(user.getEmailId());
+        if (existingUser == null || !existingUser.getPassword().equals(user.getPassword())) {
+            return loginFailure; // Invalid email or password
+        }
+
+        return loginSuccess; // Login successful
     }
 
     @DeleteMapping(path = "/users/{id}")
