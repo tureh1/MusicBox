@@ -28,7 +28,7 @@ public class LoginActivity extends AppCompatActivity {
     TextView forgotPassword;
     TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
-    private static final String URL_STRING_REQ = "37c895cd8d87345b/users";
+
 
 
     @Override
