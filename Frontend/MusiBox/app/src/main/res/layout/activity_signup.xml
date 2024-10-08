@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".SignupActivity">
+    tools:context=".SignUp">
 
     <TextView
         android:id="@+id/SignUpText"
@@ -26,10 +26,11 @@
         android:layout_height="42dp"
         android:drawableLeft="@drawable/baseline_person_24"
         android:drawablePadding="8dp"
-        android:textColor="@color/Grey"
+        android:textColor="@color/black"
         android:textSize="20sp"
         android:layout_marginTop="30dp"
         android:hint="email"
+
         />
     <EditText
         android:id="@+id/password"
@@ -37,7 +38,7 @@
         android:layout_height="42dp"
         android:drawableLeft="@drawable/baseline_lock_24"
         android:drawablePadding="8dp"
-        android:textColor="@color/Grey"
+        android:textColor="@color/black"
         android:textSize="20sp"
         android:layout_marginTop="30dp"
         android:hint="password"
@@ -50,7 +51,7 @@
         android:drawableLeft="@drawable/baseline_lock_24"
         android:drawablePadding="8dp"
 
-        android:textColor="@color/Grey"
+        android:textColor="@color/black"
         android:textSize="20sp"
         android:layout_marginTop="30dp"
         android:hint="confirm password"

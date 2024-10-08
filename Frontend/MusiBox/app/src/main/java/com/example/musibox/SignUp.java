@@ -7,15 +7,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-<<<<<<< HEAD:Frontend/MusiBox/app/src/main/java/com/example/musibox/SignupActivity.java
 
-=======
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
->>>>>>> 781aa96 (update):Frontend/MusiBox/app/src/main/java/com/example/musibox/SignUp.java
+
 
 
 import org.json.JSONException;
@@ -24,10 +22,7 @@ import org.json.JSONObject;
 public class SignUp extends AppCompatActivity {
 
     private EditText email, password, confirm;
-<<<<<<< HEAD:Frontend/MusiBox/app/src/main/java/com/example/musibox/SignupActivity.java
 
-=======
->>>>>>> 781aa96 (update):Frontend/MusiBox/app/src/main/java/com/example/musibox/SignUp.java
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +34,6 @@ public class SignUp extends AppCompatActivity {
         confirm = findViewById(R.id.confirm);
         Button signUpButton = findViewById(R.id.SignUpButton);
 
-<<<<<<< HEAD:Frontend/MusiBox/app/src/main/java/com/example/musibox/SignupActivity.java
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-=======
         // Initialize the Volley request queue
         RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
@@ -55,7 +46,7 @@ public class SignUp extends AppCompatActivity {
                 }
             }
         });
->>>>>>> 781aa96 (update):Frontend/MusiBox/app/src/main/java/com/example/musibox/SignUp.java
+
     }
 
     private boolean handleSignUp() {
@@ -79,11 +70,9 @@ public class SignUp extends AppCompatActivity {
         return true;
     }
 
-<<<<<<< HEAD:Frontend/MusiBox/app/src/main/java/com/example/musibox/SignupActivity.java
 
-=======
     private void sendSignUpRequest(String email, String password) {
-        String url = "http://10.90.72.167:8080/users";
+        String url = "http://10.90.72.167:8080/signup"; // Your backend URL
 
         // Create a JSON object with the email and password
         JSONObject requestData = new JSONObject();
@@ -98,11 +87,24 @@ public class SignUp extends AppCompatActivity {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,
                 response -> {
                     // Handle the success response here
-                    Toast.makeText(SignUp.this, "Sign Up Successful", Toast.LENGTH_SHORT).show();
+                    try {
+                        String message = response.getString("message");
 
-                    // Navigate to LoginActivity
-                    Intent intent = new Intent(SignUp.this, LoginActivity.class);
-                    startActivity(intent);
+                        // Check the message to determine if the signup was successful
+                        if (message.equals("signup success")) {
+                            Toast.makeText(SignUp.this, message, Toast.LENGTH_SHORT).show();
+
+                            // Navigate to LoginActivity
+                            Intent intent = new Intent(SignUp.this, LoginActivity.class);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(SignUp.this, message, Toast.LENGTH_SHORT).show();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(SignUp.this, "Unexpected response format", Toast.LENGTH_SHORT).show();
+                    }
                 },
                 error -> {
                     // Handle the error here
@@ -110,7 +112,6 @@ public class SignUp extends AppCompatActivity {
                 });
 
         // Add the request to the Volley queue
-        com.example.musibox.VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 }
->>>>>>> 781aa96 (update):Frontend/MusiBox/app/src/main/java/com/example/musibox/SignUp.java
