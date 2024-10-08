@@ -59,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Navigate to SignUpActivity or show a Toast for now
-                Toast.makeText(LoginActivity.this, "Sign Up clicked", Toast.LENGTH_SHORT).show();
+             
 
                  Intent intent = new Intent(LoginActivity.this, SignUp.class);
                  startActivity(intent);
@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                 },
                 error -> {
                     // Handle the error here
-                    Toast.makeText(LoginActivity.this, "Sign Up Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Log in Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 });
 
         // Add the request to the Volley queue
