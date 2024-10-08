@@ -14,8 +14,15 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class LoginActivity extends AppCompatActivity {
-    EditText username;
+    EditText email;
     EditText password;
     Button loginButton;
     TextView forgotPassword;
@@ -30,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        username = findViewById(R.id.username);
+        email = findViewById(R.id.username);
         password = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginButton);
         forgotPassword = findViewById(R.id.forgotPassword);
@@ -64,30 +71,89 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if (hasFocus && isFirstClick) {
-                    username.setText("");  // Clear the default text from username
+                    email.setText("");  // Clear the default text from username
                     password.setText("");  // Clear the default text from password
                     isFirstClick = false;  // Ensure this only happens once for both fields
                 }
             }
         };
         // Attach the common listener to both fields
-        username.setOnFocusChangeListener(clearTextListener);
+        email.setOnFocusChangeListener(clearTextListener);
         password.setOnFocusChangeListener(clearTextListener);
+
+        RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                if (username.getText().toString().equals("user") && password.getText().toString().equals("password")) {
-                    Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(LoginActivity.this, "The User and Password do not match.  .", Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                if (handleLogIn()) {
+                    // Send email and password to the backend
+                    sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
                 }
-
-                //Clears after log in attempt
-                username.setText("");
-                password.setText("");
             }
         });
+
     }
 
+    private boolean handleLogIn() {
+        String usernameInput = email.getText().toString().trim();
+        String passwordInput = password.getText().toString().trim();
+
+        if (usernameInput.isEmpty() || passwordInput.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (passwordInput.length() < 6) {
+            Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+
+
+    private void sendLogInRequest(String email, String password) {
+        String url = "http://10.90.72.167:8080/login"; // Your backend URL
+
+        // Create a JSON object with the email and password
+        JSONObject requestData = new JSONObject();
+        try {
+            requestData.put("emailId", email);
+            requestData.put("password", password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Create the JsonObjectRequest for the POST request
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,
+                response -> {
+                    // Handle the success response here
+                    try {
+                        String message = response.getString("message");
+
+                        // Check the message to determine if the login was successful
+                        if (message.equals("login successful")) {
+                            Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+
+
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Unexpected response format", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    // Handle the error here
+                    Toast.makeText(LoginActivity.this, "Sign Up Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+        // Add the request to the Volley queue
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+    }
+    
 }
