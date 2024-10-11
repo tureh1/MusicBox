@@ -1,0 +1,121 @@
+package onetoone.Users;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import onetoone.Persons.Person;
+
+/**
+ *
+ * @author Vivek Bengre
+ */
+
+@Entity
+public class User {
+
+    /*
+     * The annotation @ID marks the field below as the primary key for the table created by springboot
+     * The @GeneratedValue generates a value if not already present, The strategy in this case is to start from 1 and increment for each table
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    // private double cpuClock;
+    private String email;
+    // private int cpuCores;
+    private String password;
+    //private int ram;
+    //private String manufacturer;
+    //private int cost;
+
+    /*
+     * @OneToOne creates a relation between the current entity/table(Laptop) with the entity/table defined below it(Person)
+     * @JsonIgnore is to assure that there is no infinite loop while returning either Person/laptop objects (laptop->Person->laptop->...)
+     */
+    @OneToOne
+    @JsonIgnore
+    private Person Person;
+
+    public User( String email, String password) {
+        this.email = email;
+        this.password = password;
+        //  this.ram = ram;
+        // this.manufacturer = manufacturer;
+        // this.cost = cost;
+    }
+
+    public User() {
+    }
+
+    // =============================== Getters and Setters for each field ================================== //
+
+    public int getId(){
+        return id;
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
+
+    public String getEmail(){
+        return email;
+    }
+
+    public void setEmail(String email){
+        this.email = email;
+    }
+
+    public String getPassword(){
+        return password;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
+    }
+
+    public Person getPerson(){
+        return Person;
+    }
+
+    public void setPerson(Person Person){
+        this.Person = Person;
+    }
+
+   /* public String getManufacturer(){
+        return manufacturer;
+    }
+
+    public void setManufacturer(String manufacturer){
+        this.manufacturer = manufacturer;
+    }
+
+    public int getCost(){
+        return cost;
+    }
+
+    public void setCost(int cost){
+        this.cost = cost;
+    }
+
+    public Person getPerson(){
+        return Person;
+    }
+
+    public void setPerson(Person Person){
+        this.Person = Person;
+    }
+
+    public int getRam(){
+        return ram;
+    }
+
+    public void setRam(int ram){
+        this.ram = ram;
+    }
+*/
+}
