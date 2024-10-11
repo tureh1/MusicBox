@@ -20,7 +20,7 @@
         android:textSize="70sp"
         android:layout_marginBottom="30dp" />
 
-    <!-- Subheading or tagline -->
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
         android:layout_marginBottom="40dp"
         android:textAlignment="center"/>
 
-    <!-- Button to navigate to next screen -->
+
     <Button
         android:id="@+id/getStartedButton"
         android:layout_width="wrap_content"
