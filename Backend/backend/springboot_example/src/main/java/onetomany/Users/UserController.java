@@ -24,7 +24,7 @@ public class UserController {
     private String signupFailure = "{\"message\":\"email already registered\"}";
     private String passwordChangeSuccess = "{\"message\":\"password reset successfully\"}";
     private String passwordChangeFailure = "{\"message\":\"password reset unsuccessfully\"}";
-    private String loginSuccess = "{\"message\":\"login successful\"}";
+    private String loginSuccessTemplate = "{\"message\":\"login successful\", \"userId\": %d}";
     private String loginFailure = "{\"message\":\"invalid email or password\"}";
 
     @GetMapping(path = "/users")
@@ -70,7 +70,8 @@ public class UserController {
             return loginFailure; // Invalid email or password
         }
 
-        return loginSuccess; // Login successful
+        // Login successful, send userId in the response
+        return String.format(loginSuccessTemplate, existingUser.getId()); // Assuming getId() returns the user ID
     }
 
     @DeleteMapping(path = "/users/{emailId}")
