@@ -34,6 +34,9 @@
         <activity
             android:name=".ForgotActivity"
             android:exported="true" />
+        <activity android:name=".homeActivity"/>
+        <activity android:name=".UserProfileActivity"/>
+
     </application>
 
 </manifest>
