@@ -1,4 +1,4 @@
-package onetomany.Posts;
+/*package onetomany.Posts;
 
 import onetomany.Users.User;
 import onetomany.Users.UserRepository;
@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+@RestController
+@RequestMapping("/posts")
 public class PostController {
 
     @Autowired
@@ -102,3 +105,4 @@ public class PostController {
     }
 
 }
+*/

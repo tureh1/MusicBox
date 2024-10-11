@@ -1,4 +1,4 @@
-package onetomany.Posts;
+/*package onetomany.Posts;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,3 +11,4 @@ public interface PostRepository extends JpaRepository<Post, String> {
     List<Post> findByAlbumId(int albumId);
     void deleteById(int id);
 }
+*/

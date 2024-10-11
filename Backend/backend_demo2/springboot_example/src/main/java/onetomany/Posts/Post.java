@@ -1,6 +1,6 @@
-package onetomany.Posts;
+/*package onetomany.Posts;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -8,18 +8,43 @@ import java.util.Date;
 
 import onetomany.Users.User;
 
-
-
+@Entity
+@Table(name="post")
 public class Post {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="id")
     private int id;
+    @Column(unique = true)
+   // @JsonProperty("title")
     private String title;
+    @Lob
     private String contents;
+    @Column(name="rating")
     private int rating;
+    @Column(name="date")
     private Date date = new Date();
 
+    /*
+     * Relations
+     */
+/*
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
+
+    private Integer movieId;
+
+  //  @Id
+   // @GeneratedValue(strategy = GenerationType.IDENTITY)
+   // private int id;
+   // private String title;
+   // private String contents;
+   // private int rating;
+   // private Date date = new Date();
+/*
     public int getId(){
         return id;
     }
@@ -59,20 +84,21 @@ public class Post {
     public void setDate(Date date){
         this.date = date;
     }
-
+/*
     public int  getAlbumId() {
         return albumId;
     }
-/*
+
     public void setAlbumId(Integer  albumId) {
         this.albumId = albumId;
     }
 */
+    /*
     public User getUser(){
-        return User;
+        return user;
     }
 
     public void setUser(User user){
-        this.User = user;
+        this.user = user;
     }
-}
+}*/

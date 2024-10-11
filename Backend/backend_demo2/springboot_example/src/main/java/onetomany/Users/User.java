@@ -1,9 +1,10 @@
 package onetomany.Users;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import onetomany.Profile.Profile;
+
+import java.util.List;
 
 @Entity
 public class User {
@@ -17,6 +18,9 @@ public class User {
     private String password;
     private Boolean ifActive = true; // or false, based on your logic
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Profile profile;
     // =============================== Constructors ================================== //
 
     public User(String emailId, String password) {
@@ -52,6 +56,14 @@ public class User {
 
     public void setPassword(String password) { // Setter for password
         this.password = password;
+    }
+
+    public Profile getProfile() { // Change to single Profile
+        return profile;
+    }
+
+    public void setProfile(Profile profile) { // Change to single Profile
+        this.profile = profile;
     }
 
     public static class UpdatePasswordRequest {
