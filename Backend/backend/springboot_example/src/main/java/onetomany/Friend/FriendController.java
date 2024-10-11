@@ -22,12 +22,12 @@ public class FriendController {
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
 
-    @PutMapping(path = "/friends/{friendId}")
-    public String updateFriend(@PathVariable int friendId, @RequestBody Friend updatedFriend) {
-        Optional<Friend> friendOptional = friendRepository.findById(friendId);
-        if (friendOptional.isPresent()) {
-            Friend existingFriend = friendOptional.get();
+    @PutMapping(path = "/friends/email/{friendEmail}")
+    public String updateFriendByEmail(@PathVariable String friendEmail, @RequestBody Friend updatedFriend) {
+        // Find the friend by email
+        Friend existingFriend = friendRepository.findByFriendEmail(friendEmail);
 
+        if (existingFriend != null) {
             // Update fields
             existingFriend.setFriendName(updatedFriend.getFriendName());
 
@@ -38,6 +38,7 @@ public class FriendController {
         }
         return failure; // Friend not found
     }
+
 
     @PostMapping(path = "/users/{userId}/addFriend")
     public String addFriend(@PathVariable int userId, @RequestBody Friend friend) {
@@ -69,11 +70,16 @@ public class FriendController {
     }
 
 
-    @DeleteMapping(path = "/friends/{friendId}")
-    public String deleteFriend(@PathVariable int friendId) {
+    @DeleteMapping(path = "/friends/{friendEmail}")
+    public String deleteFriend(@PathVariable String friendEmail) {
         try {
-            friendRepository.deleteById(friendId);
-            return success;
+            // Find the friend by email first
+            Friend friend = friendRepository.findByFriendEmail(friendEmail);
+            if (friend != null) {
+                friendRepository.delete(friend); // Use delete method directly on the Friend object
+                return success;
+            }
+            return failure; // Friend not found
         } catch (Exception e) {
             return failure;
         }
