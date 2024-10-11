@@ -63,7 +63,6 @@ public class ForgotActivity extends AppCompatActivity {
 
         return true;
     }
-
     private void sendPasswordRequest(String email, String password) {
         String url = "http://10.90.72.167:8080/newpass/" + email;
 
