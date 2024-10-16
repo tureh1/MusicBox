@@ -28,7 +28,6 @@ public class Profile {
     // =============================== Constructors ================================== //
     public Profile() {
      //   this.createdAt = new Date(); // Initialize creation date
-        this.bio="";
     }
 
     public Profile(User user, String bio) {
