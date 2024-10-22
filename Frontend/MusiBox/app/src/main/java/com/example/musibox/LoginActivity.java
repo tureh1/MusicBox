@@ -85,8 +85,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (handleLogIn()) {
                     // Send email and password to the backend
-                  //  sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
-                    Toast.makeText(LoginActivity.this, "Dummy Login Successful", Toast.LENGTH_SHORT).show();  //Dummy
+                   sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
+                   // Toast.makeText(LoginActivity.this, "Dummy Login Successful", Toast.LENGTH_SHORT).show();  //Dummy
                     String emailInput = email.getText().toString().trim();
                     Intent homeIntent = new Intent(LoginActivity.this, homeActivity.class);
                     homeIntent.putExtra("emailId",emailInput);

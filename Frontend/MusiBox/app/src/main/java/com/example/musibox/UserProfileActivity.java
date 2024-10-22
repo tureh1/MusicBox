@@ -18,6 +18,9 @@ import com.android.volley.toolbox.StringRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class UserProfileActivity extends AppCompatActivity {
     private EditText bioProfile;
     private TextView friendsCount;
@@ -54,11 +57,10 @@ public class UserProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String bioText = bioProfile.getText().toString().trim(); // Get bio text
+                saveBio(bioText);
                 if (!bioText.isEmpty()) {
                     // Call saveBio to send the POST request with bio text
                     saveBio(bioText);
-                } else {
-                    Toast.makeText(UserProfileActivity.this, "Bio cannot be empty", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -75,6 +77,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
     private void getBio(){
         String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
+        //String url = "http://10.90.72.167:8080/users/6/bio";
 
         // Create a GET request with Volley
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -102,37 +105,44 @@ public class UserProfileActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    private void saveBio(String bioText){
+    private void saveBio(String bioText) {
         String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
 
         JSONObject jsonBody = new JSONObject();
         try {
-            jsonBody.put("bio", bioText); // Add bio text
+            jsonBody.put("bio", bioText);  // Add bio text to JSON object
         } catch (JSONException e) {
             e.printStackTrace();
-            return;  // Return early if JSON creation fails
+            return;
         }
-        // Create a POST request with Volley
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, jsonBody,
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonBody,
                 response -> {
-                    // Handle successful response
-                    Toast.makeText(UserProfileActivity.this, "Bio saved successfully!", Toast.LENGTH_SHORT).show();
+                    // Handle the successful response
+                    Toast.makeText(UserProfileActivity.this, "Bio updated successfully!", Toast.LENGTH_SHORT).show();
+                    bioProfile.setText(bioText);
                 },
                 error -> {
                     // Handle error response
-                    String errorMessage = "Failed to save bio: " + error.getMessage();
-                    if (error.networkResponse != null) {
-                        errorMessage += "\nResponse Code: " + error.networkResponse.statusCode
-                                + "\nResponse Data: " + new String(error.networkResponse.data);
-                    }
+                    String errorMessage = "Failed to update bio: " + error.getMessage();
+                    Log.e("UserProfileActivity", errorMessage);  // Log the error for debugging
                     Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();
-                });
+                }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");  // Set the Content-Type header
+                return headers;
+            }
+        };
 
-        // Add the request to the Volley queue
+          // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
-    }
+        // Add the request to the Volley queue
 
-    private void deleteBio(){
+    }
+    private void deleteBio() {
+
         String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
 
         // Create a DELETE request with Volley
@@ -144,7 +154,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 },
                 error -> {
                     // Handle error response
-                    String errorMessage = "Failed to delete bio: " + error.getMessage();
+                    String errorMessage = "Failed to delete bio: " + (error.getMessage() != null ? error.getMessage() : "Unknown error");
                     if (error.networkResponse != null) {
                         errorMessage += "\nResponse Code: " + error.networkResponse.statusCode
                                 + "\nResponse Data: " + new String(error.networkResponse.data);
