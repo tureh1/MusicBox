@@ -72,7 +72,7 @@ public class SignUp extends AppCompatActivity {
 
 
     private void sendSignUpRequest(String email, String password) {
-        String url = "http://10.90.72.167:8080/signup"; // Your backend URL
+        String url = "http://10.90.72.167:8080/signup";
 
         // Create a JSON object with the email and password
         JSONObject requestData = new JSONObject();
@@ -91,10 +91,8 @@ public class SignUp extends AppCompatActivity {
                         String message = response.getString("message");
 
                         // Check the message to determine if the signup was successful
-                        if (message.equals("signup success")) {
+                        if (message.equals("signup successfully")) {
                             Toast.makeText(SignUp.this, message, Toast.LENGTH_SHORT).show();
-
-                            // Navigate to LoginActivity
                             Intent intent = new Intent(SignUp.this, LoginActivity.class);
                             startActivity(intent);
                         } else {

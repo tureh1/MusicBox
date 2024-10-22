@@ -12,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -25,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText email;
     EditText password;
     Button loginButton;
+    Button DeleteButton;
     TextView forgotPassword;
     TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
@@ -40,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
         email = findViewById(R.id.username);
         password = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginButton);
+        DeleteButton = findViewById(R.id.DeleteButton);
         forgotPassword = findViewById(R.id.forgotPassword);
         signUpLink = findViewById(R.id.signup);
 
@@ -94,6 +95,18 @@ public class LoginActivity extends AppCompatActivity {
                     finish();
                 }
             }
+
+        });
+        DeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (handleLogIn()) {
+                    // Send email and password to the backend
+                    DeleteRequest(email.getText().toString().trim());
+
+                }
+            }
+
         });
 
     }
@@ -136,11 +149,21 @@ public class LoginActivity extends AppCompatActivity {
 
                         // Check the message to determine if the login was successful
                         if (message.equals("login successful")) {
+                            // Get user ID from the response
+                            int userId = response.getInt("userId"); // Make sure your backend sends userId in the response
+
+                            // Store user data in SharedPreferences
+                            getSharedPreferences("user_data", MODE_PRIVATE)
+                                    .edit()
+                                    .putString("email", email) // Store email
+                                    .putInt("userId", userId) // Store user ID
+                                    .apply(); // Use apply() for async saving
+
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
 
-
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            Intent intent = new Intent(LoginActivity.this, MainPage.class);
                             startActivity(intent);
+                            finish(); // Optionally call finish() to remove the login activity from the back stack
                         } else {
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
@@ -158,41 +181,37 @@ public class LoginActivity extends AppCompatActivity {
         // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
+    private void DeleteRequest(String email) {
+        String url = "http://10.90.72.167:8080/users/" + email; // Pass the email in the URL
 
-    private void fetchUserData(String userId) {
-        String url = "http://10.90.72.167:8080/user/" + userId;
-
-        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+        // Create the JsonObjectRequest for the DELETE request
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,  // No body for DELETE
                 response -> {
-                    // Handle the response
+                    // Handle the success response here
                     try {
-                        //fetched user data
-                        String email = response.getString("emailId");
+                        String message = response.getString("message");
 
+                        // Check the message to determine if the delete was successful
+                        if (message.equals("success")) {
+                            Toast.makeText(LoginActivity.this, "User deleted successfully", Toast.LENGTH_SHORT).show();
 
-                        // Store the fetched data for later use.
-                        getSharedPreferences("user_data", MODE_PRIVATE)
-                                .edit()
-                                .putString("userId", userId)
-                                .putString("email", email)
-                                .apply();
-
-                        // Navigate to the next activity
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-
+                        } else {
+                            Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, "Error parsing user data", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Unexpected response format", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
-                    // Handle error
-                    Toast.makeText(LoginActivity.this, "Failed to fetch user data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    // Handle the error here
+                    Toast.makeText(LoginActivity.this, "Deletion failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 });
 
-        // Add the GET request to the Volley queue
-        VolleySingleton.getInstance(this).addToRequestQueue(getRequest);
+        // Add the request to the Volley queue
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
-    
+
+
+
 }

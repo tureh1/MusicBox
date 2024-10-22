@@ -27,18 +27,18 @@
         android:drawableLeft="@drawable/baseline_person_24"
         android:drawablePadding="8dp"
         android:hint="email"
-        android:textColor="@color/Grey"
+        android:textColor="@color/black"
         android:textSize="20sp"
         android:layout_marginTop="30dp"
         />
     <EditText
         android:id="@+id/password"
         android:layout_width="270dp"
-        android:layout_height="42dp"
+        android:layout_height="45dp"
         android:drawableLeft="@drawable/baseline_lock_24"
         android:drawablePadding="8dp"
         android:hint="password"
-        android:textColor="@color/Grey"
+        android:textColor="@color/black"
         android:textSize="20sp"
         android:layout_marginTop="30dp"
         android:inputType="textPassword"
@@ -51,6 +51,18 @@
         android:layout_marginTop="8dp"
         android:backgroundTint="@color/BabyBlue"
         android:text="Login"
+        android:textColor="@color/NavyBlue"
+        android:textSize="18sp" />
+
+
+
+    <Button
+        android:id="@+id/DeleteButton"
+        android:layout_width="229dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/BabyBlue"
+        android:text="Delete"
         android:textColor="@color/NavyBlue"
         android:textSize="18sp" />
 
@@ -69,4 +81,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
         android:text="Don't have one? Create Account" />
+
+
 </LinearLayout>
