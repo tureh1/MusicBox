@@ -35,10 +35,16 @@
         <activity
             android:name=".ForgotActivity"
             android:exported="true" />
+<<<<<<< Frontend/MusiBox/app/src/main/AndroidManifest.xml
+        <activity android:name=".homeActivity"/>
+        <activity android:name=".UserProfileActivity"/>
+
+=======
         <activity
             android:name=".MainPage"
             android:exported="true" />
-        <activity android:name=".FriendsActivity"></activity>
+        <activity android:name=".FriendsActivity"/>
+>>>>>>> Frontend/MusiBox/app/src/main/AndroidManifest.xml
     </application>
 
 </manifest>
