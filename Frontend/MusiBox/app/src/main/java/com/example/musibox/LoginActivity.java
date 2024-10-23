@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     Button DeleteButton;
     TextView forgotPassword;
     TextView signUpLink;
-    private boolean isFirstClick = true; // Flag to check if it's the first click
+    private boolean isFirstClick = true;
 
 
 
@@ -87,9 +87,8 @@ public class LoginActivity extends AppCompatActivity {
                 if (handleLogIn()) {
                     // Send email and password to the backend
                    sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
-                   // Toast.makeText(LoginActivity.this, "Dummy Login Successful", Toast.LENGTH_SHORT).show();  //Dummy
                     String emailInput = email.getText().toString().trim();
-                    Intent homeIntent = new Intent(LoginActivity.this, homeActivity.class);
+                    Intent homeIntent = new Intent(LoginActivity.this,  MainPage.class);
                     homeIntent.putExtra("emailId",emailInput);
                     startActivity(homeIntent);
                     finish();

@@ -60,11 +60,24 @@ public class MainPage extends AppCompatActivity implements UserAdapter.OnUserCli
         friendsList.setLayoutManager(new LinearLayoutManager(this));
         friendsList.setAdapter(userAdapter);
 
+
+        house.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, RatingActivity.class);
+            startActivity(intent);
+        });
         message.setOnClickListener(v -> {
             // Action to perform when the message button is clicked
             Intent intent = new Intent(MainPage.this, FriendsActivity.class);
             startActivity(intent);
         });
+
+        user.setOnClickListener(v -> {
+            // Start UserProfileActivity and pass the user's email
+            Intent intent = new Intent(MainPage.this, UserProfileActivity.class);
+            intent.putExtra("emailId", userEmail); // Pass the userEmail to the profile activity
+            startActivity(intent);
+        });
+
         // Add TextChangeListener to the search bar for dynamic search
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -88,7 +101,7 @@ public class MainPage extends AppCompatActivity implements UserAdapter.OnUserCli
     }
 
     private void fetchUsers(String query) {
-        String url = "http://10.90.72.167:8080/users";  // Update with your actual URL
+        String url = "http://10.90.72.167:8080/users";
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 response -> {
