@@ -59,6 +59,9 @@ public class LoginActivity extends AppCompatActivity {
         signUpLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Navigate to SignUpActivity or show a Toast for now
+
+
                 Intent intent = new Intent(LoginActivity.this, SignUp.class);
                 startActivity(intent);
             }
@@ -86,13 +89,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (handleLogIn()) {
                     // Send email and password to the backend
-                   sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
-                   // Toast.makeText(LoginActivity.this, "Dummy Login Successful", Toast.LENGTH_SHORT).show();  //Dummy
-                    String emailInput = email.getText().toString().trim();
-                    Intent homeIntent = new Intent(LoginActivity.this, homeActivity.class);
-                    homeIntent.putExtra("emailId",emailInput);
-                    startActivity(homeIntent);
-                    finish();
+                    sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
+
                 }
             }
 
