@@ -12,5 +12,5 @@ public interface FriendRepository extends JpaRepository<Friend, Integer> {
 
     Friend findByFriendEmail(String friendEmail);
 
-    List<Friend> findByUserIdAndIsAccepted(int userId, boolean b);
+    List<Friend> findByUserIdAndIsAccepted(int userId, boolean isAccepted);
 }

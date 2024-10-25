@@ -14,6 +14,9 @@ public class Friend {
     private String friendName;
     private String friendEmail;
 
+    private boolean isAccepted;
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
