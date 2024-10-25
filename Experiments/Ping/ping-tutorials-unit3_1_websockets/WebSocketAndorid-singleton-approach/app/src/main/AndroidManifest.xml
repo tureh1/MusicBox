@@ -20,6 +20,10 @@
         <activity
             android:name=".ChatActivity1"
             android:exported="false" />
+
+        <activity
+            android:name=".ChatMessageManager"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

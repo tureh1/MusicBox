@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import org.java_websocket.handshake.ServerHandshake;
 
-public class ChatActivity1 extends AppCompatActivity implements WebSocketListener{
+public class ChatActivity1 extends AppCompatActivity implements WebSocketListener {
 
     private Button sendBtn, backMainBtn;
     private EditText msgEtx;
@@ -22,47 +22,56 @@ public class ChatActivity1 extends AppCompatActivity implements WebSocketListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat1);
 
-        /* initialize UI elements */
-        sendBtn = (Button) findViewById(R.id.sendBtn);
-        backMainBtn = (Button) findViewById(R.id.backMainBtn);
-        msgEtx = (EditText) findViewById(R.id.msgEdt);
-        msgTv = (TextView) findViewById(R.id.tx1);
+        sendBtn = findViewById(R.id.sendBtn);
+        backMainBtn = findViewById(R.id.backMainBtn);
+        msgEtx = findViewById(R.id.msgEdt);
+        msgTv = findViewById(R.id.tx1);
 
-        /* connect this activity to the websocket instance */
-        WebSocketManager1.getInstance().setWebSocketListener(ChatActivity1.this);
+        WebSocketManager1.getInstance().setWebSocketListener(this);
 
-        /* send button listener */
         sendBtn.setOnClickListener(v -> {
-            try {
-                // send message
-                WebSocketManager1.getInstance().sendMessage(msgEtx.getText().toString());
-            } catch (Exception e) {
-                Log.d("ExceptionSendMessage:", e.getMessage().toString());
-            }
+            String message = msgEtx.getText().toString();
+            WebSocketManager1.getInstance().sendMessage(message);
+            ChatMessageManager.getInstance().addMessage("Chat 1: " + message);
+            msgEtx.setText("");
+            updateMessageView();
         });
 
-        /* back button listener */
         backMainBtn.setOnClickListener(view -> {
-            // got to chat activity
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateMessageView();
+    }
+
+    private void updateMessageView() {
+        StringBuilder messages = new StringBuilder();
+        for (String message : ChatMessageManager.getInstance().getMessages()) {
+            messages.append(message).append("\n");
+        }
+        msgTv.setText(messages.toString());
+    }
 
     @Override
     public void onWebSocketMessage(String message) {
+        ChatMessageManager.getInstance().addMessage("Chat 1 (Received): " + message);
+        updateMessageView();
+    }
+
+
+
         /**
          * In Android, all UI-related operations must be performed on the main UI thread
          * to ensure smooth and responsive user interfaces. The 'runOnUiThread' method
          * is used to post a runnable to the UI thread's message queue, allowing UI updates
          * to occur safely from a background or non-UI thread.
          */
-        runOnUiThread(() -> {
-            String s = msgTv.getText().toString();
-            msgTv.setText(s + "\n"+message);
-        });
-    }
+
 
     @Override
     public void onWebSocketClose(int code, String reason, boolean remote) {
