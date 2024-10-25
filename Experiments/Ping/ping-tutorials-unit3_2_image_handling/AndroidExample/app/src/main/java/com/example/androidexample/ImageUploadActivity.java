@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,12 +30,14 @@ public class ImageUploadActivity extends AppCompatActivity {
 
     private ActivityResultLauncher<String> mGetContent;
 
+    @SuppressLint({"CutPasteId", "MissingInflatedId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_upload);
 
         mImageView = findViewById(R.id.imageSelView);
+        mImageView = findViewById(R.id.imageSelView1);
         selectBtn = findViewById(R.id.selectBtn);
 
         // select image from gallery
@@ -103,7 +106,7 @@ public class ImageUploadActivity extends AppCompatActivity {
             InputStream inputStream = getContentResolver().openInputStream(imageUri);
             ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
-            int bufferSize = 1024;
+            int bufferSize = 2000;
             byte[] buffer = new byte[bufferSize];
 
             int len;

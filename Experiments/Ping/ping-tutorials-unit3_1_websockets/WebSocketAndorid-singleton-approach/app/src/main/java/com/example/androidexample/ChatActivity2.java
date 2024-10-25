@@ -52,7 +52,7 @@ public class ChatActivity2 extends AppCompatActivity implements WebSocketListene
 
     @Override
     public void onWebSocketMessage(String message) {
-        ChatMessageManager.getInstance().addMessage("Chat 2 (Received): " + message);
+        ChatMessageManager.getInstance().addMessage("Chat 2: " + message);
         updateMessageView();
     }
 
