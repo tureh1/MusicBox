@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  * The server provides functionality for broadcasting messages to all connected
  * users and sending messages to specific users.
  */
-@ServerEndpoint("/chat/1/{username}")
+@ServerEndpoint("/chat/merge/{username}")
 @Component
 public class ChatServer1 {
 

@@ -38,6 +38,11 @@ public class UserProfileActivity extends AppCompatActivity {
         deleteBio = findViewById(R.id.delete_bio_text);
         friendsCount = findViewById(R.id.friends_count);
 
+        friendsCount.setOnClickListener(v -> {
+                    // Action to perform when the message button is clicked
+                    Intent intent1 = new Intent(UserProfileActivity.this, FriendsActivity.class);
+                    startActivity(intent1);
+                });
         Intent intent = getIntent();
         String email = intent.getStringExtra("emailId");
         userId = intent.getStringExtra("userId");

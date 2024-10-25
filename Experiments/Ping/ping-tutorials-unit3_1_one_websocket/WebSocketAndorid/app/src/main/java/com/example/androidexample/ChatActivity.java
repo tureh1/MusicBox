@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -31,12 +32,19 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
 
         /* send button listener */
         sendBtn.setOnClickListener(v -> {
-            try {
-                // send message
-                WebSocketManager.getInstance().sendMessage(msgEtx.getText().toString());
-            } catch (Exception e) {
-                Log.d("ExceptionSendMessage:", e.getMessage().toString());
+            if(msgEtx.length() == 0) {
+
+                    Toast.makeText(this, "Please Enter a Message", Toast.LENGTH_SHORT).show();
+
             }
+            else{
+                    try {
+                        // send message
+                        WebSocketManager.getInstance().sendMessage(msgEtx.getText().toString());
+                    } catch (Exception e) {
+                        Log.d("ExceptionSendMessage:", e.getMessage().toString());
+                    }
+                }
         });
     }
 
