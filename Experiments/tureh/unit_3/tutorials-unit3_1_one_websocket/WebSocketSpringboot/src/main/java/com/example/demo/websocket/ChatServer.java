@@ -3,6 +3,8 @@ package com.example.demo.websocket;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnError;
@@ -36,10 +38,13 @@ public class ChatServer {
 
     // Store all socket session and their corresponding username
     // Two maps for the ease of retrieval by key
-    private static Map < Session, String > sessionUsernameMap = new Hashtable < > ();
-    private static Map < String, Session > usernameSessionMap = new Hashtable < > ();
+    private static Map<Session, String> sessionUsernameMap = new ConcurrentHashMap<>();
+    private static Map<String, Session> usernameSessionMap = new ConcurrentHashMap<>();
 
-    // server side logger
+    // NEW: Track online users to manage user statuses
+    private static Set<String> onlineUsers = ConcurrentHashMap.newKeySet();
+
+    // Server-side logger
     private final Logger logger = LoggerFactory.getLogger(ChatServer.class);
 
     /**
@@ -51,26 +56,28 @@ public class ChatServer {
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) throws IOException {
 
-        // server side log
+        // Server-side log
         logger.info("[onOpen] " + username);
 
         // Handle the case of a duplicate username
         if (usernameSessionMap.containsKey(username)) {
             session.getBasicRemote().sendText("Username already exists");
             session.close();
-        }
-        else {
-            // map current session with username
+        } else {
+            // Map current session with username
             sessionUsernameMap.put(session, username);
 
-            // map current username with session
+            // Map current username with session
             usernameSessionMap.put(username, session);
 
-            // send to the user joining in
-            sendMessageToPArticularUser(username, "Welcome to the chat server, "+username);
+            // NEW: Mark user as online in onlineUsers set
+            onlineUsers.add(username);
 
-            // send to everyone in the chat
-            broadcast("User: " + username + " has Joined the Chat");
+            // Send a welcome message to the user joining in
+            sendMessageToParticularUser(username, "Welcome to the chat server, " + username);
+
+            // Broadcast to everyone in the chat
+            broadcast("User: " + username + " has joined the chat.");
         }
     }
 
@@ -83,29 +90,30 @@ public class ChatServer {
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
 
-        // get the username by session
+        // Get the username by session
         String username = sessionUsernameMap.get(session);
 
-        // server side log
+        // Server-side log
         logger.info("[onMessage] " + username + ": " + message);
 
-        // Direct message to a user using the format "@username <message>"
-        if (message.startsWith("@")) {
-
-            // split by space
-            String[] split_msg =  message.split("\\s+");
-
-            // Combine the rest of message
-            StringBuilder actualMessageBuilder = new StringBuilder();
-            for (int i = 1; i < split_msg.length; i++) {
-                actualMessageBuilder.append(split_msg[i]).append(" ");
+        // NEW: Handle status query command to check if a user is online
+        if (message.startsWith("@status")) {
+            String[] splitMessage = message.split("\\s+", 2);
+            if (splitMessage.length == 2) {
+                String targetUsername = splitMessage[1];
+                checkUserStatus(username, targetUsername);
+            } else {
+                sendMessageToParticularUser(username, "Usage: @status <username>");
             }
-            String destUserName = split_msg[0].substring(1);    //@username and get rid of @
-            String actualMessage = actualMessageBuilder.toString();
-            sendMessageToPArticularUser(destUserName, "[DM from " + username + "]: " + actualMessage);
-            sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage);
-        }
-        else { // Message to whole chat
+        } else if (message.startsWith("@")) {
+            // Direct message to a user using the format "@username <message>"
+            String[] splitMsg = message.split("\\s+", 2);
+            String destUserName = splitMsg[0].substring(1);    // @username and get rid of "@"
+            String actualMessage = splitMsg.length > 1 ? splitMsg[1] : "";
+            sendMessageToParticularUser(destUserName, "[DM from " + username + "]: " + actualMessage);
+            sendMessageToParticularUser(username, "[DM to " + destUserName + "]: " + actualMessage);
+        } else {
+            // Message to whole chat
             broadcast(username + ": " + message);
         }
     }
@@ -118,17 +126,20 @@ public class ChatServer {
     @OnClose
     public void onClose(Session session) throws IOException {
 
-        // get the username from session-username mapping
+        // Get the username from session-username mapping
         String username = sessionUsernameMap.get(session);
 
-        // server side log
+        // Server-side log
         logger.info("[onClose] " + username);
 
-        // remove user from memory mappings
+        // Remove user from memory mappings
         sessionUsernameMap.remove(session);
         usernameSessionMap.remove(username);
 
-        // send the message to chat
+        // NEW: Mark user as offline by removing from onlineUsers set
+        onlineUsers.remove(username);
+
+        // Send the message to chat
         broadcast(username + " disconnected");
     }
 
@@ -141,11 +152,25 @@ public class ChatServer {
     @OnError
     public void onError(Session session, Throwable throwable) {
 
-        // get the username from session-username mapping
+        // Get the username from session-username mapping
         String username = sessionUsernameMap.get(session);
 
-        // do error handling here
+        // Do error handling here
         logger.info("[onError]" + username + ": " + throwable.getMessage());
+    }
+
+    /**
+     * Checks if a user is online and sends the status to the requesting user.
+     *
+     * @param requesterUsername The username of the user making the request.
+     * @param targetUsername The username of the user whose status is being requested.
+     */
+    private void checkUserStatus(String requesterUsername, String targetUsername) {
+        if (onlineUsers.contains(targetUsername)) {
+            sendMessageToParticularUser(requesterUsername, "User " + targetUsername + " is online.");
+        } else {
+            sendMessageToParticularUser(requesterUsername, "User " + targetUsername + " is offline.");
+        }
     }
 
     /**
@@ -154,9 +179,12 @@ public class ChatServer {
      * @param username The username of the recipient.
      * @param message  The message to be sent.
      */
-    private void sendMessageToPArticularUser(String username, String message) {
+    private void sendMessageToParticularUser(String username, String message) {
         try {
-            usernameSessionMap.get(username).getBasicRemote().sendText(message);
+            Session session = usernameSessionMap.get(username);
+            if (session != null) {
+                session.getBasicRemote().sendText(message);
+            }
         } catch (IOException e) {
             logger.info("[DM Exception] " + e.getMessage());
         }

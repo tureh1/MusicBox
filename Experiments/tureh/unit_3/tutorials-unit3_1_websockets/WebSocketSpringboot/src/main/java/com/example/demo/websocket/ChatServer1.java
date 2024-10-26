@@ -35,9 +35,8 @@ import org.springframework.stereotype.Component;
 public class ChatServer1 {
 
     // Store all socket session and their corresponding username
-    // Two maps for the ease of retrieval by key
-    private static Map < Session, String > sessionUsernameMap = new Hashtable < > ();
-    private static Map < String, Session > usernameSessionMap = new Hashtable < > ();
+    private static Map<Session, String> sessionUsernameMap = new Hashtable<>();
+    private static Map<String, Session> usernameSessionMap = new Hashtable<>();
 
     // server side logger
     private final Logger logger = LoggerFactory.getLogger(ChatServer1.class);
@@ -50,7 +49,6 @@ public class ChatServer1 {
      */
     @OnOpen
     public void onOpen(Session session, @PathParam("username") String username) throws IOException {
-
         // server side log
         logger.info("[onOpen] " + username);
 
@@ -58,16 +56,14 @@ public class ChatServer1 {
         if (usernameSessionMap.containsKey(username)) {
             session.getBasicRemote().sendText("Username already exists");
             session.close();
-        }
-        else {
+        } else {
             // map current session with username
             sessionUsernameMap.put(session, username);
-
             // map current username with session
             usernameSessionMap.put(username, session);
 
             // send to the user joining in
-            sendMessageToPArticularUser(username, "Welcome to the chat server, "+username);
+            sendMessageToPArticularUser(username, "Welcome to the chat server, " + username);
 
             // send to everyone in the chat
             broadcast("User: " + username + " has Joined the Chat");
@@ -82,33 +78,39 @@ public class ChatServer1 {
      */
     @OnMessage
     public void onMessage(Session session, String message) throws IOException {
-
         // get the username by session
         String username = sessionUsernameMap.get(session);
 
         // server side log
         logger.info("[onMessage] " + username + ": " + message);
 
-        // Direct message to a user using the format "@username <message>"
-        if (message.startsWith("@")) {
+        if (message.equalsIgnoreCase("typing")) {
+            // Notify others that the user is typing
+            broadcast(username + " is typing...");
+        } else {
+            // Check for a user message (not typing)
+            if (!message.equalsIgnoreCase("typing")) {
+                // Direct message to a user using the format "@username <message>"
+                if (message.startsWith("@")) {
+                    // split by space
+                    String[] split_msg = message.split("\\s+");
 
-            // split by space
-            String[] split_msg =  message.split("\\s+");
-
-            // Combine the rest of message
-            StringBuilder actualMessageBuilder = new StringBuilder();
-            for (int i = 1; i < split_msg.length; i++) {
-                actualMessageBuilder.append(split_msg[i]).append(" ");
+                    // Combine the rest of the message
+                    StringBuilder actualMessageBuilder = new StringBuilder();
+                    for (int i = 1; i < split_msg.length; i++) {
+                        actualMessageBuilder.append(split_msg[i]).append(" ");
+                    }
+                    String destUserName = split_msg[0].substring(1); // @username and get rid of @
+                    String actualMessage = actualMessageBuilder.toString();
+                    sendMessageToPArticularUser(destUserName, "[DM from " + username + "]: " + actualMessage);
+                    sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage);
+                } else { // Message to whole chat
+                    broadcast(username + ": " + message);
+                }
             }
-            String destUserName = split_msg[0].substring(1);    //@username and get rid of @
-            String actualMessage = actualMessageBuilder.toString();
-            sendMessageToPArticularUser(destUserName, "[DM from " + username + "]: " + actualMessage);
-            sendMessageToPArticularUser(username, "[DM from " + username + "]: " + actualMessage);
-        }
-        else { // Message to whole chat
-            broadcast(username + ": " + message);
         }
     }
+
 
     /**
      * Handles the closure of a WebSocket connection.
@@ -117,7 +119,6 @@ public class ChatServer1 {
      */
     @OnClose
     public void onClose(Session session) throws IOException {
-
         // get the username from session-username mapping
         String username = sessionUsernameMap.get(session);
 
@@ -127,6 +128,9 @@ public class ChatServer1 {
         // remove user from memory mappings
         sessionUsernameMap.remove(session);
         usernameSessionMap.remove(username);
+
+        // Notify the user leaving
+        sendMessageToPArticularUser(username, "You have left the chat.");
 
         // send the message to chat
         broadcast(username + " disconnected");
@@ -140,12 +144,11 @@ public class ChatServer1 {
      */
     @OnError
     public void onError(Session session, Throwable throwable) {
-
         // get the username from session-username mapping
         String username = sessionUsernameMap.get(session);
 
         // do error handling here
-        logger.info("[onError]" + username + ": " + throwable.getMessage());
+        logger.info("[onError] " + username + ": " + throwable.getMessage());
     }
 
     /**
