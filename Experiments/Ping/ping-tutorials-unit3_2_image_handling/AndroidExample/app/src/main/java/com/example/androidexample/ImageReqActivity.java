@@ -21,7 +21,7 @@ public class ImageReqActivity extends AppCompatActivity {
     private static int c = 1;
 //    public static final String URL_IMAGE = "http://sharding.org/outgoing/temp/testimg3.jpg";
 
-    public static final String URL_IMAGE = "http://10.0.2.2:8081/images/1";
+    public static final String URL_IMAGE = "http://10.0.2.2:8080/images/1";
 
 
     @Override

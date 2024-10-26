@@ -26,7 +26,7 @@ public class ImageUploadActivity extends AppCompatActivity {
 
     // replace this with the actual address
     // 10.0.2.2 to be used for localhost if running springboot on the same host
-    private static String UPLOAD_URL = "http://10.0.2.2:8081/images";
+    private static String UPLOAD_URL = "http://10.0.2.2:8080/images";
 
     private ActivityResultLauncher<String> mGetContent;
 
