@@ -15,10 +15,10 @@
         android:id="@+id/incomingMessageText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/incoming_message_bg"
+        android:background="@drawable/message"
         android:padding="10dp"
         android:textColor="@android:color/white"
         android:layout_marginStart="8dp"
-        android:text="Incoming message"
-        android:maxWidth="70%" />
+        android:text="Incoming message"/>
+
 </LinearLayout>
