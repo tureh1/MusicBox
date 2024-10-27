@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,16 +26,18 @@ public class ImageUploadActivity extends AppCompatActivity {
 
     // replace this with the actual address
     // 10.0.2.2 to be used for localhost if running springboot on the same host
-    private static String UPLOAD_URL = "http://10.0.2.2:8081/images";
+    private static String UPLOAD_URL = "http://10.0.2.2:8080/images";
 
     private ActivityResultLauncher<String> mGetContent;
 
+    @SuppressLint({"CutPasteId", "MissingInflatedId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_upload);
 
         mImageView = findViewById(R.id.imageSelView);
+        mImageView = findViewById(R.id.imageSelView1);
         selectBtn = findViewById(R.id.selectBtn);
 
         // select image from gallery
@@ -103,7 +106,7 @@ public class ImageUploadActivity extends AppCompatActivity {
             InputStream inputStream = getContentResolver().openInputStream(imageUri);
             ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 
-            int bufferSize = 1024;
+            int bufferSize = 2000;
             byte[] buffer = new byte[bufferSize];
 
             int len;

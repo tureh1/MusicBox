@@ -18,10 +18,11 @@ public class ImageReqActivity extends AppCompatActivity {
 
     private Button btnImageReq;
     private ImageView imageView;
-
+    private static int c = 1;
 //    public static final String URL_IMAGE = "http://sharding.org/outgoing/temp/testimg3.jpg";
 
-    public static final String URL_IMAGE = "http://10.0.2.2:8081/images/1";
+    public static final String URL_IMAGE = "http://10.0.2.2:8080/images/1";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class ImageReqActivity extends AppCompatActivity {
         btnImageReq.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {makeImageRequest();}
+
         });
     }
 
@@ -44,11 +46,13 @@ public class ImageReqActivity extends AppCompatActivity {
 
         ImageRequest imageRequest = new ImageRequest(
             URL_IMAGE,
+
             new Response.Listener<Bitmap>() {
                 @Override
                 public void onResponse(Bitmap response) {
                     // Display the image in the ImageView
                     imageView.setImageBitmap(response);
+
                 }
             },
             0, // Width, set to 0 to get the original width
