@@ -196,6 +196,8 @@
                         try {
                             String message = response.getString("message");
                             Toast.makeText(FriendsActivity.this, message, Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(FriendsActivity.this, FriendsActivity.class);
+                            startActivity(intent);
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(FriendsActivity.this, "Unexpected response format", Toast.LENGTH_SHORT).show();
@@ -285,6 +287,7 @@
             }
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, url, updatedFriendJson,
+
                     response -> {
                         Toast.makeText(FriendsActivity.this, "Friend updated", Toast.LENGTH_SHORT).show();
                         fetchFriends(); // Refresh the friends list
