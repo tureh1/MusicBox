@@ -22,6 +22,7 @@ public class FriendController {
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
 
+
     @PutMapping(path = "/friends/email/{friendEmail}")
     public String updateFriendByEmail(@PathVariable String friendEmail, @RequestBody Friend updatedFriend) {
         // Find the friend by email
@@ -43,13 +44,23 @@ public class FriendController {
     @PostMapping(path = "/users/{userId}/addFriend")
     public String addFriend(@PathVariable int userId, @RequestBody Friend friend) {
         Optional<User> user = Optional.ofNullable(userRepository.findById(userId));
+
         if (user.isPresent()) {
+            // Check if a friend with the same email already exists for this user
+            Friend existingFriend = friendRepository.findByFriendEmailAndUserId(friend.getFriendEmail(), userId);
+            if (existingFriend != null) {
+                return failure; // Friend already exists
+            }
+
+            // Set the user and save the new friend
             friend.setUser(user.get());
             friendRepository.save(friend);
             return success;
         }
         return failure;
     }
+
+
 
     @GetMapping(path = "/users/{userId}/friends")
     public List<Friend> getFriendsByUser(@PathVariable int userId) {
@@ -72,16 +83,13 @@ public class FriendController {
 
     @DeleteMapping(path = "/friends/{friendEmail}")
     public String deleteFriend(@PathVariable String friendEmail) {
-        try {
-            // Find the friend by email first
-            Friend friend = friendRepository.findByFriendEmail(friendEmail);
-            if (friend != null) {
-                friendRepository.delete(friend); // Use delete method directly on the Friend object
-                return success;
-            }
-            return failure; // Friend not found
-        } catch (Exception e) {
-            return failure;
+        Friend friend = friendRepository.findByFriendEmail(friendEmail);
+        if (friend != null) {
+            friendRepository.delete(friend);
+            return success;
         }
+        return failure; // Friend not found
     }
+
+
 }
