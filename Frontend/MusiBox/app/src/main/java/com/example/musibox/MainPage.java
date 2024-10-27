@@ -1,5 +1,6 @@
 package com.example.musibox;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
@@ -32,7 +33,9 @@ public class MainPage extends AppCompatActivity implements UserAdapter.OnUserCli
     private ImageButton house;
     private ImageButton message;
     private ImageButton user;
+    private ImageButton adduser;
 
+    @SuppressLint("MissingInflatedId")
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +58,30 @@ public class MainPage extends AppCompatActivity implements UserAdapter.OnUserCli
         house = findViewById(R.id.home);
         message = findViewById(R.id.message);
         user = findViewById(R.id.user);
+        adduser = findViewById(R.id.adduser);
         userList = new ArrayList<>();
         userAdapter = new UserAdapter(userList, this); // Pass the listener
         friendsList.setLayoutManager(new LinearLayoutManager(this));
         friendsList.setAdapter(userAdapter);
 
-        message.setOnClickListener(v -> {
+        adduser.setOnClickListener(v -> {
             // Action to perform when the message button is clicked
             Intent intent = new Intent(MainPage.this, FriendsActivity.class);
+            startActivity(intent);
+        });
+        user.setOnClickListener(v -> {
+            // Action to perform when the message button is clicked
+            Intent intent = new Intent(MainPage.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
+        message.setOnClickListener(v -> {
+            // Action to perform when the message button is clicked
+            Intent intent = new Intent(MainPage.this, MessageActivity.class);
+            startActivity(intent);
+        });
+        house.setOnClickListener(v -> {
+            // Action to perform when the message button is clicked
+            Intent intent = new Intent(MainPage.this, MainPage.class);
             startActivity(intent);
         });
         // Add TextChangeListener to the search bar for dynamic search

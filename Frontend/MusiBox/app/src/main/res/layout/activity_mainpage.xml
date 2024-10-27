@@ -1,11 +1,10 @@
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Other UI components -->
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
@@ -32,6 +31,16 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/home" />
 
+
+            <ImageButton
+                android:id="@+id/adduser"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:background="#00FFFFFF"
+                android:scaleType="fitCenter"
+                android:src="@drawable/adduser" />
+
             <ImageButton
                 android:id="@+id/message"
                 android:layout_width="wrap_content"
@@ -54,19 +63,20 @@
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
     <ImageView
+        android:id="@+id/rectangle_11"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/rectangle_11"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:id="@+id/rectangle_11" />
+        app:layout_constraintTop_toTopOf="parent"></ImageView>
+
 
     <TextView
         android:id="@+id/MusiText"
-        android:layout_width="356dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/caveat"
         android:shadowColor="@color/black"
         android:shadowDy="5"
@@ -74,42 +84,33 @@
         android:text="Musi Box"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="30sp"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="-112dp" />
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-
-
-
-
-        <AutoCompleteTextView
-            android:id="@+id/search_bar"
-            android:layout_width="0dp"
-            android:layout_height="43dp"
-            android:background="@drawable/searchbar"
-            android:drawableLeft="@drawable/baseline_search_24"
-            android:hint=" Search for friends"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/rectangle_11"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-    <FrameLayout
-        android:id="@+id/search_results_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/search_bar"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/friend_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
-        tools:ignore="ExtraText">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/friend_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/Grey"
-            android:elevation="10dp"
-            app:layout_constraintTop_toBottomOf="@id/search_bar"
-            app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"/>
-    </FrameLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_bar"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <EditText
+        android:id="@+id/search_bar"
+        android:layout_width="0dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/searchbar"
+        android:drawableLeft="@drawable/baseline_search_24"
+        android:hint=" Search for friends"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rectangle_11" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
