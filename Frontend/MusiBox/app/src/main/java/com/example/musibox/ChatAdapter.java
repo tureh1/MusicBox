@@ -3,7 +3,9 @@ package com.example.musibox;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,7 +13,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int VIEW_TYPE_INCOMING = 1;
     private static final int VIEW_TYPE_OUTGOING = 2;
-    private List<ChatMessage> messageList;
+    private final List<ChatMessage> messageList;
 
     public ChatAdapter(List<ChatMessage> messageList) {
         this.messageList = messageList;

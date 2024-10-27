@@ -1,10 +1,13 @@
 package com.example.musibox;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,6 +24,7 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
     private ChatAdapter chatAdapter;
     private EditText messageInput;
     private List<ChatMessage> messageList;
+    private String friendEmail; // Store the email of the friend we are chatting with
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -32,6 +36,10 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
         recyclerView = findViewById(R.id.recyclerView);
         messageInput = findViewById(R.id.messageInput);
         Button sendButton = findViewById(R.id.sendButton);
+        ImageButton back = findViewById(R.id.back);
+
+        // Get the friend's email from the intent
+        friendEmail = getIntent().getStringExtra("friendEmail");
 
         // Set up RecyclerView with ChatAdapter
         messageList = new ArrayList<>();
@@ -39,17 +47,23 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
+        back.setOnClickListener(v -> {
+            finish(); // Go back to the previous activity
+        });
+
         // Initialize WebSocket and set listener
         WebSocketManager.getInstance().setWebSocketListener(this);
-        WebSocketManager.getInstance().connectWebSocket("ws://yourserverurl/chat");
+        WebSocketManager.getInstance().connectWebSocket("ws://yourserverurl/chat/" + friendEmail); // Connect to the WebSocket for this specific chat
 
         // Set up send button click listener
         sendButton.setOnClickListener(v -> {
             String message = messageInput.getText().toString().trim();
             if (!message.isEmpty()) {
-                WebSocketManager.getInstance().sendMessage(message);
+                WebSocketManager.getInstance().sendMessage(message); // Send message to the WebSocket
                 addMessage(new ChatMessage(message, true)); // Add sent message to the list
                 messageInput.setText("");
+            } else {
+                Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -84,6 +98,6 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        WebSocketManager.getInstance().disconnectWebSocket();
+        WebSocketManager.getInstance().disconnectWebSocket(); // Disconnect WebSocket on activity destroy
     }
 }

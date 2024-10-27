@@ -94,6 +94,14 @@
                 android:backgroundTint="#00FFFFFF"
                 android:scaleType="fitCenter"
                 android:src="@drawable/home" />
+            <ImageButton
+                android:id="@+id/adduser"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:background="#00FFFFFF"
+                android:scaleType="fitCenter"
+                android:src="@drawable/adduser" />
 
             <ImageButton
                 android:id="@+id/message"

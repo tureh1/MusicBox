@@ -77,15 +77,8 @@
             });
             message.setOnClickListener(v -> {
                 Intent intent = new Intent(FriendsActivity.this, MessageActivity.class);
-                // Pass the list of friend emails to MessageActivity
-                ArrayList<String> friendEmails = new ArrayList<>();
-                for (Friend friend : friendList) {
-                    friendEmails.add(friend.getFriendEmail());
-                }
-                intent.putStringArrayListExtra("friendEmails", friendEmails);
                 startActivity(intent);
             });
-
             // Set up the search bar
             searchBar.addTextChangedListener(new TextWatcher() {
                 @Override
