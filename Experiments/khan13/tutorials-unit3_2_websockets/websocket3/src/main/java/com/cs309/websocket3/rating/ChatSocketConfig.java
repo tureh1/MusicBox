@@ -1,4 +1,4 @@
-package com.cs309.websocket3.chat;
+package com.cs309.websocket3.rating;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
