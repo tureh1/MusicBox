@@ -24,4 +24,6 @@ public class Message {
     public void setMessageContent(String messageContent) {
         this.messageContent = messageContent;
     }
+
+
 }

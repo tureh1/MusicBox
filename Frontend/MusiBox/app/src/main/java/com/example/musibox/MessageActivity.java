@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageActivity extends AppCompatActivity {
+public class MessageActivity extends AppCompatActivity implements MessageAdapter.OnMessageClickListener {
     private RecyclerView recyclerView;
     private MessageAdapter messageAdapter;
     private List<Message> messageList;
@@ -35,18 +35,18 @@ public class MessageActivity extends AppCompatActivity {
 
         messageList = new ArrayList<>();
 
-        // Fetch the friends' emails from the backend
+        // Fetch friends' emails from the backend
         fetchFriendsEmails();
 
-        messageAdapter = new MessageAdapter(messageList, this);
+        messageAdapter = new MessageAdapter(messageList, this); // Pass 'this' as the click listener
         recyclerView.setAdapter(messageAdapter);
 
+        // Set up navigation buttons
         house = findViewById(R.id.home);
         addUserButton = findViewById(R.id.adduser);
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
 
-        // Set up button click listeners for navigation
         house.setOnClickListener(v -> {
             Intent intent = new Intent(MessageActivity.this, MainPage.class);
             startActivity(intent);
@@ -99,5 +99,12 @@ public class MessageActivity extends AppCompatActivity {
                 });
 
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
+    }
+
+    @Override
+    public void onMessageClick(String friendEmail) {
+        Intent intent = new Intent(MessageActivity.this, ChatActivity.class);
+        intent.putExtra("friendEmail", friendEmail); // Pass friend's email to ChatActivity
+        startActivity(intent);
     }
 }

@@ -8,13 +8,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import org.java_websocket.handshake.ServerHandshake;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +27,7 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_message);
+        setContentView(R.layout.activity_chat);
 
         // Initialize UI components
         recyclerView = findViewById(R.id.recyclerView);
@@ -47,9 +44,7 @@ public class ChatActivity extends AppCompatActivity implements WebSocketListener
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
-        back.setOnClickListener(v -> {
-            finish(); // Go back to the previous activity
-        });
+        back.setOnClickListener(v -> finish()); // Go back to the previous activity
 
         // Initialize WebSocket and set listener
         WebSocketManager.getInstance().setWebSocketListener(this);

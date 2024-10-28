@@ -129,12 +129,12 @@
         }
 
         private void fetchUsers(String query) {
-            String url = "http://10.90.72.167:8080/users";  // Update with your actual URL
+            String url = "http://10.90.72.167:8080/users";
 
             JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                     response -> {
                         try {
-                            userList.clear();  // Clear existing list before adding new data
+                            userList.clear();
 
                             for (int i = 0; i < response.length(); i++) {
                                 JSONObject userObject = response.getJSONObject(i);
@@ -172,7 +172,7 @@
 
         @Override
         public void onUserClick(String email) {
-            sendFriendEmailRequest(email); // Call the POST method with the clicked email
+            sendFriendEmailRequest(email);
         }
 
         private void sendFriendEmailRequest(String email) {
@@ -260,8 +260,16 @@
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
                     response -> {
-                        Toast.makeText(FriendsActivity.this, "Friend deleted", Toast.LENGTH_SHORT).show();
-                        fetchFriends(); // Refresh the friends list
+                        String message = null;
+                        try {
+                            message = response.getString("message");
+                            Intent intent = new Intent(FriendsActivity.this, FriendsActivity.class);
+                            startActivity(intent);
+
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        Toast.makeText(FriendsActivity.this, message, Toast.LENGTH_SHORT).show();
                     },
                     error -> {
                         Log.e("FriendsActivity", "Error: " + error.toString());
@@ -290,7 +298,8 @@
 
                     response -> {
                         Toast.makeText(FriendsActivity.this, "Friend updated", Toast.LENGTH_SHORT).show();
-                        fetchFriends(); // Refresh the friends list
+                        Intent intent = new Intent(FriendsActivity.this, FriendsActivity.class);
+                        startActivity(intent);
                     },
                     error -> {
                         Log.e("FriendsActivity", "Error: " + error.toString());
