@@ -11,6 +11,8 @@ public class Friend {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+
+    private boolean isAccepted;
     private String friendName;
     private String friendEmail;
 
@@ -62,4 +64,13 @@ public class Friend {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public boolean isIsAccepted() {
+        return isAccepted;
+    }
+
+    public void setIsAccepted(boolean isAccepted) {
+        this.isAccepted = isAccepted;
+    }
 }
+
