@@ -10,7 +10,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:src="@drawable/back"
-        android:background="@color/white"/>
+        android:background="@null" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

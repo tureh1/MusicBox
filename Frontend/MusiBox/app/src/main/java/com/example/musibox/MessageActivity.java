@@ -102,7 +102,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
     }
 
     // Method to fetch user email from backend
-    private void fetchUserEmail(int userId) {
+    private void fetchUserEmail(int userId, UserEmailCallback callback) {
         String url = "http://10.90.72.167:8080/users/" + userId; // Adjust URL based on your backend
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -111,6 +111,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
                         JSONObject jsonObject = new JSONObject(response);
                         userEmail = jsonObject.getString("emailId"); // Adjust based on your JSON response
                         Log.d("MessageActivity", "User email retrieved from backend: " + userEmail);
+                        callback.onEmailFetched(userEmail); // Trigger the callback with the fetched email
                     } catch (JSONException e) {
                         Log.e("MessageActivity", "Error parsing user email: " + e.getMessage());
                     }
@@ -131,17 +132,24 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         // Fetch userId from SharedPreferences
         int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
         if (userId != -1) {
-            fetchUserEmail(userId); // Fetch the user email from the backend
-        }
-
-        // Check if the friend email is valid
-        if (friendEmail != null && !friendEmail.isEmpty()) {
-            Intent intent = new Intent(MessageActivity.this, ChatActivity.class);
-            intent.putExtra("friendEmail", friendEmail);
-            intent.putExtra("userEmail", userEmail); // Use the fetched userEmail
-            startActivity(intent);
+            fetchUserEmail(userId, email -> {
+                // Start ChatActivity after the email has been fetched
+                if (friendEmail != null && !friendEmail.isEmpty()) {
+                    Intent intent = new Intent(MessageActivity.this, ChatActivity.class);
+                    intent.putExtra("friendEmail", friendEmail);
+                    intent.putExtra("userEmail", email); // Use the fetched userEmail
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Friend email is missing", Toast.LENGTH_SHORT).show();
+                }
+            });
         } else {
-            Toast.makeText(this, "Friend email is missing", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Define a callback interface
+    public interface UserEmailCallback {
+        void onEmailFetched(String email);
     }
 }
