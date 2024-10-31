@@ -1,8 +1,7 @@
 package com.example.musibox;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,88 +10,144 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatActivity extends AppCompatActivity implements WebSocketListener {
-
+public class ChatActivity extends AppCompatActivity {
+    private String friendEmail;
+    private String userEmail;
+    private WebSocketClient webSocketClient;
+    private EditText messageInput;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
-    private EditText messageInput;
     private List<ChatMessage> messageList;
-    private String friendEmail; // Store the email of the friend we are chatting with
+    private Button sendButton;
+    private ImageButton backButton;
 
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Initialize UI components
-        recyclerView = findViewById(R.id.recyclerView);
-        messageInput = findViewById(R.id.messageInput);
-        Button sendButton = findViewById(R.id.sendButton);
-        ImageButton back = findViewById(R.id.back);
-
-        // Get the friend's email from the intent
+        // Get friendEmail and userEmail from Intent
         friendEmail = getIntent().getStringExtra("friendEmail");
+        userEmail = getIntent().getStringExtra("userEmail");
+        Log.d("ChatActivity", "User email passed to ChatActivity: " + userEmail); // Log the user email
 
-        // Set up RecyclerView with ChatAdapter
+        // Initialize views
+        messageInput = findViewById(R.id.messageInput);
+        sendButton = findViewById(R.id.sendButton);
+        backButton = findViewById(R.id.back);
+        recyclerView = findViewById(R.id.recyclerView);
+
+        // Set up message list and adapter
         messageList = new ArrayList<>();
-        chatAdapter = new ChatAdapter(messageList);
+        chatAdapter = new ChatAdapter(messageList, userEmail);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
-        back.setOnClickListener(v -> finish()); // Go back to the previous activity
+        // Set up WebSocket connection
+        setupWebSocket();
 
-        // Initialize WebSocket and set listener
-        WebSocketManager.getInstance().setWebSocketListener(this);
-        WebSocketManager.getInstance().connectWebSocket("ws://yourserverurl/chat/" + friendEmail); // Connect to the WebSocket for this specific chat
+        // Setup button listeners
+        setupButtons();
+    }
 
-        // Set up send button click listener
-        sendButton.setOnClickListener(v -> {
-            String message = messageInput.getText().toString().trim();
-            if (!message.isEmpty()) {
-                WebSocketManager.getInstance().sendMessage(message); // Send message to the WebSocket
-                addMessage(new ChatMessage(message, true)); // Add sent message to the list
-                messageInput.setText("");
-            } else {
-                Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
+    // Set up WebSocket connection to the backend
+    private void setupWebSocket() {
+        String wsUrl = "ws://10.90.72.167:8080/chat/" + userEmail + "/" + friendEmail;
+        URI uri;
+        try {
+            uri = new URI(wsUrl);
+        } catch (Exception e) {
+            Log.e("ChatActivity", "Invalid WebSocket URL", e);
+            return;
+        }
+
+        // Create WebSocket client
+        webSocketClient = new WebSocketClient(uri) {
+            @Override
+            public void onOpen(ServerHandshake handshakedata) {
+                Log.d("ChatActivity", "WebSocket opened");
             }
-        });
+
+            @Override
+            public void onMessage(String message) {
+                // Handle incoming message from server
+                runOnUiThread(() -> {
+                    messageList.add(new ChatMessage(message, false)); // Message from the friend
+                    chatAdapter.notifyItemInserted(messageList.size() - 1);
+                    recyclerView.scrollToPosition(messageList.size() - 1);
+                });
+            }
+
+            @Override
+            public void onClose(int code, String reason, boolean remote) {
+                Log.d("ChatActivity", "WebSocket closed: " + reason);
+            }
+
+            @Override
+            public void onError(Exception ex) {
+                Log.e("ChatActivity", "WebSocket error: ", ex);
+            }
+        };
+
+        // Connect the WebSocket client
+        webSocketClient.connect();
     }
 
-    private void addMessage(ChatMessage message) {
-        messageList.add(message);
-        chatAdapter.notifyItemInserted(messageList.size() - 1);
-        recyclerView.scrollToPosition(messageList.size() - 1);
+    // Set up button listeners
+    private void setupButtons() {
+        sendButton.setOnClickListener(v -> sendMessage());
+        backButton.setOnClickListener(v -> finish());
     }
 
-    // WebSocketListener implementation
-    @Override
-    public void onWebSocketOpen(ServerHandshake handshakedata) {
-        // Connection established
-    }
+    // Method to send messages via WebSocket
+    private void sendMessage() {
+        String message = messageInput.getText().toString();
+        if (message.isEmpty()) {
+            Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-    @Override
-    public void onWebSocketMessage(String message) {
-        runOnUiThread(() -> addMessage(new ChatMessage(message, false))); // Add received message
-    }
+        // Check if WebSocket is connected
+        if (webSocketClient != null && webSocketClient.isOpen()) {
+            try {
+                // Send the message via WebSocket
+                webSocketClient.send(message);
 
-    @Override
-    public void onWebSocketClose(int code, String reason, boolean remote) {
-        // Connection closed
-    }
+                // Add message to the list and show it in the chat view as "sent"
+                messageList.add(new ChatMessage(message, true)); // Message from the user
+                chatAdapter.notifyItemInserted(messageList.size() - 1);
+                recyclerView.scrollToPosition(messageList.size() - 1);
 
-    @Override
-    public void onWebSocketError(Exception ex) {
-        ex.printStackTrace();
+                // Clear the input field
+                messageInput.setText("");
+            } catch (Exception e) {
+                Log.e("ChatActivity", "Error sending message: ", e);
+            }
+        } else {
+            Toast.makeText(this, "WebSocket is not connected", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        WebSocketManager.getInstance().disconnectWebSocket(); // Disconnect WebSocket on activity destroy
+        if (webSocketClient != null) {
+            webSocketClient.close(); // Close the WebSocket connection when activity is destroyed
+        }
     }
 }

@@ -1,22 +1,19 @@
 package com.example.musibox;
 
 public class ChatMessage {
-    private String text;   // The content of the message
-    private boolean sentByUser; // Indicates if the message was sent by the user
+    private String message;
+    private boolean isSentByUser;
 
-    // Constructor
-    public ChatMessage(String text, boolean sentByUser) {
-        this.text = text;
-        this.sentByUser = sentByUser;
+    public ChatMessage(String message, boolean isSentByUser) {
+        this.message = message;
+        this.isSentByUser = isSentByUser;
     }
 
-    // Getter for message text
-    public String getText() {
-        return text;
+    public String getMessage() {
+        return message;
     }
 
-    // Method to check if the message was sent by the user
     public boolean isSentByUser() {
-        return sentByUser;
+        return isSentByUser;
     }
 }

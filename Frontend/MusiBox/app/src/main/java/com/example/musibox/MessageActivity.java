@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,47 +26,39 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
     private ImageButton messageButton;
     private ImageButton userButton;
 
+    private String userEmail; // Member variable to store the user email
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
 
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        messageList = new ArrayList<>();
-
-        // Fetch friends' emails from the backend
+        initViews();
+        setupRecyclerView();
+        setupNavigationButtons();
         fetchFriendsEmails();
+    }
 
-        messageAdapter = new MessageAdapter(messageList, this); // Pass 'this' as the click listener
-        recyclerView.setAdapter(messageAdapter);
-
-        // Set up navigation buttons
+    private void initViews() {
+        recyclerView = findViewById(R.id.recyclerView);
         house = findViewById(R.id.home);
         addUserButton = findViewById(R.id.adduser);
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
+    }
 
-        house.setOnClickListener(v -> {
-            Intent intent = new Intent(MessageActivity.this, MainPage.class);
-            startActivity(intent);
-        });
+    private void setupRecyclerView() {
+        messageList = new ArrayList<>();
+        messageAdapter = new MessageAdapter(messageList, this);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(messageAdapter);
+    }
 
-        addUserButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MessageActivity.this, FriendsActivity.class);
-            startActivity(intent);
-        });
-
-        messageButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
-            startActivity(intent);
-        });
-
-        userButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MessageActivity.this, UserProfileActivity.class);
-            startActivity(intent);
-        });
+    private void setupNavigationButtons() {
+        house.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, MainPage.class)));
+        addUserButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, FriendsActivity.class)));
+        messageButton.setOnClickListener(v -> Toast.makeText(this, "You are already in Message Activity", Toast.LENGTH_SHORT).show());
+        userButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, UserProfileActivity.class)));
     }
 
     private void fetchFriendsEmails() {
@@ -76,35 +69,79 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         }
 
         String url = "http://10.90.72.167:8080/users/" + userId + "/friends";
-
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        messageList.clear(); // Clear existing messages
-                        for (int i = 0; i < response.length(); i++) {
-                            JSONObject friendObject = response.getJSONObject(i);
-                            String friendEmail = friendObject.getString("friendEmail");
-                            String messageContent = "Message from " + friendEmail; // Placeholder for actual messages
-                            messageList.add(new Message(friendEmail, messageContent));
-                        }
-                        messageAdapter.notifyDataSetChanged(); // Notify the adapter of data change
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(MessageActivity.this, "Failed to parse friends", Toast.LENGTH_SHORT).show();
-                    }
-                },
-                error -> {
-                    Log.e("MessageActivity", "Error: " + error.toString());
-                    Toast.makeText(MessageActivity.this, "Failed to fetch friends: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                this::handleFriendsResponse,
+                this::handleErrorResponse);
 
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
+    private void handleFriendsResponse(JSONArray response) {
+        try {
+            messageList.clear();
+            if (response.length() == 0) {
+                Toast.makeText(this, "No friends found", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            for (int i = 0; i < response.length(); i++) {
+                JSONObject friendObject = response.getJSONObject(i);
+                String friendEmail = friendObject.getString("friendEmail");
+                String messageContent = "Message from " + friendEmail; // Placeholder for actual messages
+                messageList.add(new Message(friendEmail, messageContent));
+            }
+            messageAdapter.notifyDataSetChanged();
+        } catch (JSONException e) {
+            Log.e("MessageActivity", "JSON parsing error: " + e.getMessage());
+            Toast.makeText(this, "Failed to parse friends", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void handleErrorResponse(Throwable error) {
+        Log.e("MessageActivity", "Error: " + error.toString());
+        Toast.makeText(this, "Failed to fetch friends: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+
+    // Method to fetch user email from backend
+    private void fetchUserEmail(int userId) {
+        String url = "http://10.90.72.167:8080/users/" + userId; // Adjust URL based on your backend
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        userEmail = jsonObject.getString("emailId"); // Adjust based on your JSON response
+                        Log.d("MessageActivity", "User email retrieved from backend: " + userEmail);
+                    } catch (JSONException e) {
+                        Log.e("MessageActivity", "Error parsing user email: " + e.getMessage());
+                    }
+                },
+                error -> {
+                    Log.e("MessageActivity", "Error fetching user email: " + error.toString());
+                    Toast.makeText(this, "Failed to fetch user email: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
     @Override
     public void onMessageClick(String friendEmail) {
-        Intent intent = new Intent(MessageActivity.this, ChatActivity.class);
-        intent.putExtra("friendEmail", friendEmail); // Pass friend's email to ChatActivity
-        startActivity(intent);
+        Log.d("MessageActivity", "User clicked on: " + friendEmail);
+
+        // Fetch userId from SharedPreferences
+        int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
+        if (userId != -1) {
+            fetchUserEmail(userId); // Fetch the user email from the backend
+        }
+
+        // Check if the friend email is valid
+        if (friendEmail != null && !friendEmail.isEmpty()) {
+            Intent intent = new Intent(MessageActivity.this, ChatActivity.class);
+            intent.putExtra("friendEmail", friendEmail);
+            intent.putExtra("userEmail", userEmail); // Use the fetched userEmail
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Friend email is missing", Toast.LENGTH_SHORT).show();
+        }
     }
 }
