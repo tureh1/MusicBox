@@ -1,6 +1,15 @@
 package onetomany.Album;
 
-import javax.persistence.*;
+import onetomany.Rating.RatingRepository;
+//import javax.persistence.*;
+//import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+//import jakarta.persistence.Temporal;
+//import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "Album")
@@ -8,20 +17,15 @@ public class Album {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id; // Changed from String to int
 
     private String title;
-
     private String artist;
-
     private String genre;
-
     private int releaseYear;
+    private String coverUrl;
 
-    private String coverUrl; // URL to album cover image
-
-    public Album() {
-    }
+    public Album() {}
 
     public Album(String title, String artist, String genre, int releaseYear, String coverUrl) {
         this.title = title;
@@ -33,11 +37,11 @@ public class Album {
 
     // Getters and setters
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -82,7 +86,7 @@ public class Album {
     }
 
     // Placeholder for WebSocket-based rating retrieval
-    public double getAverageRating() {
-        return WebSocketRatingService.getAverageRatingForAlbum(this.id);
-    }
+   // public double getAverageRating() {
+     //   return RatingRepository.getAverageRating(this.id);
+    //}
 }

@@ -1,7 +1,7 @@
 package onetomany.Rating;
 
 import java.util.Date;
-
+import onetomany.Album.Album;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,19 +15,15 @@ import jakarta.persistence.TemporalType;
 
 @Entity
 @Table(name = "ratings")
-//@Data
-public class Rating {
+public class Rating extends onetomany.Album.Album{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "album_id", nullable = false)
-    private String albumId;
+    private int albumId;  // Changed from String to int
 
-    @Column(name = "user_name")
     private String userName;
-
-    @Column(nullable = false)
     private int rating;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -36,49 +32,18 @@ public class Rating {
 
     public Rating() {}
 
-    public Rating(String albumId, String userName, int rating) {
+    public Rating(int albumId, String userName, int rating) {
         this.albumId = albumId;
         this.userName = userName;
         this.rating = rating;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAlbumId() {
+    // Getters and setters
+    public int getAlbumId() {
         return albumId;
     }
 
-    public void setAlbumId(String albumId) {
+    public void setAlbumId(int albumId) {
         this.albumId = albumId;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    public Date getSubmittedAt() {
-        return submittedAt;
-    }
-
-    public void setSubmittedAt(Date submittedAt) {
-        this.submittedAt = submittedAt;
     }
 }

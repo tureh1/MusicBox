@@ -6,12 +6,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RatingRepository extends JpaRepository<onetomany.Rating.Rating, Long> {
+public interface RatingRepository extends JpaRepository<Rating, Long> {
 
-    // Fetch all ratings for a specific album by its ID
-    List<onetomany.Rating.Rating> findByAlbumId(String albumId);
+    List<Rating> findByAlbumId(int albumId);
 
-    // Calculate the average rating for an album
     @Query("SELECT COALESCE(AVG(r.rating), 0) FROM Rating r WHERE r.albumId = :albumId")
-    double getAverageRating(String albumId);
+    double getAverageRating(int albumId);
 }

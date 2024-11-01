@@ -7,8 +7,9 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 @Configuration
 public class ChatSocketConfig {
     @Bean
-    public serverEndpointExporter ServerEndpointExporter() {
+    public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
     }
 
 }
+

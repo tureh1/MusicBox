@@ -3,6 +3,8 @@ package onetomany.Album;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/album")
 public class AlbumController {
@@ -11,8 +13,7 @@ public class AlbumController {
     private AlbumRepository albumRepository;
 
     @GetMapping("/{albumID}")
-    public Album getAlbumById(@PathVariable Long albumID) {
-        return albumRepository.findById(albumID)
-                .orElseThrow(() -> new ResourceNotFoundException("Album not found with ID: " + albumID));
+    public Optional<Album> getAlbumById(@PathVariable int albumID) { // Changed from String to int
+        return albumRepository.findById(albumID);
     }
 }
