@@ -1,15 +1,17 @@
 package com.example.musibox;
 
 public class Album {
-    private String coverUrl;
+    private String albumId;
     private String name;
+    private String coverUrl;
     private String artist;
     private String releaseDate;
     private float averageRating;
 
-    public Album(String coverUrl, String name, String artist, String releaseDate, float averageRating) {
+    public Album(String coverUrl, String id, String name, String artist, String releaseDate, float averageRating) {
         this.coverUrl = coverUrl;
-        this.name = name;
+        this.albumId = id;
+        this.name=name;
         this.artist = artist;
         this.releaseDate = releaseDate;
         this.averageRating = averageRating;
@@ -19,9 +21,11 @@ public class Album {
         return coverUrl;
     }
 
-    public String getName() {
-        return name;
+    public String getAlbumId() {
+        return albumId;
     }
+
+    public String getName(){return name;}
 
     public String getArtist() {
         return artist;
@@ -33,6 +37,10 @@ public class Album {
 
     public float getAverageRating() {
         return averageRating;
+    }
+
+    public void setAverageRating(float averageRating) {
+        this.averageRating = averageRating;
     }
 }
 

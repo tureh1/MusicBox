@@ -41,6 +41,7 @@ public class UserProfileActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String email = intent.getStringExtra("emailId");
         userId = intent.getStringExtra("userId");
+        
         // Initialize the Volley request queue
         RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
