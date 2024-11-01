@@ -1,48 +1,51 @@
 package com.example.musibox;
 
-import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private final List<ChatMessage> messageList;
-    private final String userEmail;
+    private List<ChatMessage> messageList;
 
-    public ChatAdapter(List<ChatMessage> messageList, String userEmail) {
+    private static final int VIEW_TYPE_USER_MESSAGE = 1;
+    private static final int VIEW_TYPE_FRIEND_MESSAGE = 2;
+
+    public ChatAdapter(List<ChatMessage> messageList) {
         this.messageList = messageList;
-        this.userEmail = userEmail;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return messageList.get(position).isSentByUser() ? 0 : 1; // 0 for outgoing, 1 for incoming
+        ChatMessage message = messageList.get(position);
+        return message.isSentByUser() ? VIEW_TYPE_USER_MESSAGE : VIEW_TYPE_FRIEND_MESSAGE;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == 0) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.outgoing_message, parent, false);
-            return new OutgoingMessageViewHolder(view);
+        if (viewType == VIEW_TYPE_USER_MESSAGE) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.outgoing_message, parent, false);
+            return new UserMessageViewHolder(view);
         } else {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.incoming_message, parent, false);
-            return new IncomingMessageViewHolder(view);
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.incoming_message, parent, false);
+            return new FriendMessageViewHolder(view);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ChatMessage chatMessage = messageList.get(position);
-        if (holder instanceof OutgoingMessageViewHolder) {
-            ((OutgoingMessageViewHolder) holder).bind(chatMessage);
-        } else if (holder instanceof IncomingMessageViewHolder) {
-            ((IncomingMessageViewHolder) holder).bind(chatMessage);
+        ChatMessage message = messageList.get(position);
+
+        if (holder instanceof UserMessageViewHolder) {
+            ((UserMessageViewHolder) holder).bind(message.getContent(), message.getTimestamp());
+        } else {
+            ((FriendMessageViewHolder) holder).bind(message.getContent(), message.getTimestamp());
         }
     }
 
@@ -51,29 +54,35 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return messageList.size();
     }
 
-    static class OutgoingMessageViewHolder extends RecyclerView.ViewHolder {
-        private final TextView outgoingMessageText;
+    public static class UserMessageViewHolder extends RecyclerView.ViewHolder {
+        TextView messageTextView;
+        TextView timestampTextView; // Added for timestamp
 
-        OutgoingMessageViewHolder(View itemView) {
+        public UserMessageViewHolder(View itemView) {
             super(itemView);
-            outgoingMessageText = itemView.findViewById(R.id.outgoingMessageText);
+            messageTextView = itemView.findViewById(R.id.outgoingMessageText);
+            timestampTextView = itemView.findViewById(R.id.outgoingMessageTimestamp); // Reference to timestamp view
         }
 
-        void bind(ChatMessage chatMessage) {
-            outgoingMessageText.setText(chatMessage.getMessage());
+        public void bind(String message, String timestamp) {
+            messageTextView.setText(message);
+            timestampTextView.setText(timestamp); // Set the timestamp
         }
     }
 
-    static class IncomingMessageViewHolder extends RecyclerView.ViewHolder {
-        private final TextView incomingMessageText;
+    public static class FriendMessageViewHolder extends RecyclerView.ViewHolder {
+        TextView messageTextView;
+        TextView timestampTextView; // Added for timestamp
 
-        IncomingMessageViewHolder(View itemView) {
+        public FriendMessageViewHolder(View itemView) {
             super(itemView);
-            incomingMessageText = itemView.findViewById(R.id.incomingMessageText);
+            messageTextView = itemView.findViewById(R.id.incomingMessageText);
+            timestampTextView = itemView.findViewById(R.id.incomingMessageTimestamp); // Reference to timestamp view
         }
 
-        void bind(ChatMessage chatMessage) {
-            incomingMessageText.setText(chatMessage.getMessage());
+        public void bind(String message, String timestamp) {
+            messageTextView.setText(message);
+            timestampTextView.setText(timestamp); // Set the timestamp
         }
     }
 }

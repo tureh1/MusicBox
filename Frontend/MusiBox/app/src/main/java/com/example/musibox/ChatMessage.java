@@ -1,19 +1,25 @@
 package com.example.musibox;
 
-public class ChatMessage {
-    private String message;
-    private boolean isSentByUser;
+public class    ChatMessage {
+    private String content;
+    private boolean sentByUser;
+    private String timestamp; // New field for timestamp
 
-    public ChatMessage(String message, boolean isSentByUser) {
-        this.message = message;
-        this.isSentByUser = isSentByUser;
+    public ChatMessage(String content, boolean sentByUser, String timestamp) {
+        this.content = content;
+        this.sentByUser = sentByUser;
+        this.timestamp = timestamp;
     }
 
-    public String getMessage() {
-        return message;
+    public String getContent() {
+        return content;
     }
 
     public boolean isSentByUser() {
-        return isSentByUser;
+        return sentByUser;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
     }
 }

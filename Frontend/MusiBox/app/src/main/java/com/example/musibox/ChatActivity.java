@@ -22,8 +22,12 @@ import org.json.JSONObject;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ChatActivity extends AppCompatActivity {
     private String friendEmail;
@@ -54,9 +58,12 @@ public class ChatActivity extends AppCompatActivity {
 
         // Set up message list and adapter
         messageList = new ArrayList<>();
-        chatAdapter = new ChatAdapter(messageList, userEmail);
+        chatAdapter = new ChatAdapter(messageList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
+
+        // Fetch old messages from the backend
+        fetchOldMessages();
 
         // Set up WebSocket connection
         setupWebSocket();
@@ -65,7 +72,6 @@ public class ChatActivity extends AppCompatActivity {
         setupButtons();
     }
 
-    // Set up WebSocket connection to the backend
     private void setupWebSocket() {
         String wsUrl = "ws://10.90.72.167:8080/chat/" + userEmail + "/" + friendEmail;
         URI uri;
@@ -76,7 +82,6 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        // Create WebSocket client
         webSocketClient = new WebSocketClient(uri) {
             @Override
             public void onOpen(ServerHandshake handshakedata) {
@@ -85,9 +90,10 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onMessage(String message) {
-                // Handle incoming message from server
                 runOnUiThread(() -> {
-                    messageList.add(new ChatMessage(message, false)); // Message from the friend
+                    // Assuming the incoming message is in JSON format
+                    String currentTimestamp = formatCurrentTimestamp(); // Get formatted current timestamp
+                    messageList.add(new ChatMessage(message, false, currentTimestamp)); // Message from friend
                     chatAdapter.notifyItemInserted(messageList.size() - 1);
                     recyclerView.scrollToPosition(messageList.size() - 1);
                 });
@@ -104,17 +110,52 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
 
-        // Connect the WebSocket client
         webSocketClient.connect();
     }
 
-    // Set up button listeners
+    private void fetchOldMessages() {
+        String url = "http://10.90.72.167:8080/messages?email=" + userEmail + "&friendEmail=" + friendEmail;
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONArray messagesArray = new JSONArray(response);
+
+                            for (int i = 0; i < messagesArray.length(); i++) {
+                                JSONObject messageObj = messagesArray.getJSONObject(i);
+                                String content = messageObj.getString("content");
+                                boolean isSentByUser = messageObj.getString("type").equals("user-message");
+                                String formattedTimestamp = messageObj.getString("timestamp"); // Get the formatted timestamp directly from the response
+
+                                messageList.add(new ChatMessage(content, isSentByUser, formattedTimestamp));
+                            }
+
+                            chatAdapter.notifyDataSetChanged();
+                            recyclerView.scrollToPosition(messageList.size() - 1);
+
+                        } catch (JSONException e) {
+                            Log.e("ChatActivity", "JSON Parsing error: ", e);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.e("ChatActivity", "Volley error: ", error);
+                    }
+                });
+
+        queue.add(stringRequest);
+    }
+
+
     private void setupButtons() {
         sendButton.setOnClickListener(v -> sendMessage());
         backButton.setOnClickListener(v -> finish());
     }
 
-    // Method to send messages via WebSocket
     private void sendMessage() {
         String message = messageInput.getText().toString();
         if (message.isEmpty()) {
@@ -122,24 +163,38 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        // Check if WebSocket is connected
         if (webSocketClient != null && webSocketClient.isOpen()) {
             try {
-                // Send the message via WebSocket
                 webSocketClient.send(message);
 
-                // Add message to the list and show it in the chat view as "sent"
-                messageList.add(new ChatMessage(message, true)); // Message from the user
+                // Get the current timestamp
+                String currentTimestamp = formatCurrentTimestamp(); // Get formatted current timestamp
+                messageList.add(new ChatMessage(message, true, currentTimestamp));
                 chatAdapter.notifyItemInserted(messageList.size() - 1);
                 recyclerView.scrollToPosition(messageList.size() - 1);
-
-                // Clear the input field
                 messageInput.setText("");
             } catch (Exception e) {
                 Log.e("ChatActivity", "Error sending message: ", e);
             }
         } else {
             Toast.makeText(this, "WebSocket is not connected", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String formatCurrentTimestamp() {
+        return new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(new Date());
+    }
+
+    private String formatTimestamp(String timestamp) {
+        // Assuming timestamp is in ISO 8601 format; you may need to adjust the format according to your backend
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat outputFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        try {
+            Date date = inputFormat.parse(timestamp);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            Log.e("ChatActivity", "Timestamp parsing error: ", e);
+            return timestamp; // Return the original timestamp if parsing fails
         }
     }
 
