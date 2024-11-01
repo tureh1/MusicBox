@@ -1,5 +1,6 @@
 package onetomany.Chat;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import jakarta.persistence.*;
@@ -33,14 +34,18 @@ public class Message {
         this.userName = userName;
         this.friendEmail = friendEmail;
         this.content = content;
+        this.sent = new Date();  // Sets timestamp when the message is created
     }
 
     // Getter and Setter for friendEmail
+
+    public String getFormattedTimestamp() {
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a");
+        return formatter.format(this.sent);
+    }
     public String getFriendEmail() {
         return friendEmail;
     }
 
-    public void setFriendEmail(String friendEmail) {
-        this.friendEmail = friendEmail;
-    }
+
 }

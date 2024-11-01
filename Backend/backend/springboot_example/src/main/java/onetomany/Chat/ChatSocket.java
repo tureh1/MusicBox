@@ -1,6 +1,7 @@
 package onetomany.Chat;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 @Controller
-@ServerEndpoint(value = "/chat/{email}")
+@ServerEndpoint(value = "/chat/{email}/{friendEmail}")
 public class ChatSocket {
 
     private static MessageRepository msgRepo;
@@ -44,46 +45,45 @@ public class ChatSocket {
     private final Logger logger = LoggerFactory.getLogger(ChatSocket.class);
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("email") String email) throws IOException {
-        logger.info("User connected: " + email);
+    public void onOpen(Session session, @PathParam("email") String email, @PathParam("friendEmail") String friendEmail) throws IOException {
+        logger.info("User connected: " + email + " to chat with " + friendEmail);
 
         sessionEmailMap.put(session, email);
         emailSessionMap.put(email, session);
 
-        sendMessageToUser(email, getChatHistory(email));
+        // Check if friendship is accepted before allowing chat
+        if (isFriendshipAccepted(email, friendEmail)) {
+            List<String> chatHistory = getChatHistory(email, friendEmail);
+            for (String msg : chatHistory) {
+                sendMessageToUser(email, msg); // Send each message separately
+            }
+        } else {
+            sendMessageToUser(email, "Cannot chat with " + friendEmail + ". Friendship is not confirmed.");
+            session.close();
+        }
     }
 
     @OnMessage
-    public void onMessage(Session session, String message) throws IOException {
+    public void onMessage(Session session, String messageContent) throws IOException {
         String senderEmail = sessionEmailMap.get(session);
+        String friendEmail = getFriendEmailBySession(session);
 
-        if (message.startsWith("@")) {
-            String[] splitMessage = message.split(" ", 2);
-            if (splitMessage.length < 2) {
-                sendMessageToUser(senderEmail, "Error: Message format should be '@friendEmail messageContent'");
-                return;
-            }
+        if (friendEmail != null && isFriendshipAccepted(senderEmail, friendEmail)) {
+            Message message = new Message(senderEmail, friendEmail, messageContent);
+            msgRepo.save(message);
 
-            String friendEmail = splitMessage[0].substring(1);
-            String messageContent = splitMessage[1];
+            String timestampedMessage = senderEmail + " [" + message.getFormattedTimestamp() + "]: " + messageContent;
 
-            // Check if both users are friends with isAccepted=true
-            if (isFriendshipAccepted(senderEmail, friendEmail)) {
-                if (emailSessionMap.containsKey(friendEmail)) {
-                    sendMessageToUser(friendEmail, senderEmail + ": " + messageContent);
-                    sendMessageToUser(senderEmail, "You to " + friendEmail + ": " + messageContent);
-
-                    msgRepo.save(new Message(senderEmail, friendEmail, messageContent));
-                } else {
-                    sendMessageToUser(senderEmail, "User " + friendEmail + " is offline.");
-                }
+            if (emailSessionMap.containsKey(friendEmail)) {
+                sendMessageToUser(friendEmail, timestampedMessage);
             } else {
-                sendMessageToUser(senderEmail, "Cannot send message. " + friendEmail + " is not your friend.");
+                sendMessageToUser(senderEmail, "User " + friendEmail + " is offline.");
             }
         } else {
-            sendMessageToUser(senderEmail, "Error: Message must start with '@friendEmail'");
+            sendMessageToUser(senderEmail, "Cannot send message. " + friendEmail + " is not your friend or friendship is not confirmed.");
         }
     }
+
 
     private boolean isFriendshipAccepted(String user1, String user2) {
         Friend friendRelation1 = friendRepo.findByFriendEmailAndUserId(user2, getUserIdByEmail(user1));
@@ -95,6 +95,10 @@ public class ChatSocket {
     private int getUserIdByEmail(String email) {
         User user = userRepo.findByEmailId(email);
         return user != null ? user.getId() : -1;
+    }
+
+    private String getFriendEmailBySession(Session session) {
+        return session.getPathParameters().get("friendEmail");
     }
 
     @OnClose
@@ -121,15 +125,17 @@ public class ChatSocket {
         }
     }
 
-    private String getChatHistory(String email) {
-        List<Message> messages = msgRepo.findAll();
-        StringBuilder history = new StringBuilder();
+    private List<String> getChatHistory(String email, String friendEmail) {
+        // Retrieve messages in chronological order between the two users
+        List<Message> messages = msgRepo.findMessagesBetweenUsers(email, friendEmail);
+        List<String> history = new ArrayList<>();
 
+        // Format messages to include sender's name, timestamp, and content
         for (Message message : messages) {
-            if (message.getUserName().equals(email) || message.getFriendEmail().equals(email)) {
-                history.append(message.getUserName()).append(": ").append(message.getContent()).append("\n");
-            }
+            String formattedMessage = message.getUserName() + " [" + message.getFormattedTimestamp() + "]: " + message.getContent();
+            history.add(formattedMessage);
         }
-        return history.toString();
+        return history;
     }
+
 }
