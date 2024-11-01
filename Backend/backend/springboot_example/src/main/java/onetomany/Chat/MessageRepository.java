@@ -1,0 +1,9 @@
+package onetomany.Chat;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface MessageRepository extends JpaRepository<Message, Long> {
+    List<Message> findByUserNameAndFriendEmail(String userName, String friendEmail);
+    List<Message> findByFriendEmailAndUserName(String friendEmail, String userName);
+}
