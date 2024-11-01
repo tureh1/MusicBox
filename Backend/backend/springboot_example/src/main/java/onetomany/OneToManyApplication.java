@@ -4,16 +4,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
 import onetomany.Users.User;
 import onetomany.Users.UserRepository;
 
 @SpringBootApplication
-class Main {
+public class OneToManyApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Main.class, args);
+        SpringApplication.run(OneToManyApplication.class, args);
     }
-
-    // Create some users for initial testing
 }
+
