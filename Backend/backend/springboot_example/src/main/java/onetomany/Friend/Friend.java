@@ -11,7 +11,6 @@ public class Friend {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-
     private boolean isAccepted;
     private String friendName;
     private String friendEmail;
@@ -25,10 +24,11 @@ public class Friend {
         // Default constructor
     }
 
-    public Friend(String friendName, String friendEmail, User user) {
-        this.friendName = friendName;
+    public Friend(User user, String friendEmail, boolean isAccepted) {
+        this.user = user; // Make sure this user is properly assigned
         this.friendEmail = friendEmail;
-        this.user = user;
+        this.isAccepted = isAccepted;
+        this.friendName = null; // Initialize friendName if needed, set later
     }
 
     // Getters and Setters
@@ -65,12 +65,11 @@ public class Friend {
         this.user = user;
     }
 
-    public boolean isIsAccepted() {
+    public boolean isAccepted() { // Method name updated to follow Java naming conventions
         return isAccepted;
     }
 
-    public void setIsAccepted(boolean isAccepted) {
+    public void setAccepted(boolean isAccepted) { // Method name updated to follow Java naming conventions
         this.isAccepted = isAccepted;
     }
 }
-

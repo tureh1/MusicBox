@@ -5,7 +5,8 @@ public class ChatMessage {
     private String recipient;
     private String content;
 
-    public ChatMessage() {}
+    public ChatMessage() {
+    }
 
     public ChatMessage(String sender, String recipient, String content) {
         this.sender = sender;

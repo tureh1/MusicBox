@@ -14,3 +14,4 @@ public class ChatController {
         return message; // Return the message to be sent to subscribers
     }
 }
+

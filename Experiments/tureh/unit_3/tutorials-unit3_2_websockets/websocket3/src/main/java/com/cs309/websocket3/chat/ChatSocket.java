@@ -4,149 +4,114 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-@Controller      // this is needed for this to be an endpoint to springboot
-@ServerEndpoint(value = "/chat/{username}")  // this is Websocket url
+@Controller
+@ServerEndpoint(value = "/chat/{email}")  // WebSocket URL with sender's email as a path parameter
 public class ChatSocket {
 
 	private static MessageRepository msgRepo;
 
 	@Autowired
 	public void setMessageRepository(MessageRepository repo) {
-		msgRepo = repo;  // we are setting the static variable
+		msgRepo = repo;
 	}
 
-	// Store all socket session and their corresponding username.
-	private static Map<Session, String> sessionUsernameMap = new Hashtable<>();
-	private static Map<String, Session> usernameSessionMap = new Hashtable<>();
+	// Maps to store sessions with user emails
+	private static Map<Session, String> sessionEmailMap = new Hashtable<>();
+	private static Map<String, Session> emailSessionMap = new Hashtable<>();
 
 	private final Logger logger = LoggerFactory.getLogger(ChatSocket.class);
 
 	@OnOpen
-	public void onOpen(Session session, @PathParam("username") String username)
-			throws IOException {
+	public void onOpen(Session session, @PathParam("email") String email) throws IOException {
+		logger.info("User connected: " + email);
 
-		logger.info("Entered into Open");
+		// Store user session information
+		sessionEmailMap.put(session, email);
+		emailSessionMap.put(email, session);
 
-		// store connecting user information
-		sessionUsernameMap.put(session, username);
-		usernameSessionMap.put(username, session);
-
-		// Send chat history to the newly connected user
-		sendMessageToParticularUser(username, getChatHistory());
-
-		// Broadcast that a new user joined
-		String message = "User: " + username + " has joined the chat.";
-		broadcast(message);
+		// Send previous chat history to newly connected user
+		sendMessageToUser(email, getChatHistory(email));
 	}
-
 
 	@OnMessage
 	public void onMessage(Session session, String message) throws IOException {
-		// Handle new messages
-		logger.info("Entered into Message: Got Message:" + message);
-		String username = sessionUsernameMap.get(session);
+		logger.info("Received message: " + message);
+		String senderEmail = sessionEmailMap.get(session);
 
-		// Check for typing indicator
-		if (message.equals("typing")) {
-			// Notify others that this user is typing
-			broadcast(username + " is typing...");
-			return;
-		}
-
-		// Direct message to a user using the format "@username <message>"
+		// Validate message format: should start with "@friendEmail messageContent"
 		if (message.startsWith("@")) {
-			String destUsername = message.split(" ")[0].substring(1);
-
-			// Check if the destination user is online
-			if (usernameSessionMap.containsKey(destUsername)) {
-				// Send the message to the sender and receiver
-				sendMessageToParticularUser(destUsername, "[DM] " + username + ": " + message);
-				sendMessageToParticularUser(username, "[DM] " + username + ": " + message);
-			} else {
-				// Notify the sender that the destination user is offline
-				sendMessageToParticularUser(username, "User " + destUsername + " is offline.");
+			String[] splitMessage = message.split(" ", 2);
+			if (splitMessage.length < 2) {
+				sendMessageToUser(senderEmail, "Error: Message format should be '@friendEmail messageContent'");
+				return;
 			}
 
-		} else { // broadcast
-			broadcast(username + ": " + message);
+			String friendEmail = splitMessage[0].substring(1);  // Get friendEmail without '@'
+			String messageContent = splitMessage[1];
+
+			// Check if the friend is online
+			if (emailSessionMap.containsKey(friendEmail)) {
+				// Send the message to the friend
+				sendMessageToUser(friendEmail, senderEmail + ": " + messageContent);
+
+				// Notify sender that the message was sent
+				sendMessageToUser(senderEmail, "You to " + friendEmail + ": " + messageContent);
+
+				// Save the message in the repository
+				msgRepo.save(new Message(senderEmail, friendEmail, messageContent));
+			} else {
+				// Notify sender that the friend is offline
+				sendMessageToUser(senderEmail, "User " + friendEmail + " is offline.");
+			}
+		} else {
+			sendMessageToUser(senderEmail, "Error: Message must start with '@friendEmail'");
 		}
-
-		// Saving chat history to repository
-		msgRepo.save(new Message(username, message));
 	}
-
 
 	@OnClose
 	public void onClose(Session session) throws IOException {
-		logger.info("Entered into Close");
-
-		// Remove the user connection information
-		String username = sessionUsernameMap.get(session);
-		sessionUsernameMap.remove(session);
-		usernameSessionMap.remove(username);
-
-		// Broadcast that the user disconnected
-		String message = username + " has left the chat.";
-		broadcast(message);
+		String email = sessionEmailMap.get(session);
+		sessionEmailMap.remove(session);
+		emailSessionMap.remove(email);
+		logger.info("User disconnected: " + email);
 	}
-
 
 	@OnError
 	public void onError(Session session, Throwable throwable) {
-		// Do error handling here
-		logger.info("Entered into Error");
-		throwable.printStackTrace();
+		logger.error("WebSocket error", throwable);
 	}
 
-
-	private void sendMessageToParticularUser(String username, String message) {
+	// Sends a message to a specific user based on their email
+	private void sendMessageToUser(String email, String message) {
 		try {
-			usernameSessionMap.get(username).getBasicRemote().sendText(message);
+			Session recipientSession = emailSessionMap.get(email);
+			if (recipientSession != null) {
+				recipientSession.getBasicRemote().sendText(message);
+			}
 		} catch (IOException e) {
-			logger.info("Exception: " + e.getMessage().toString());
-			e.printStackTrace();
+			logger.error("Error sending message: " + e.getMessage(), e);
 		}
 	}
 
-
-	private void broadcast(String message) {
-		sessionUsernameMap.forEach((session, username) -> {
-			try {
-				session.getBasicRemote().sendText(message);
-			} catch (IOException e) {
-				logger.info("Exception: " + e.getMessage().toString());
-				e.printStackTrace();
-			}
-		});
-	}
-
-
-	// Gets the Chat history from the repository
-	private String getChatHistory() {
+	// Retrieves chat history between the connected user and all others
+	private String getChatHistory(String email) {
 		List<Message> messages = msgRepo.findAll();
+		StringBuilder history = new StringBuilder();
 
-		// Convert the list to a string
-		StringBuilder sb = new StringBuilder();
-		if (messages != null && messages.size() != 0) {
-			for (Message message : messages) {
-				sb.append(message.getUserName() + ": " + message.getContent() + "\n");
+		for (Message message : messages) {
+			// Include messages where this user was either the sender or the recipient
+			if (message.getUserName().equals(email) || message.getFriendEmail().equals(email)) {
+				history.append(message.getUserName()).append(": ").append(message.getContent()).append("\n");
 			}
 		}
-		return sb.toString();
+		return history.toString();
 	}
-
-} // end of Class
+}
