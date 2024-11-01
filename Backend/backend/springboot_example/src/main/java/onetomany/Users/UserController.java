@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -54,9 +56,11 @@ public class UserController {
     }
 
     @GetMapping(path = "/users/{id}")
-    User getUserById(@PathVariable int id) {
-        return userRepository.findById(id);
+    public ResponseEntity<User> getUserById(@PathVariable int id) {
+        Optional<User> user = Optional.ofNullable(userRepository.findById(id));
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
+
 
     @PostMapping(path = "/login")
     public String loginUser(@RequestBody User user) {
@@ -75,14 +79,15 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/users/{emailId}")
-    String deleteUserByEmail(@PathVariable String emailId) {
+    public ResponseEntity<String> deleteUserByEmail(@PathVariable String emailId) {
         User user = userRepository.findByEmailId(emailId);
         if (user != null) {
-            userRepository.delete(user); // Delete the user by the object
-            return success;
+            userRepository.delete(user);
+            return ResponseEntity.ok(success);
         }
-        return failure; // If the user with that email was not found
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure);
     }
+
 
     @PutMapping(path = "/newpass/{emailId}")
     public String updateUserPassword(@PathVariable String emailId, @RequestBody User.UpdatePasswordRequest updateRequest) {
