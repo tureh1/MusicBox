@@ -256,7 +256,7 @@
                 return;
             }
 
-            String url = "http://10.90.72.167:8080/friends/" + friend.getFriendEmail();
+            String url = "http://10.90.72.167:8080/users/" +  userId +"/friends/" + friend.getFriendEmail();
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
                     response -> {

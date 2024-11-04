@@ -35,4 +35,13 @@
             android:textColor="#555555" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/optionsIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/angle_small_down"
+        android:contentDescription="Options"
+        android:layout_gravity="center_vertical"
+        android:padding="4dp"/>
+
 </LinearLayout>

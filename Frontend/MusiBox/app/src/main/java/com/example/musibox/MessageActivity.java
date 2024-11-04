@@ -25,8 +25,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
     private ImageButton addUserButton;
     private ImageButton messageButton;
     private ImageButton userButton;
-
-    private String userEmail; // Member variable to store the user email
+    private String userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,17 +100,63 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         Toast.makeText(this, "Failed to fetch friends: " + error.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
-    // Method to fetch user email from backend
+    private void deleteFriend(String friendEmail) {
+        int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
+        if (userId == -1) {
+            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String url = "http://10.90.72.167:8080/users/" + userId + "/friends/" + friendEmail;
+
+        StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, url,
+                response -> {
+                    Toast.makeText(this, "Friend deleted successfully", Toast.LENGTH_SHORT).show();
+                    fetchFriendsEmails();
+                },
+                error -> {
+                    Log.e("MessageActivity", "Error deleting friend: " + error.toString());
+                    Toast.makeText(this, "Failed to delete friend: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+        );
+
+        VolleySingleton.getInstance(this).addToRequestQueue(deleteRequest);
+    }
+
+    @Override
+    public void onMessageClick(String friendEmail) {
+        int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
+        if (userId != -1) {
+            fetchUserEmail(userId, email -> {
+                if (friendEmail != null && !friendEmail.isEmpty()) {
+                    Intent intent = new Intent(MessageActivity.this, ChatActivity.class);
+                    intent.putExtra("friendEmail", friendEmail);
+                    intent.putExtra("userEmail", email);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Friend email is missing", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onFriendDelete(Message friend) {
+        deleteFriend(friend.getUsername());
+    }
+
+
     private void fetchUserEmail(int userId, UserEmailCallback callback) {
-        String url = "http://10.90.72.167:8080/users/" + userId; // Adjust URL based on your backend
+        String url = "http://10.90.72.167:8080/users/" + userId;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 response -> {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
-                        userEmail = jsonObject.getString("emailId"); // Adjust based on your JSON response
-                        Log.d("MessageActivity", "User email retrieved from backend: " + userEmail);
-                        callback.onEmailFetched(userEmail); // Trigger the callback with the fetched email
+                        userEmail = jsonObject.getString("emailId");
+                        callback.onEmailFetched(userEmail);
                     } catch (JSONException e) {
                         Log.e("MessageActivity", "Error parsing user email: " + e.getMessage());
                     }
@@ -126,29 +171,10 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
     }
 
     @Override
-    public void onMessageClick(String friendEmail) {
-        Log.d("MessageActivity", "User clicked on: " + friendEmail);
-
-        // Fetch userId from SharedPreferences
-        int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
-        if (userId != -1) {
-            fetchUserEmail(userId, email -> {
-                // Start ChatActivity after the email has been fetched
-                if (friendEmail != null && !friendEmail.isEmpty()) {
-                    Intent intent = new Intent(MessageActivity.this, ChatActivity.class);
-                    intent.putExtra("friendEmail", friendEmail);
-                    intent.putExtra("userEmail", email); // Use the fetched userEmail
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(this, "Friend email is missing", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
-        }
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
     }
 
-    // Define a callback interface
     public interface UserEmailCallback {
         void onEmailFetched(String email);
     }

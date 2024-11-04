@@ -15,6 +15,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     // Define an interface for click events
     public interface OnMessageClickListener {
         void onMessageClick(String friendEmail);
+
+        void onFriendDelete(Message friend);
     }
 
     public MessageAdapter(List<Message> messageList, OnMessageClickListener listener) {
