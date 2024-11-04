@@ -56,7 +56,7 @@
         android:id="@+id/MusiText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/caveat"
         android:shadowColor="@color/black"
         android:shadowDy="5"
@@ -64,10 +64,11 @@
         android:text="Musi Box"
         android:textAlignment="center"
         android:textColor="@color/black"
-        android:textSize="30sp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.047"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
@@ -93,6 +94,14 @@
                 android:backgroundTint="#00FFFFFF"
                 android:scaleType="fitCenter"
                 android:src="@drawable/home" />
+            <ImageButton
+                android:id="@+id/adduser"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:background="#00FFFFFF"
+                android:scaleType="fitCenter"
+                android:src="@drawable/adduser" />
 
             <ImageButton
                 android:id="@+id/message"

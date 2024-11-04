@@ -1,4 +1,4 @@
-package com.example.androidexample;
+package com.example.musibox;
 
 import org.java_websocket.handshake.ServerHandshake;
 

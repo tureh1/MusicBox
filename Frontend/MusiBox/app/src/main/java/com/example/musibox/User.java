@@ -10,6 +10,4 @@ public class User {
     public String getEmailId() {
         return emailId;
     }
-
-    // Add other fields as necessary (like username, etc.)
 }
