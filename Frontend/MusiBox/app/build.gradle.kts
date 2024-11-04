@@ -32,12 +32,16 @@ android {
 }
 
 dependencies {
+
+
+    implementation (libs.java.websocket)
     implementation(libs.volley)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.mediarouter)
+    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

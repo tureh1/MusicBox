@@ -1,0 +1,33 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:gravity="end"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/outgoingMessageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/message1"
+        android:padding="10dp"
+        android:textColor="@android:color/black"
+        android:textAlignment="viewStart"
+        android:layout_marginEnd="8dp"
+        android:text="Outgoing message" />
+
+
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/generic_avatar"
+        android:layout_gravity="bottom"
+        android:contentDescription="User icon" />
+    <TextView
+        android:id="@+id/outgoingMessageTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        />
+</LinearLayout>
