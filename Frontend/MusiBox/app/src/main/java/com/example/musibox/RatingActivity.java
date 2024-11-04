@@ -19,14 +19,15 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainPage extends AppCompatActivity implements WebSocketListener {
+public class RatingActivity extends AppCompatActivity implements WebSocketListener {
 
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
     private List<Album> albumList;
     private String albumId; // Define this at the class level
 
-    @SuppressLint("MissingInflatedId")
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +46,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
         String serverUrl = "ws://10.90.72.167:8080/${albumId}/rating";
 
         WebSocketManager.getInstance().connectWebSocket(serverUrl);
-        WebSocketManager.getInstance().setWebSocketListener(MainPage.this);
+        WebSocketManager.getInstance().setWebSocketListener(RatingActivity.this);
 
 
         // Set albumId before calling fetchAlbumData
@@ -101,8 +102,8 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
             e.printStackTrace();
         }
     }
-    private void fetchAlbumData() {
 
+    private void fetchAlbumData() {
         String url = "http://10.90.72.167:8080/" + albumId;
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
@@ -133,14 +134,14 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Toast.makeText(MainPage.this, "Error parsing album data", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(RatingActivity.this, "Error parsing album data", Toast.LENGTH_SHORT).show();
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(MainPage.this, "Error fetching album data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(RatingActivity.this, "Error fetching album data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -149,7 +150,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
     }
 }
 
-// Method to add dummy album data
+    // Method to add dummy album data
 //    private void addDummyAlbums() {
 //        // Adding dummy albums
 //        albumList.add(new Album(
