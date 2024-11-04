@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import java.net.URI;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +45,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        // Initialize views and variables
         friendEmail = getIntent().getStringExtra("friendEmail");
         userEmail = getIntent().getStringExtra("userEmail");
 
@@ -57,6 +59,7 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
 
+        // Fetch old messages and set up WebSocket
         fetchOldMessages();
         setupWebSocket();
         setupButtons();
@@ -64,39 +67,42 @@ public class ChatActivity extends AppCompatActivity {
 
     private void setupWebSocket() {
         String wsUrl = "ws://10.90.72.167:8080/chat/" + userEmail + "/" + friendEmail;
+        URI uri;
         try {
-            URI uri = new URI(wsUrl);
-            webSocketClient = new WebSocketClient(uri) {
-                @Override
-                public void onOpen(ServerHandshake handshakedata) {
-                    Log.d("ChatActivity", "WebSocket opened");
-                }
-
-                @Override
-                public void onMessage(String message) {
-                    runOnUiThread(() -> {
-                        // Format the message and add it to the list
-                        String currentTimestamp = formatCurrentTimestamp();
-                        messageList.add(new ChatMessage(message, false, currentTimestamp));
-                        chatAdapter.notifyItemInserted(messageList.size() - 1);
-                        recyclerView.scrollToPosition(messageList.size() - 1);
-                    });
-                }
-
-                @Override
-                public void onClose(int code, String reason, boolean remote) {
-                    Log.d("ChatActivity", "WebSocket closed: " + reason);
-                }
-
-                @Override
-                public void onError(Exception ex) {
-                    Log.e("ChatActivity", "WebSocket error: ", ex);
-                }
-            };
-            webSocketClient.connect();
+            uri = new URI(wsUrl);
         } catch (Exception e) {
             Log.e("ChatActivity", "Invalid WebSocket URL", e);
+            return;
         }
+
+        webSocketClient = new WebSocketClient(uri) {
+            @Override
+            public void onOpen(ServerHandshake handshakedata) {
+                Log.d("ChatActivity", "WebSocket opened");
+            }
+
+            @Override
+            public void onMessage(String message) {
+                runOnUiThread(() -> {
+                    String currentTimestamp = formatCurrentTimestamp();
+                    messageList.add(new ChatMessage(message, false, currentTimestamp));
+                    chatAdapter.notifyItemInserted(messageList.size() - 1);
+                    recyclerView.scrollToPosition(messageList.size() - 1);
+                });
+            }
+
+            @Override
+            public void onClose(int code, String reason, boolean remote) {
+                Log.d("ChatActivity", "WebSocket closed: " + reason);
+            }
+
+            @Override
+            public void onError(Exception ex) {
+                Log.e("ChatActivity", "WebSocket error: ", ex);
+            }
+        };
+
+        webSocketClient.connect();
     }
 
     private void fetchOldMessages() {
@@ -107,15 +113,21 @@ public class ChatActivity extends AppCompatActivity {
                 response -> {
                     try {
                         JSONArray messagesArray = new JSONArray(response);
+
                         for (int i = 0; i < messagesArray.length(); i++) {
                             JSONObject messageObject = messagesArray.getJSONObject(i);
                             String sender = messageObject.getString("sender");
                             String content = messageObject.getString("content");
-                            String timestamp = messageObject.getString("timestamp");
+                            String timestamp = messageObject.getString("timestamp"); // Make sure this is correct
 
+                            // Determine if the message was sent by the user
                             boolean isSentByUser = sender.equals(userEmail);
+
+                            // Create ChatMessage with the correct timestamp from the backend
                             messageList.add(new ChatMessage(content, isSentByUser, timestamp));
                         }
+
+                        // Notify the adapter and scroll to the last message
                         chatAdapter.notifyDataSetChanged();
                         recyclerView.scrollToPosition(messageList.size() - 1);
                     } catch (JSONException e) {
@@ -140,12 +152,17 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         if (webSocketClient != null && webSocketClient.isOpen()) {
-            webSocketClient.send(message);
-            String currentTimestamp = formatCurrentTimestamp();
-            messageList.add(new ChatMessage(message, true, currentTimestamp));
-            chatAdapter.notifyItemInserted(messageList.size() - 1);
-            recyclerView.scrollToPosition(messageList.size() - 1);
-            messageInput.setText("");
+            try {
+                webSocketClient.send(message);
+
+                String currentTimestamp = formatCurrentTimestamp();
+                messageList.add(new ChatMessage(message, true, currentTimestamp));
+                chatAdapter.notifyItemInserted(messageList.size() - 1);
+                recyclerView.scrollToPosition(messageList.size() - 1);
+                messageInput.setText("");
+            } catch (Exception e) {
+                Log.e("ChatActivity", "Error sending message: ", e);
+            }
         } else {
             Toast.makeText(this, "Unable to send message", Toast.LENGTH_SHORT).show();
         }
