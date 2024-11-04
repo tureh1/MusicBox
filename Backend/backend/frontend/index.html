@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        #chat {
+            width: 400px;
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Chat Application</h1>
+<div id="chat"></div>
+<input type="text" id="sender" placeholder="Your Name" />
+<input type="text" id="recipient" placeholder="Recipient Name" />
+<input type="text" id="message" placeholder="Message" />
+<button id="send">Send</button>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+<body>
+<script>
+    const socket = new WebSocket('ws://localhost:8080/chat');
+
+    socket.onopen = function() {
+        console.log('WebSocket connection established');
+        // Example message
+        const message = JSON.stringify({
+            sender: 'user1',
+            recipient: 'user2',
+            content: 'Hello, WebSocket!'
+        });
+        socket.send(message);
+    };
+
+    socket.onmessage = function(event) {
+        console.log('Message from server: ', event.data);
+    };
+
+    socket.onerror = function(error) {
+        console.error('WebSocket error: ', error);
+    };
+</script>
+</body>
+</html>
+
+<script>
+    const chatDisplay = document.getElementById('chat');
+    const senderInput = document.getElementById('sender');
+    const recipientInput = document.getElementById('recipient');
+    const messageInput = document.getElementById('message');
+    const sendButton = document.getElementById('send');
+
+    const socket = new SockJS('http://localhost:8080/chat'); // Adjust the URL based on your server configuration
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/messages', function (chatMessage) {
+            const message = JSON.parse(chatMessage.body);
+            displayMessage(message);
+        });
+    });
+
+    sendButton.addEventListener('click', function () {
+        const message = {
+            sender: senderInput.value,
+            recipient: recipientInput.value,
+            content: messageInput.value
+        };
+        stompClient.send("/app/sendMessage", {}, JSON.stringify(message));
+        messageInput.value = ''; // Clear the message input
+    });
+
+    function displayMessage(message) {
+        chatDisplay.innerHTML += `<p><strong>${message.sender}:</strong> ${message.content}</p>`;
+        chatDisplay.scrollTop = chatDisplay.scrollHeight; // Auto scroll to the latest message
+    }
+</script>
+</body>
+</html>

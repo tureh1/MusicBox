@@ -2,15 +2,7 @@ package com.cs309.websocket3.chat;
 
 import java.util.Date;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
 
 import lombok.Data;
 
@@ -18,12 +10,15 @@ import lombok.Data;
 @Table(name = "messages")
 @Data
 public class Message {
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column
-    private String userName;
+    private String userName; // Sender's email
+
+    @Column
+    private String friendEmail; // Recipient's email
 
     @Lob
     private String content;
@@ -31,46 +26,21 @@ public class Message {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sent")
     private Date sent = new Date();
-	
-	
-	public Message() {};
-	
-	public Message(String userName, String content) {
-		this.userName = userName;
-		this.content = content;
-	}
 
-    public Long getId() {
-        return id;
-    }
+    public Message() {}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
+    public Message(String userName, String friendEmail, String content) {
         this.userName = userName;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
+        this.friendEmail = friendEmail;
         this.content = content;
     }
 
-    public Date getSent() {
-        return sent;
+    // Getter and Setter for friendEmail
+    public String getFriendEmail() {
+        return friendEmail;
     }
 
-    public void setSent(Date sent) {
-        this.sent = sent;
+    public void setFriendEmail(String friendEmail) {
+        this.friendEmail = friendEmail;
     }
-
-    
 }

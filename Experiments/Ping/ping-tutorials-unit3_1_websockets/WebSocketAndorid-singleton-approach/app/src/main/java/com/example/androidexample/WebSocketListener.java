@@ -33,7 +33,7 @@ public interface WebSocketListener {
     void onWebSocketClose(int code, String reason, boolean remote);
 
     /**
-     * Called when an error occurs in the WebSocket communication.
+     * Called when an error occurs in the WebSocket communication.r
      *
      * @param ex The exception that describes the error.
      */

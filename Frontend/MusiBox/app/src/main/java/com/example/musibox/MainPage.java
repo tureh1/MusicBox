@@ -26,6 +26,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
     private List<Album> albumList;
     private String albumId; // Define this at the class level
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
