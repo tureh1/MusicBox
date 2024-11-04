@@ -132,7 +132,7 @@ public class ChatSocket {
 
         // Format messages to include sender's name, timestamp, and content
         for (Message message : messages) {
-            String formattedMessage = message.getUserName() + " [" + message.getFormattedTimestamp() + "]: " + message.getContent();
+            String formattedMessage = message.getContent();
             history.add(formattedMessage);
         }
         return history;
