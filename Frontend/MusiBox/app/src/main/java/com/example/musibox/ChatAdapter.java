@@ -6,11 +6,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+
+
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private List<ChatMessage> messageList;
-
+    private final List<ChatMessage> messageList;
     private static final int VIEW_TYPE_USER_MESSAGE = 1;
     private static final int VIEW_TYPE_FRIEND_MESSAGE = 2;
 
@@ -18,11 +20,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.messageList = messageList;
     }
 
+
     @Override
     public int getItemViewType(int position) {
         ChatMessage message = messageList.get(position);
         return message.isSentByUser() ? VIEW_TYPE_USER_MESSAGE : VIEW_TYPE_FRIEND_MESSAGE;
     }
+
 
     @NonNull
     @Override
@@ -44,7 +48,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         if (holder instanceof UserMessageViewHolder) {
             ((UserMessageViewHolder) holder).bind(message.getContent(), message.getTimestamp());
-        } else {
+        } else if (holder instanceof FriendMessageViewHolder) {
             ((FriendMessageViewHolder) holder).bind(message.getContent(), message.getTimestamp());
         }
     }
@@ -56,33 +60,33 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public static class UserMessageViewHolder extends RecyclerView.ViewHolder {
         TextView messageTextView;
-        TextView timestampTextView; // Added for timestamp
+        TextView timestampTextView;
 
         public UserMessageViewHolder(View itemView) {
             super(itemView);
             messageTextView = itemView.findViewById(R.id.outgoingMessageText);
-            timestampTextView = itemView.findViewById(R.id.outgoingMessageTimestamp); // Reference to timestamp view
+            timestampTextView = itemView.findViewById(R.id.outgoingMessageTimestamp);
         }
 
         public void bind(String message, String timestamp) {
             messageTextView.setText(message);
-            timestampTextView.setText(timestamp); // Set the timestamp
+            timestampTextView.setText(timestamp);
         }
     }
 
     public static class FriendMessageViewHolder extends RecyclerView.ViewHolder {
         TextView messageTextView;
-        TextView timestampTextView; // Added for timestamp
+        TextView timestampTextView;
 
         public FriendMessageViewHolder(View itemView) {
             super(itemView);
             messageTextView = itemView.findViewById(R.id.incomingMessageText);
-            timestampTextView = itemView.findViewById(R.id.incomingMessageTimestamp); // Reference to timestamp view
+            timestampTextView = itemView.findViewById(R.id.incomingMessageTimestamp);
         }
 
         public void bind(String message, String timestamp) {
             messageTextView.setText(message);
-            timestampTextView.setText(timestamp); // Set the timestamp
+            timestampTextView.setText(timestamp);
         }
     }
 }
