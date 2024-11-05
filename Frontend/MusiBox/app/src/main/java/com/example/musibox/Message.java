@@ -3,10 +3,11 @@ package com.example.musibox;
 public class Message {
     private String username;
     private String messageContent;
-
+    private String friendEmail;
     public Message(String username, String messageContent) {
         this.username = username;
         this.messageContent = messageContent;
+        this.friendEmail = friendEmail;
     }
 
     public String getUsername() {
@@ -25,6 +26,9 @@ public class Message {
         this.messageContent = messageContent;
     }
 
+    public String getFriendEmail() {
+        return friendEmail;
+    }
 
 
 }

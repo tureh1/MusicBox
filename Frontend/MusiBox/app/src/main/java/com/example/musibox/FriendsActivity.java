@@ -3,7 +3,6 @@
     import android.annotation.SuppressLint;
     import android.content.Intent;
     import android.os.Bundle;
-    import android.os.Message;
     import android.text.Editable;
     import android.text.TextWatcher;
     import android.util.Log;
