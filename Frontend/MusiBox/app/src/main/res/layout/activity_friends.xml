@@ -15,41 +15,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <AutoCompleteTextView
-        android:id="@+id/search_bar"
-        android:layout_width="0dp"
-        android:layout_height="43dp"
-        android:background="@drawable/searchbar"
-        android:drawableLeft="@drawable/baseline_search_24"
-        android:hint=" Search for friends"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/rectangle_11"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/friend_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/Grey"
-        android:elevation="10dp"
 
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_bar"
-        app:layout_constraintVertical_bias="0.0"
-      />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/friendsRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_bar"/>
 
     <TextView
         android:id="@+id/MusiText"
