@@ -1,10 +1,9 @@
 package com.example.musibox;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     Button DeleteButton;
     TextView forgotPassword;
     TextView signUpLink;
-    private boolean isFirstClick = true;
+    private boolean isFirstClick = true; // Flag to check if it's the first click
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,72 +41,47 @@ public class LoginActivity extends AppCompatActivity {
         forgotPassword = findViewById(R.id.forgotPassword);
         signUpLink = findViewById(R.id.signup);
 
-        forgotPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Navigate to ForgotPasswordActivity or show a Toast for now
-                Toast.makeText(LoginActivity.this, "Forgot Password clicked", Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(LoginActivity.this, ForgotActivity.class);
-                startActivity(intent);
-            }
+        // Forgot Password click listener
+        forgotPassword.setOnClickListener(view -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotActivity.class);
+            startActivity(intent);
         });
 
-        signUpLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Navigate to SignUpActivity
-                Intent intent = new Intent(LoginActivity.this, SignUp.class);
-                startActivity(intent);
-            }
+        // Sign Up click listener
+        signUpLink.setOnClickListener(view -> {
+            Intent intent = new Intent(LoginActivity.this, SignUp.class);
+            startActivity(intent);
         });
 
-        // Common focus change listener for both username and password fields
-        View.OnFocusChangeListener clearTextListener = new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if (hasFocus && isFirstClick) {
-                    email.setText("");  // Clear the default text from username
-                    password.setText("");  // Clear the default text from password
-                    isFirstClick = false;  // Ensure this only happens once for both fields
-                }
+        // Focus change listener to clear text on first click
+        View.OnFocusChangeListener clearTextListener = (view, hasFocus) -> {
+            if (hasFocus && isFirstClick) {
+                email.setText("");
+                password.setText("");
+                isFirstClick = false;
             }
         };
-        // Attach the common listener to both fields
         email.setOnFocusChangeListener(clearTextListener);
         password.setOnFocusChangeListener(clearTextListener);
 
         RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (handleLogIn()) {
-                    // Send email and password to the backend
-                   sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
-                    String emailInput = email.getText().toString().trim();
-                    Intent homeIntent = new Intent(LoginActivity.this,  MainPage.class);
-                    homeIntent.putExtra("emailId",emailInput);
-                    startActivity(homeIntent);
-                    finish();
-                }
+        // Login button click listener
+        loginButton.setOnClickListener(v -> {
+            if (handleLogIn()) {
+                sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
             }
-
-        });
-        DeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (handleLogIn()) {
-                    // Send email and password to the backend
-                    DeleteRequest(email.getText().toString().trim());
-
-                }
-            }
-
         });
 
+        // Delete button click listener
+        DeleteButton.setOnClickListener(v -> {
+            if (handleLogIn()) {
+                DeleteRequest(email.getText().toString().trim());
+            }
+        });
     }
 
+    // Validation for login input
     private boolean handleLogIn() {
         String usernameInput = email.getText().toString().trim();
         String passwordInput = password.getText().toString().trim();
@@ -120,13 +94,12 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "Password must be at least 6 characters.", Toast.LENGTH_SHORT).show();
             return false;
         }
-
         return true;
     }
 
-
+    // Send login request to the backend
     private void sendLogInRequest(String email, String password) {
-        String url = "http://10.90.72.167:8080/login"; // Your backend URL
+        String url = "http://10.90.72.167:8080/login"; // Backend URL
 
         // Create a JSON object with the email and password
         JSONObject requestData = new JSONObject();
@@ -143,24 +116,27 @@ public class LoginActivity extends AppCompatActivity {
                     // Handle the success response here
                     try {
                         String message = response.getString("message");
+                        Log.d("LoginActivity", "Response message: " + message);
 
                         // Check the message to determine if the login was successful
-                        if (message.equals("login successful")) {
-                            // Get user ID from the response
-                            int userId = response.getInt("userId"); // Make sure your backend sends userId in the response
+                        if (message.equalsIgnoreCase("login successful")) {
+                            int userId = response.getInt("userId"); // Retrieve user ID
+                            Log.d("LoginActivity", "User ID: " + userId);
 
                             // Store user data in SharedPreferences
                             getSharedPreferences("user_data", MODE_PRIVATE)
                                     .edit()
                                     .putString("email", email) // Store email
-                                    .putInt("userId", userId) // Store user ID
-                                    .apply(); // Use apply() for async saving
+                                    .putInt("userId", userId)   // Store user ID
+                                    .apply();
 
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
 
+                            // Start MainPage activity
                             Intent intent = new Intent(LoginActivity.this, MainPage.class);
+                            Log.d("LoginActivity", "Starting MainPage");
                             startActivity(intent);
-                            finish(); // Optionally call finish() to remove the login activity from the back stack
+                            finish(); // Remove login activity from the back stack
                         } else {
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
@@ -178,20 +154,22 @@ public class LoginActivity extends AppCompatActivity {
         // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
+
+    // Send delete request to the backend
     private void DeleteRequest(String email) {
-        String url = "http://10.90.72.167:8080/users/" + email; // Pass the email in the URL
+        String url = "http://10.90.72.167:8080/users/" + email; // Email passed in the URL
 
         // Create the JsonObjectRequest for the DELETE request
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,  // No body for DELETE
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
                 response -> {
                     // Handle the success response here
                     try {
                         String message = response.getString("message");
+                        Log.d("LoginActivity", "Delete Response message: " + message);
 
                         // Check the message to determine if the delete was successful
                         if (message.equals("success")) {
                             Toast.makeText(LoginActivity.this, "User deleted successfully", Toast.LENGTH_SHORT).show();
-
                         } else {
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
@@ -208,7 +186,4 @@ public class LoginActivity extends AppCompatActivity {
         // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
-
-
-
 }

@@ -34,6 +34,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     private RecyclerView friendsList;
     private List<User> userList;
     private UserAdapter userAdapter;
+    private Button createGroupButton;
 
     @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
@@ -60,6 +61,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
                     userList.clear();
                     userAdapter.notifyDataSetChanged();
                     friendsList.setVisibility(View.GONE);
+                    createGroupButton.setVisibility(View.GONE);
                 }
             }
 
@@ -70,6 +72,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         findViewById(R.id.create_group_activity_root).setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 recyclerView.setVisibility(View.VISIBLE);
+                createGroupButton.setVisibility(View.GONE);
                 searchBar.clearFocus();
             }
             return true;
@@ -84,7 +87,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         addUserButton = findViewById(R.id.adduser);
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
-        Button createGroupButton = findViewById(R.id.create_group_button);
+        createGroupButton = findViewById(R.id.create_group_button);
     }
 
     private void setupRecyclerView() {
@@ -123,6 +126,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
                         userAdapter.notifyDataSetChanged();
                         friendsList.setVisibility(userList.isEmpty() ? View.GONE : View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);
+                        createGroupButton.setVisibility(View.VISIBLE);
                     } catch (JSONException e) {
                         Log.e(TAG, "Failed to parse users", e);
                         Toast.makeText(CreateGroupActivity.this, "Failed to parse users", Toast.LENGTH_SHORT).show();

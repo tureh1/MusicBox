@@ -63,6 +63,8 @@
     <TextView
         android:id="@+id/messagesTitle"
         android:layout_width="match_parent"
+        app:layout_constraintTop_toBottomOf="@id/MusiText"
+
         android:layout_height="wrap_content"
         android:fontFamily="@font/jockeyone"
         android:gravity="center"
