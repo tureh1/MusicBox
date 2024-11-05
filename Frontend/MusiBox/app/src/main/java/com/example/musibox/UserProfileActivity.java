@@ -40,7 +40,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         friendsCount.setOnClickListener(v -> {
                     // Action to perform when the message button is clicked
-                    Intent intent1 = new Intent(UserProfileActivity.this, FriendsActivity.class);
+                    Intent intent1 = new Intent(UserProfileActivity.this, CreateGroupActivity.class);
                     startActivity(intent1);
                 });
         Intent intent = getIntent();

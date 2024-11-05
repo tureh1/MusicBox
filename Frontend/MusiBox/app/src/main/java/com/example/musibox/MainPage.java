@@ -62,7 +62,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
         });
 
         addUserButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainPage.this, FriendsActivity.class);
+            Intent intent = new Intent(MainPage.this, CreateGroupActivity.class);
             startActivity(intent);
         });
 

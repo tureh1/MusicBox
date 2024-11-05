@@ -45,7 +45,7 @@
         <activity
             android:name=".MainPage"
             android:exported="true" />
-        <activity android:name=".FriendsActivity"
+        <activity android:name=".CreateGroupActivity"
             android:exported="true"/>
         <activity android:name=".ChatActivity"
             android:exported="true">

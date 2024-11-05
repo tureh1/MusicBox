@@ -123,7 +123,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
 
     private void setupNavigationButtons() {
         house.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, MainPage.class)));
-        addUserButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, FriendsActivity.class)));
+        addUserButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, CreateGroupActivity.class)));
         messageButton.setOnClickListener(v -> Toast.makeText(this, "You are already in Message Activity", Toast.LENGTH_SHORT).show());
         userButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, UserProfileActivity.class)));
     }
