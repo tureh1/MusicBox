@@ -49,13 +49,6 @@
         android:text="Tame Lmpala"
         android:textSize="16sp" />
 
-    <TextView
-        android:id="@+id/release_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:text="07/17/2015"
-        android:textSize="14sp" />
 
     <!-- Rating Bar for User Rating -->
     <RatingBar
