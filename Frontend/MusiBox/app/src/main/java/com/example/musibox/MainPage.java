@@ -1,5 +1,6 @@
 package com.example.musibox;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -10,8 +11,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-
-
+import android.widget.ImageButton;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,7 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainPage extends AppCompatActivity implements WebSocketListener {
-
+    private ImageButton homeButton;
+    private ImageButton addUserButton;
+    private ImageButton messageButton;
+    private ImageButton userButton;
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
     private List<Album> albumList;
@@ -31,7 +34,10 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mainpage);
         albumId = getIntent().getStringExtra("albumId");
-
+        homeButton = findViewById(R.id.navigation_home);
+        addUserButton = findViewById(R.id.navigation_adduser);
+        messageButton = findViewById(R.id.navigation_message);
+        userButton = findViewById(R.id.navigation_user);
         // Initialize RecyclerView and Adapter
         recyclerView = findViewById(R.id.recyclerView);
         albumList = new ArrayList<>();
@@ -50,6 +56,25 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
         // Set albumId before calling fetchAlbumData
         albumId = "albumId"; // Replace with actual value
         fetchAlbumData();
+        homeButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, MainPage.class);
+            startActivity(intent);
+        });
+
+        addUserButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, FriendsActivity.class);
+            startActivity(intent);
+        });
+
+        messageButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, MessageActivity.class);
+            startActivity(intent);
+        });
+
+        userButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
     }
 
     @Override
