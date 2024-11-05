@@ -1,8 +1,13 @@
 package com.example.musibox;
-
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
+import android.widget.ImageButton;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +15,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 
 import org.java_websocket.handshake.ServerHandshake;
@@ -20,17 +26,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainPage extends AppCompatActivity implements WebSocketListener {
-
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
     private List<Album> albumList;
     private String albumId; // Define this at the class level
+    private ImageButton home;
+    private ImageButton addUserButton;
+    private ImageButton messageButton;
+    private ImageButton userButton;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_rating_page);
+        setContentView(R.layout.activity_mainpage);
         albumId = getIntent().getStringExtra("albumId");
 
         // Initialize RecyclerView and Adapter
@@ -51,7 +60,20 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
         // Set albumId before calling fetchAlbumData
         albumId = "albumId"; // Replace with actual value
         fetchAlbumData();
+        setupNavigationButtons();
+
+        // Set up bottom navigation
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+
     }
+
+    private void setupNavigationButtons() {
+        home.setOnClickListener(v -> Toast.makeText(this, "You are already in Home Page", Toast.LENGTH_SHORT).show());
+        addUserButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, FriendsActivity.class)));
+        messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
+        userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
+    }
+
 
     @Override
     public void onWebSocketOpen(ServerHandshake handshakedata) {
@@ -104,7 +126,6 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
     private void fetchAlbumData() {
 
         String url = "http://10.90.72.167:8080/" + albumId;
-
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {

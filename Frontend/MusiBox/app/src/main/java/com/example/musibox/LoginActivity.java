@@ -29,8 +29,6 @@ public class LoginActivity extends AppCompatActivity {
     TextView signUpLink;
     private boolean isFirstClick = true;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,13 +53,10 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
         signUpLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Navigate to SignUpActivity or show a Toast for now
-
-
+                // Navigate to SignUpActivity
                 Intent intent = new Intent(LoginActivity.this, SignUp.class);
                 startActivity(intent);
             }

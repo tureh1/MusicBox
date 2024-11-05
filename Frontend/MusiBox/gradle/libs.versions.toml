@@ -1,6 +1,6 @@
 [versions]
 agp = "8.5.2"
-javaWebsocket = "1.5.1"
+javaWebsocket = "1.5.7"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -13,7 +13,6 @@ recyclerviewVersion = "1.2.1"
 volley = "1.2.1"
 mediarouter = "1.7.0"
 recyclerview = "1.2.1"
-java_websocket = "1.5.2"
 
 
 [libraries]
@@ -30,7 +29,6 @@ recyclerview-v121 = { module = "androidx.recyclerview:recyclerview", version.ref
 volley = { module = "com.android.volley:volley", version.ref = "volley" }
 mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.ref = "mediarouter" }
 recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
-java_websocket = { module = "org.java-websocket:Java-WebSocket", version = "1.5.2" }
 
 
 [plugins]

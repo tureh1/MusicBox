@@ -36,7 +36,7 @@ android {
 dependencies {
 
 
-    implementation (libs.java.websocket)
+    implementation(libs.java.websocket)
     implementation(libs.volley)
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -48,5 +48,4 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(libs.recyclerview)
-    implementation(libs.java.websocket)
 }
