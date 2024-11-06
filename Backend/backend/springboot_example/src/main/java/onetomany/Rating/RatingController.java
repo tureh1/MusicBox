@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/ratings")
-public class RatingController {
+public class  RatingController {
 
     @Autowired
     private SongRepository songRepo;

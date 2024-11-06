@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Controller
 @ServerEndpoint("/rate/{email}/{songId}")
@@ -99,7 +100,7 @@ public class RatingSocket {
 
     // Broadcast updated rating to all WebSocket connections
     private void broadcastRatingUpdate(Long songId) {
-        List<Session> sessions = sessionEmailMap.keySet().stream().toList();
+        List<Session> sessions = sessionEmailMap.keySet().stream().collect(Collectors.toList());
         sessions.forEach(session -> {
             try {
                 String averageRatingMessage = getAverageRatingMessage(songId);
@@ -109,6 +110,7 @@ public class RatingSocket {
             }
         });
     }
+
 
     // Generate the rating message
     private String getAverageRatingMessage(Long songId) {
