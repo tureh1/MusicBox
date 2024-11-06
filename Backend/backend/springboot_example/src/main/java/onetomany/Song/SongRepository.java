@@ -18,4 +18,6 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     // Method to find songs in random order
     @Query("SELECT s FROM Song s ORDER BY RAND()")
     List<Song> findSongsInRandomOrder();
+
+    List<Song> findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(String title, String artist);
 }
