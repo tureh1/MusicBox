@@ -51,6 +51,8 @@
 
         <activity android:name=".ChatActivity"
             android:exported="true"/>
+        <activity android:name=".PlaylistActivity"
+            android:exported="true"/>
 
 
 

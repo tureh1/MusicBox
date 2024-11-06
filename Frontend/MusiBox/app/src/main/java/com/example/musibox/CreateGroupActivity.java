@@ -59,16 +59,28 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         fetchGroups();
         selectedUsers = new HashSet<>();
 
-        createGroupButton.setOnClickListener(v -> createGroup());
-
+        createGroupButton.setOnClickListener(v -> {
+            // Handle create group functionality
+            createGroup();
+            // Show the group list again after creating a group
+            recyclerView.setVisibility(View.VISIBLE);
+            friendsList.setVisibility(View.GONE);
+            createGroupButton.setVisibility(View.GONE);
+            chipGroup.setVisibility(View.GONE);
+            chipGroup.removeAllViews();
+            selectedUsers.clear();
+            searchBar.getText().clear();
+        });
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() > 0) {
+                    // Fetch users based on search query
                     fetchUsers(s.toString());
                 } else {
                     userList.clear();
@@ -80,16 +92,21 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
 
+        // Hide group list when search bar is focused
         searchBar.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
+                recyclerView.setVisibility(View.GONE); // Hide group list when searching
                 friendsList.setVisibility(View.VISIBLE);
                 createGroupButton.setVisibility(View.VISIBLE);
                 chipGroup.setVisibility(View.VISIBLE);
             } else {
                 if (searchBar.getText().toString().isEmpty()) {
+                    // Show the group list again if search bar is not focused and empty
+                    recyclerView.setVisibility(View.VISIBLE);
                     friendsList.setVisibility(View.GONE);
                     createGroupButton.setVisibility(View.GONE);
                     chipGroup.setVisibility(View.GONE);
@@ -97,12 +114,17 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             }
         });
 
+        // Handle clicks outside the search bar (on white space)
         findViewById(R.id.create_group_activity_root).setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                friendsList.setVisibility(View.GONE);
-                createGroupButton.setVisibility(View.GONE);
-                chipGroup.setVisibility(View.GONE);
-                searchBar.clearFocus();
+                // If the search bar is focused and the user taps outside, hide search results and show group list again
+                if (searchBar.hasFocus()) {
+                    friendsList.setVisibility(View.GONE);
+                    createGroupButton.setVisibility(View.GONE);
+                    chipGroup.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE); // Show group list again
+                    searchBar.clearFocus(); // Clear focus from search bar
+                }
             }
             return true;
         });
@@ -193,6 +215,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
             return;
         }
+
         // Construct the JSON request payload
         JSONObject groupData = new JSONObject();
         try {
@@ -203,7 +226,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             return;
         }
 
-        String url = "http://10.90.72.167:8080/playlists";
+        String url = "http://10.90.72.167:8080/users/" + userId + "/playlists"; // Adjust URL if needed
 
         // Make the POST request
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, groupData,
@@ -212,6 +235,18 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
                         // Assuming your backend returns a "message" field with the status
                         String message = response.getString("message");
                         Toast.makeText(CreateGroupActivity.this, message, Toast.LENGTH_SHORT).show();
+
+                        // After group creation, refresh the groups list
+                        fetchGroups();  // This will reload the groups
+
+                        // Reset the UI
+                        recyclerView.setVisibility(View.VISIBLE);
+                        friendsList.setVisibility(View.GONE);
+                        createGroupButton.setVisibility(View.GONE);
+                        chipGroup.setVisibility(View.GONE);
+                        chipGroup.removeAllViews();
+                        selectedUsers.clear();
+                        searchBar.getText().clear();
                     } catch (JSONException e) {
                         Log.e(TAG, "Failed to parse group creation response", e);
                         Toast.makeText(CreateGroupActivity.this, "Unexpected response from server", Toast.LENGTH_SHORT).show();
@@ -234,7 +269,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             return;
         }
 
-        String url = "http://10.90.72.167:8080/playlists"; // Adjust URL if needed
+        String url = "http://10.90.72.167:8080/users/" + userId + "/playlists/myPlaylists"; // Adjust URL if needed
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 response -> {
@@ -279,10 +314,13 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
 
 
 
+
     @Override
     public void onGroupClick(Group group) {
-        // Handle group item click
-        Toast.makeText(this, "Group selected: " + group.getName(), Toast.LENGTH_SHORT).show();
+        // Start PlaylistActivity when a group is clicked
+        Intent intent = new Intent(CreateGroupActivity.this, PlaylistActivity.class);
+        intent.putExtra("groupName", group.getName()); // Pass group name as an extra
+        startActivity(intent);
     }
 
     @Override
