@@ -15,14 +15,14 @@ public class Rating {
     private String userEmail; // User's email
 
     @Column
-    private Long songId; // ID of the song being rated
+    private int songId; // ID of the song being rated
 
     @Column
     private int rating; // Rating value between 1 and 5
 
     public Rating() {}
 
-    public Rating(String userEmail, Long songId, int rating) {
+    public Rating(String userEmail, int songId, int rating) {
         this.userEmail = userEmail;
         this.songId = songId;
         this.rating = rating;

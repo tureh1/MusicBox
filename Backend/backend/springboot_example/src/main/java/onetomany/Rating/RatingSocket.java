@@ -44,7 +44,7 @@ public class RatingSocket {
     }
 
     @OnMessage
-    public void onMessage(Session session, @PathParam("songId") Long songId, String message) throws IOException {
+    public void onMessage(Session session, @PathParam("songId") int songId, String message) throws IOException {
         logger.info("Message received: " + message);
         int rating;
         try {
@@ -87,7 +87,7 @@ public class RatingSocket {
     }
 
     // Calculate and update the average rating of the song
-    private void updateAverageRating(Long songId) {
+    private void updateAverageRating(int songId) {
         List<Rating> ratings = ratingRepository.findBySongId(songId);
         double average = ratings.stream().mapToInt(Rating::getRating).average().orElse(0);
 
@@ -99,7 +99,7 @@ public class RatingSocket {
     }
 
     // Broadcast updated rating to all WebSocket connections
-    private void broadcastRatingUpdate(Long songId) {
+    private void broadcastRatingUpdate(int songId) {
         List<Session> sessions = sessionEmailMap.keySet().stream().collect(Collectors.toList());
         sessions.forEach(session -> {
             try {
@@ -113,7 +113,7 @@ public class RatingSocket {
 
 
     // Generate the rating message
-    private String getAverageRatingMessage(Long songId) {
+    private String getAverageRatingMessage(int songId) {
         Song song = songRepository.findById(songId).orElse(null);
         if (song != null) {
             return "Updated average rating for " + song.getTitle() + ": " + song.getAverageRating();

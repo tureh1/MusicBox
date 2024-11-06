@@ -3,6 +3,7 @@ package onetomany.Users;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,7 +64,7 @@ public class UserController {
 
 
     @PostMapping(path = "/login")
-    public ResponseEntity<String> loginUser(@RequestBody User user) {
+    public ResponseEntity<String> loginUser(@RequestBody User user, HttpSession session) {
         if (user == null || user.getEmailId() == null || user.getPassword() == null ||
                 user.getEmailId().trim().isEmpty() || user.getPassword().trim().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Invalid input\"}");
@@ -75,7 +76,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Invalid email or password\"}");
         }
 
-        // Login successful, return userId and success message
+        // Login successful, store user in session
+        session.setAttribute("currentUser", existingUser); // Store the logged-in user in session
+
+        // Return success message with userId
         String successMessage = String.format("{\"message\":\"Login successful\", \"userId\": %d}", existingUser.getId());
         return ResponseEntity.ok(successMessage);
     }

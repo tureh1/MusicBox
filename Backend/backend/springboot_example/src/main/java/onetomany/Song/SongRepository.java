@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface SongRepository extends JpaRepository<Song, Long> {
+public interface SongRepository extends JpaRepository<Song, Integer> {
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END FROM Song s JOIN s.userRatings r WHERE s.id = :songId AND KEY(r) = :userEmail")
     boolean userHasRatedSong(Long songId, String userEmail);
     Optional<Song> findByTitleAndArtist(String title, String artist);

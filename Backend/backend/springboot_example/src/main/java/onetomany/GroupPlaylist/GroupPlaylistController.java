@@ -1,5 +1,6 @@
 package onetomany.GroupPlaylist;
 
+import jakarta.servlet.http.HttpSession;
 import onetomany.Users.User;
 import onetomany.Users.UserRepository;
 import onetomany.Song.Song;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/playlists")
+//@RequestMapping("/playlists")
 public class GroupPlaylistController {
 
     @Autowired
@@ -23,8 +24,8 @@ public class GroupPlaylistController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @PostMapping
+/*
+    @PostMapping("/users/{userId}/playlists")
     public ResponseEntity<String> createPlaylist(@RequestBody CreatePlaylistRequest playlistRequest) {
         List<String> userEmails = playlistRequest.getUsers();
 
@@ -61,9 +62,105 @@ public class GroupPlaylistController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMessage);
     }
+*/
+/*
+    @PostMapping("/users/{userId}/playlists")
+    public ResponseEntity<String> createPlaylist(@RequestBody CreatePlaylistRequest playlistRequest, @RequestParam int currentUserId) {
+        List<String> userEmails = playlistRequest.getUsers();
+
+        // Create the playlist object
+        GroupPlaylist playlist = new GroupPlaylist();
+
+        // Set the playlist name if provided
+        if (playlistRequest.getName() != null && !playlistRequest.getName().trim().isEmpty()) {
+            playlist.setName(playlistRequest.getName());
+        }
+
+        // Add the current user to the playlist
+        User currentUser = userRepository.findById(currentUserId);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Current user not found\"}");
+        }
+        playlist.addUser(currentUser);
+
+        // Add users to the playlist if provided
+        if (userEmails != null && !userEmails.isEmpty()) {
+            for (String email : userEmails) {
+                Optional<User> userOpt = Optional.ofNullable(userRepository.findByEmailId(email));
+                if (userOpt.isPresent()) {
+                    User user = userOpt.get();
+                    if (playlist.hasUser(user)) {
+                        return ResponseEntity.ok("{\"message\": \"User already in playlist: " + email + "\"}");
+                    }
+                    playlist.addUser(user);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found: " + email + "\"}");
+                }
+            }
+        }
+
+        // Save the playlist
+        playlistRepo.save(playlist);
+
+        String responseMessage = (playlist.getName() != null && !playlist.getName().isEmpty()) ?
+                "{\"message\": \"Playlist '" + playlist.getName() + "' created successfully\"}" :
+                "{\"message\": \"Playlist created without a name\"}";
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseMessage);
+    }
+*/
+@PostMapping("/users/{userId}/playlists")
+public ResponseEntity<String> createPlaylist(
+        @PathVariable int userId,
+        @RequestBody CreatePlaylistRequest playlistRequest) {
+
+    // Fetch the creator of the playlist (the current user)
+    Optional<User> creatorOpt = Optional.ofNullable(userRepository.findById(userId));
+    if (!creatorOpt.isPresent()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Creator user not found\"}");
+    }
+    User creator = creatorOpt.get();
+
+    // Create the playlist object and add the creator as a member
+    GroupPlaylist playlist = new GroupPlaylist();
+    playlist.addUser(creator); // Add the creator to the playlist
+
+    // Set the playlist name if provided
+    if (playlistRequest.getName() != null && !playlistRequest.getName().trim().isEmpty()) {
+        playlist.setName(playlistRequest.getName());
+    }
+
+    // Add additional users to the playlist if provided
+    List<String> userEmails = playlistRequest.getUsers();
+    if (userEmails != null && !userEmails.isEmpty()) {
+        for (String email : userEmails) {
+            Optional<User> userOpt = Optional.ofNullable(userRepository.findByEmailId(email));
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                if (playlist.hasUser(user)) {
+                    continue; // Skip if the user is already in the playlist
+                }
+                playlist.addUser(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("{\"error\": \"User not found: " + email + "\"}");
+            }
+        }
+    }
+
+    // Save the playlist
+    playlistRepo.save(playlist);
+
+    String responseMessage = (playlist.getName() != null && !playlist.getName().isEmpty()) ?
+            "{\"message\": \"Playlist '" + playlist.getName() + "' created successfully\"}" :
+            "{\"message\": \"Playlist created without a name\"}";
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseMessage);
+}
+
 
     // Update the playlist name with a PUT request
-    @PutMapping("/{playlistId}/updateName")
+    @PutMapping("/users/{userId}/playlists/{playlistId}/updateName")
     public ResponseEntity<String> updatePlaylistName(@PathVariable Long playlistId, @RequestBody Map<String, String> request) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -84,7 +181,7 @@ public class GroupPlaylistController {
     }
 
     // Add a user to an existing playlist
-    @PostMapping("/{playlistId}/addUser")
+    @PostMapping("/user/{userId}/playlists/{playlistId}/addUser")
     public ResponseEntity<String> addUserToPlaylist(@PathVariable Long playlistId, @RequestBody Map<String, String> userRequest) {
         String userEmail = userRequest.get("userEmail");
 
@@ -118,7 +215,7 @@ public class GroupPlaylistController {
     }
 
     // Get all users in the playlist
-    @GetMapping("/{playlistId}/users")
+    @GetMapping("/user/{userId}/playlists/{playlistId}/users")
     public ResponseEntity<Set<User>> getUsersInPlaylist(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -131,7 +228,7 @@ public class GroupPlaylistController {
     }
 
     // Get all songs in the playlist
-    @GetMapping("/{playlistId}/songs")
+    @GetMapping("/user/{userId}/playlists/{playlistId}/songs")
     public ResponseEntity<Set<Song>> getSongsInPlaylist(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -151,7 +248,7 @@ public class GroupPlaylistController {
     }
 
     // Get both users and songs in the playlist
-    @GetMapping("/{playlistId}")
+    @GetMapping("/user/{userId}/playlists/{playlistId}")
     public ResponseEntity<Map<String, Object>> getPlaylistDetails(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -169,9 +266,33 @@ public class GroupPlaylistController {
         return ResponseEntity.ok(details);
     }
 
+    // Method to get the currently logged-in user by ID
+    private User getCurrentUserById(int userId) {
+        return userRepository.findById(userId); // Assuming this method already exists in UserRepository
+    }
+
+    // Get a user's playlists by user ID
+    @GetMapping("/users/{userId}/playlists/myPlaylists")
+    public ResponseEntity<List<GroupPlaylist>> getUserPlaylists(@PathVariable int userId) {
+        // Retrieve the current authenticated user using the user ID
+        User currentUser = getCurrentUserById(userId); // Fetch user by ID from the repository
+
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Handle the case when user is not found
+        }
+
+        // Retrieve playlists where the current user is a member
+        List<GroupPlaylist> userPlaylists = playlistRepo.findByUsersContaining(currentUser);
+
+        return ResponseEntity.ok(userPlaylists);
+    }
+
+
+
+
     // Add a song to an existing playlist
-    @PostMapping("/{playlistId}/songs/{songId}")
-    public ResponseEntity<String> addSongToPlaylist(@PathVariable Long playlistId, @PathVariable Long songId) {
+    @PostMapping("/users/{userId}/playlists/{playlistId}/songs/{songId}")
+    public ResponseEntity<String> addSongToPlaylist(@PathVariable Long playlistId, @PathVariable Integer songId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         Optional<Song> songOpt = songRepo.findById(songId);
 
@@ -193,8 +314,8 @@ public class GroupPlaylistController {
     }
 
     // Remove a song from an existing playlist
-    @DeleteMapping("/{playlistId}/songs/{songId}")
-    public ResponseEntity<String> removeSongFromPlaylist(@PathVariable Long playlistId, @PathVariable Long songId) {
+    @DeleteMapping("/users/{userId}/playlists/{playlistId}/songs/{songId}")
+    public ResponseEntity<String> removeSongFromPlaylist(@PathVariable Long playlistId, @PathVariable Integer songId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         Optional<Song> songOpt = songRepo.findById(songId);
 

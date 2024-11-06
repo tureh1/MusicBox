@@ -18,7 +18,7 @@ public class  RatingController {
     private RatingRepository ratingRepo;
 
     @PostMapping("/rate")
-    public String rateSong(@RequestParam Long songId, @RequestParam String userEmail, @RequestParam int rating) {
+    public String rateSong(@RequestParam int songId, @RequestParam String userEmail, @RequestParam int rating) {
         Optional<Song> songOpt = songRepo.findById(songId);
         if (songOpt.isPresent()) {
             Song song = songOpt.get();
@@ -46,7 +46,7 @@ public class  RatingController {
     }
 
     @GetMapping("/{songId}/average")
-    public String getAverageRating(@PathVariable Long songId) {
+    public String getAverageRating(@PathVariable int songId) {
         Optional<Song> songOpt = songRepo.findById(songId);
         if (songOpt.isPresent()) {
             Song song = songOpt.get();
@@ -54,4 +54,6 @@ public class  RatingController {
         }
         return "Song not found";
     }
+
+
 }

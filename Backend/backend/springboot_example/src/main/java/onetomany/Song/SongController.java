@@ -34,7 +34,7 @@ public class SongController {
     }
 
     @DeleteMapping("/{songId}")
-    public String deleteSong(@PathVariable Long songId) {
+    public String deleteSong(@PathVariable Integer songId) {
         songRepo.deleteById(songId);
         return "Song deleted with ID: " + songId;
     }
