@@ -1,11 +1,13 @@
 package com.example.musibox;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,7 +41,9 @@ public class ChatActivity extends AppCompatActivity {
     private List<ChatMessage> messageList;
     private Button sendButton;
     private ImageButton backButton;
+    private TextView friendName;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +57,13 @@ public class ChatActivity extends AppCompatActivity {
         sendButton = findViewById(R.id.sendButton);
         backButton = findViewById(R.id.back);
         recyclerView = findViewById(R.id.recyclerView);
+        friendName = findViewById(R.id.friendname);
 
         messageList = new ArrayList<>();
         chatAdapter = new ChatAdapter(messageList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
-
+        friendName.setText(friendEmail);
         // Fetch old messages and set up WebSocket
         fetchOldMessages();
         setupWebSocket();

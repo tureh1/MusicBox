@@ -12,15 +12,37 @@
         android:src="@drawable/back"
         android:background="@null" />
 
+    <TextView
+        android:id="@+id/friendname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="14dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="14dp"
+        android:layout_toRightOf="@id/back"
+        android:layout_alignBaseline="@id/back"
+        android:textSize="20sp" />
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/back"
+        android:layout_above="@id/recyclerView"
+        android:layout_marginTop=".5dp"
+        android:background="@android:color/black" />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/messageInputContainer"
-        android:padding="10dp"
         android:layout_below="@id/back"
+        android:layout_alignParentEnd="true"
         android:clipToPadding="false"
-        android:scrollbars="vertical"/>
+
+        android:scrollbars="vertical" />
 
     <LinearLayout
         android:id="@+id/messageInputContainer"
@@ -42,6 +64,8 @@
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send" />
+            android:text="Send"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/BabyBlue"/>
     </LinearLayout>
 </RelativeLayout>

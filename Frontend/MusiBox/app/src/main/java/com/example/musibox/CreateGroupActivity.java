@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -35,6 +37,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     private List<User> userList;
     private UserAdapter userAdapter;
     private Button createGroupButton;
+    private ChipGroup chipGroup;
 
     @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
@@ -61,7 +64,8 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
                     userList.clear();
                     userAdapter.notifyDataSetChanged();
                     friendsList.setVisibility(View.GONE);
-                    createGroupButton.setVisibility(View.GONE);
+                    createGroupButton.setVisibility(View.VISIBLE);
+                    chipGroup.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -69,10 +73,28 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             public void afterTextChanged(Editable s) {}
         });
 
+        searchBar.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                // Show friendsList, createGroupButton, and chipGroup when search bar gains focus
+                friendsList.setVisibility(View.VISIBLE);
+                createGroupButton.setVisibility(View.VISIBLE);
+                chipGroup.setVisibility(View.VISIBLE);
+            } else {
+                // Hide them when search bar loses focus, if it's empty
+                if (searchBar.getText().toString().isEmpty()) {
+                    friendsList.setVisibility(View.GONE);
+                    createGroupButton.setVisibility(View.GONE);
+                    chipGroup.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        // Set up touch listener on root layout to hide friendsList and createGroupButton on whitespace click
         findViewById(R.id.create_group_activity_root).setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                recyclerView.setVisibility(View.VISIBLE);
+                friendsList.setVisibility(View.GONE);
                 createGroupButton.setVisibility(View.GONE);
+                chipGroup.setVisibility(View.GONE);
                 searchBar.clearFocus();
             }
             return true;
@@ -88,6 +110,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
         createGroupButton = findViewById(R.id.create_group_button);
+        chipGroup = findViewById(R.id.selected_users_chip_group); // Initialize ChipGroup
     }
 
     private void setupRecyclerView() {
@@ -143,21 +166,32 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     private void toggleUserSelection(String userName) {
         if (selectedUsers.contains(userName)) {
             selectedUsers.remove(userName);
+            removeChip(userName);
         } else {
             selectedUsers.add(userName);
+            addChip(userName);
         }
-        updateSearchBarText();
+
     }
 
-    private void updateSearchBarText() {
-        StringBuilder usersText = new StringBuilder();
-        for (String user : selectedUsers) {
-            if (usersText.length() > 0) {
-                usersText.append(", ");
+
+
+    private void addChip(String userName) {
+        Chip chip = new Chip(this);
+        chip.setText(userName);
+        chip.setCloseIconVisible(true);
+        chip.setOnCloseIconClickListener(v -> toggleUserSelection(userName));
+        chipGroup.addView(chip);
+    }
+
+    private void removeChip(String userName) {
+        for (int i = 0; i < chipGroup.getChildCount(); i++) {
+            Chip chip = (Chip) chipGroup.getChildAt(i);
+            if (chip.getText().toString().equals(userName)) {
+                chipGroup.removeView(chip);
+                break;
             }
-            usersText.append(user);
         }
-        searchBar.setText(usersText.toString());
     }
 
     @Override
@@ -170,6 +204,13 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
 
     @Override
     public void onUserClick(String email) {
-        toggleUserSelection(email);
+        if (!selectedUsers.contains(email)) {
+            toggleUserSelection(email);
+            searchBar.setText(""); // Clear the search bar text after clicking on a user
+        }
+        else{
+            Toast.makeText(this, "User already selected", Toast.LENGTH_SHORT).show();
+            searchBar.setText(""); // Clear the search bar text after clicking on a user
+        }
     }
 }
