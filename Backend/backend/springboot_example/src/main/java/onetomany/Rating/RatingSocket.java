@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
@@ -60,18 +61,28 @@ public class RatingSocket {
         String userEmail = sessionEmailMap.get(session);
 
         // Check if the user has already rated this song
-        if (ratingRepository.findByUserEmailAndSongId(userEmail, songId).isPresent()) {
-            sendMessageToUser(session, "You have already rated this song.");
-            return;
+        Optional<Rating> existingRating = ratingRepository.findByUserEmailAndSongId(userEmail, songId);
+
+        if (existingRating.isPresent()) {
+            // If a rating exists, update it
+            Rating ratingToUpdate = existingRating.get();
+            ratingToUpdate.setRating(rating);
+            ratingRepository.save(ratingToUpdate);
+
+            updateAverageRating(songId);
+            broadcastRatingUpdate(songId);
+
+            sendMessageToUser(session, "Your rating has been updated successfully.");
+        } else {
+            // If no rating exists, add a new one
+            Rating newRating = new Rating(userEmail, songId, rating);
+            ratingRepository.save(newRating);
+
+            updateAverageRating(songId);
+            broadcastRatingUpdate(songId);
+
+            sendMessageToUser(session, "Your rating has been submitted.");
         }
-
-        Rating newRating = new Rating(userEmail, songId, rating);
-        ratingRepository.save(newRating);
-
-        updateAverageRating(songId);
-        broadcastRatingUpdate(songId);
-
-        sendMessageToUser(session, "Rating submitted successfully.");
     }
 
     // Calculate and update the average rating of the song

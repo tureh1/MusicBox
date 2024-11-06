@@ -15,7 +15,7 @@ public class RatingController {
     private SongRepository songRepo;
 
     @Autowired
-    private RatingRepository ratingRepo; // Add this line to inject the RatingRepository
+    private RatingRepository ratingRepo;
 
     @PostMapping("/rate")
     public String rateSong(@RequestParam Long songId, @RequestParam String userEmail, @RequestParam int rating) {
@@ -24,10 +24,17 @@ public class RatingController {
             Song song = songOpt.get();
 
             // Check if the user has already rated this song
-            if (ratingRepo.findByUserEmailAndSongId(userEmail, songId).isPresent()) {
-                return "User has already rated this song.";
+            Optional<Rating> existingRating = ratingRepo.findByUserEmailAndSongId(userEmail, songId);
+            if (existingRating.isPresent()) {
+                // If a rating exists, update it
+                Rating ratingToUpdate = existingRating.get();
+                ratingToUpdate.setRating(rating);
+                ratingRepo.save(ratingToUpdate);  // Save the updated rating
+                song.addRating(rating, userEmail); // Update the song's average rating
+                songRepo.save(song); // Save the updated song
+                return "Rating updated for song: " + song.getTitle();
             } else {
-                // Save the new rating
+                // If no rating exists, add a new one
                 Rating newRating = new Rating(userEmail, songId, rating);
                 ratingRepo.save(newRating);
                 song.addRating(rating, userEmail); // Update the song's average rating
