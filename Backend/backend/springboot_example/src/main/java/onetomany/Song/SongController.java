@@ -40,11 +40,10 @@ public class SongController {
     }
 
     @GetMapping
-    public Map<String, List<Song>> getAllSongs() {
+    public ResponseEntity<List<Song>> getAllSongs() {
         List<Song> songs = songRepo.findAll();
-        Map<String, List<Song>> response = new HashMap<>();
-        response.put("songs", songs);  // Wrap the song list in a "songs" array
-        return response;
+        return ResponseEntity.ok(songs);  // Directly return the list of songs
+
     }
 
     // Retrieve top-rated songs
