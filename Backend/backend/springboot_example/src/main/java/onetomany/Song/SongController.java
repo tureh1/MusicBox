@@ -24,17 +24,13 @@ public class SongController {
     @PostMapping
     public ResponseEntity<String> createSong(@RequestBody Song songRequest) {
         // Check if a song with the same title and artist already exists
-        Optional<Song> existingSong = songRepository.findByTitleAndArtist(songRequest.getTitle(), songRequest.getArtist());
-
-        if (existingSong.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("{\"error\": \"A song with the same title and artist already exists.\"}");
+        if (songRepository.findByTitleAndArtist(songRequest.getTitle(), songRequest.getArtist()).isPresent()) {
+            return ResponseEntity.status(409).body("{\"error\": \"A song with the same title and artist already exists.\"}");
         }
 
-        // If no duplicate is found, save the new song
+        // Save the new song
         songRepository.save(songRequest);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("{\"message\": \"Song created successfully.\"}");
+        return ResponseEntity.status(201).body("{\"message\": \"Song created successfully.\"}");
     }
 
     @DeleteMapping("/{songId}")
@@ -49,6 +45,13 @@ public class SongController {
         Map<String, List<Song>> response = new HashMap<>();
         response.put("songs", songs);  // Wrap the song list in a "songs" array
         return response;
+    }
+
+    // Retrieve top-rated songs
+    @GetMapping("/top-rated")
+    public ResponseEntity<List<Song>> getTopRatedSongs() {
+        List<Song> topRatedSongs = songRepository.findTopRatedSongs();
+        return ResponseEntity.ok(topRatedSongs);
     }
 
 }
