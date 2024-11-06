@@ -1,19 +1,19 @@
 package com.example.musibox;
 
 public class Song {
-    private Long id;
+    private int id;
     private String title;
     private String artist;
     private float averageRating;
 
-    public Song(String id, String title, String artist, float averageRating) {
+    public Song(int id, String title, String artist, float averageRating) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.averageRating = averageRating;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 

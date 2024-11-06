@@ -3,5 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">10.90.72.167</domain>
+        <domain includeSubdomains="true">coms-3090-048.class.las.iastate.edu</domain>
     </domain-config>
 </network-security-config>
