@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -177,11 +178,22 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
 
 
     private void addChip(String userName) {
+        // Limit the number of selected users to 8
+        if (selectedUsers.size() >= 8) {
+            Toast.makeText(this, "You can select up to 8 users only", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Chip chip = new Chip(this);
         chip.setText(userName);
         chip.setCloseIconVisible(true);
         chip.setOnCloseIconClickListener(v -> toggleUserSelection(userName));
+
+        // Add the chip to the ChipGroup
         chipGroup.addView(chip);
+
+        // Make sure the ChipGroup can wrap after 4 users by setting it to wrap its content
+
     }
 
     private void removeChip(String userName) {
