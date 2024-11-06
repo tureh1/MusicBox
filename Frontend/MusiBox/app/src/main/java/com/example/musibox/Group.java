@@ -6,11 +6,17 @@ public class Group {
     private String id;
     private String name;
     private List<String> members; // List of emails of members in the group
+    private String groupName;
 
-    public Group(String id, String name, List<String> members) {
+    public Group(String id, String name, List<String> members, String groupName) {
         this.id = id;
         this.name = name;
         this.members = members;
+        this.groupName = groupName;
+    }
+
+    public Group(String groupName) {
+        this.name = groupName;
     }
 
     // Getters and Setters

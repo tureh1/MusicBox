@@ -13,15 +13,21 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,7 +56,10 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         setupRecyclerView();
         setupNavigationButtons();
 
+        fetchGroups();
         selectedUsers = new HashSet<>();
+
+        createGroupButton.setOnClickListener(v -> createGroup());
 
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
@@ -76,12 +85,10 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
 
         searchBar.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                // Show friendsList, createGroupButton, and chipGroup when search bar gains focus
                 friendsList.setVisibility(View.VISIBLE);
                 createGroupButton.setVisibility(View.VISIBLE);
                 chipGroup.setVisibility(View.VISIBLE);
             } else {
-                // Hide them when search bar loses focus, if it's empty
                 if (searchBar.getText().toString().isEmpty()) {
                     friendsList.setVisibility(View.GONE);
                     createGroupButton.setVisibility(View.GONE);
@@ -90,7 +97,6 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             }
         });
 
-        // Set up touch listener on root layout to hide friendsList and createGroupButton on whitespace click
         findViewById(R.id.create_group_activity_root).setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 friendsList.setVisibility(View.GONE);
@@ -111,7 +117,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
         createGroupButton = findViewById(R.id.create_group_button);
-        chipGroup = findViewById(R.id.selected_users_chip_group); // Initialize ChipGroup
+        chipGroup = findViewById(R.id.selected_users_chip_group);
     }
 
     private void setupRecyclerView() {
@@ -133,7 +139,13 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     }
 
     private void fetchUsers(String query) {
-        String url = "http://10.90.72.167:8080/users";
+        int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
+        if (userId == -1) {
+            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String url = "http://10.90.72.167:8080/users"; // Adjust the backend URL if needed
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 response -> {
@@ -164,65 +176,118 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
-    private void toggleUserSelection(String userName) {
-        if (selectedUsers.contains(userName)) {
-            selectedUsers.remove(userName);
-            removeChip(userName);
-        } else {
-            selectedUsers.add(userName);
-            addChip(userName);
-        }
-
-    }
-
-
-
-    private void addChip(String userName) {
-        // Limit the number of selected users to 8
-        if (selectedUsers.size() >= 8) {
-            Toast.makeText(this, "You can select up to 8 users only", Toast.LENGTH_SHORT).show();
+    private void createGroup() {
+        if (selectedUsers.isEmpty()) {
+            Toast.makeText(this, "Please select at least one user", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Chip chip = new Chip(this);
-        chip.setText(userName);
-        chip.setCloseIconVisible(true);
-        chip.setOnCloseIconClickListener(v -> toggleUserSelection(userName));
+        // Generate the group name by joining selected user names with commas
+        String groupName = String.join(", ", selectedUsers);
 
-        // Add the chip to the ChipGroup
-        chipGroup.addView(chip);
+        List<String> selectedUserEmails = new ArrayList<>(selectedUsers);
 
-        // Make sure the ChipGroup can wrap after 4 users by setting it to wrap its content
-
-    }
-
-    private void removeChip(String userName) {
-        for (int i = 0; i < chipGroup.getChildCount(); i++) {
-            Chip chip = (Chip) chipGroup.getChildAt(i);
-            if (chip.getText().toString().equals(userName)) {
-                chipGroup.removeView(chip);
-                break;
-            }
+        // Check if the user is logged in
+        int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
+        if (userId == -1) {
+            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
+            return;
         }
+        // Construct the JSON request payload
+        JSONObject groupData = new JSONObject();
+        try {
+            groupData.put("name", groupName); // Group name
+            groupData.put("users", new JSONArray(selectedUserEmails)); // Selected users' emails
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        String url = "http://10.90.72.167:8080/playlists";
+
+        // Make the POST request
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, groupData,
+                response -> {
+                    try {
+                        // Assuming your backend returns a "message" field with the status
+                        String message = response.getString("message");
+                        Toast.makeText(CreateGroupActivity.this, message, Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Failed to parse group creation response", e);
+                        Toast.makeText(CreateGroupActivity.this, "Unexpected response from server", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "Failed to create group: " + error.getMessage());
+                    Toast.makeText(CreateGroupActivity.this, "Failed to create group", Toast.LENGTH_SHORT).show();
+                });
+
+        // Add request to the Volley request queue
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    @Override
-    public void onGroupClick(Group group) {}
 
-    @Override
-    public void onGroupDelete(Group group) {
-        Log.d(TAG, "Deleting group: " + group.getName());
+    private void fetchGroups() {
+        int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
+        if (userId == -1) {
+            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String url = "http://10.90.72.167:8080/playlists"; // Adjust URL if needed
+
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        groupList.clear();
+                        for (int i = 0; i < response.length(); i++) {
+                            JSONObject groupObject = response.getJSONObject(i);
+                            String groupName = groupObject.getString("name");
+                            Group group = new Group(groupName);
+                            groupList.add(group);
+                        }
+                        groupAdapter.notifyDataSetChanged();
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Failed to parse groups", e);
+                        Toast.makeText(CreateGroupActivity.this, "Failed to load groups", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "Failed to fetch groups: " + error.getMessage());
+                    Toast.makeText(CreateGroupActivity.this, "Failed to fetch groups", Toast.LENGTH_SHORT).show();
+                });
+
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
+
+
 
     @Override
     public void onUserClick(String email) {
-        if (!selectedUsers.contains(email)) {
-            toggleUserSelection(email);
-            searchBar.setText(""); // Clear the search bar text after clicking on a user
+        if (selectedUsers.add(email)) {
+            Chip chip = new Chip(this);
+            chip.setText(email);
+            chip.setCloseIconVisible(true);
+            chip.setOnCloseIconClickListener(v -> {
+                selectedUsers.remove(email);
+                chipGroup.removeView(chip);
+            });
+            chipGroup.addView(chip);
+            searchBar.getText().clear();
         }
-        else{
-            Toast.makeText(this, "User already selected", Toast.LENGTH_SHORT).show();
-            searchBar.setText(""); // Clear the search bar text after clicking on a user
-        }
+    }
+
+
+
+    @Override
+    public void onGroupClick(Group group) {
+        // Handle group item click
+        Toast.makeText(this, "Group selected: " + group.getName(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onGroupDelete(Group group) {
+        // Handle group delete
+        Toast.makeText(this, "Group deleted: " + group.getName(), Toast.LENGTH_SHORT).show();
     }
 }
