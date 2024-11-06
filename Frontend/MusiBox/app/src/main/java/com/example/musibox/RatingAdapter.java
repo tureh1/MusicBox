@@ -9,10 +9,10 @@ import java.util.List;
 
 public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder> {
 
-    private List<Album> albums;
+    private List<Song> songs; // List to hold Song objects
 
-    public RatingAdapter(List<Album> albums) {
-        this.albums = albums;
+    public RatingAdapter(List<Song> songs) { // Constructor to accept Song list
+        this.songs = songs;
     }
 
     @NonNull
@@ -24,13 +24,13 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Album album = albums.get(position);
-        holder.ratingView.bindAlbumData(album.getCoverUrl(), album.getName(), album.getArtist(), album.getReleaseDate(), album.getAverageRating());
+        Song song = songs.get(position); // Get the Song object at the current position
+        holder.ratingView.bindSongData(song); // Bind the Song data to the RatingView
     }
 
     @Override
     public int getItemCount() {
-        return albums.size();
+        return songs.size(); // Return the size of the Song list
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -42,4 +42,3 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
         }
     }
 }
-

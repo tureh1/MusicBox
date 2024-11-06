@@ -10,4 +10,3 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
 
     List<Rating> findBySongId(Long songId);
 }
-

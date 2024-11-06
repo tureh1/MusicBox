@@ -43,4 +43,3 @@ public class Album {
         this.averageRating = averageRating;
     }
 }
-

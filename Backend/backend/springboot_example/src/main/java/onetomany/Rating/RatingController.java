@@ -55,4 +55,3 @@ public class RatingController {
         return "Song not found";
     }
 }
-

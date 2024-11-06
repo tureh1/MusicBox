@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- activity_playlist.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPlaylist"
+        android:layout_width="392dp"
+        android:layout_height="647dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
+
+    <Button
+        android:id="@+id/addSongButton"
+        android:layout_width="226dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:backgroundTint="@color/NavyBlue"
+        android:drawableLeft="@android:drawable/ic_menu_add"
+        android:padding="10dp"
+        android:text="Add Song"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
+
+</LinearLayout>
