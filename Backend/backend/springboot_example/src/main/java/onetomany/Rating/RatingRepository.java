@@ -1,15 +1,12 @@
 package onetomany.Rating;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
+
 import java.util.List;
+import java.util.Optional;
 
-@Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
+    Optional<Rating> findByUserEmailAndSongId(String userEmail, Long songId);
 
-    List<Rating> findByAlbumId(int albumId);
-
-    @Query("SELECT COALESCE(AVG(r.rating), 0) FROM Rating r WHERE r.albumId = :albumId")
-    double getAverageRating(int albumId);
+    List<Rating> findBySongId(Long songId);
 }
