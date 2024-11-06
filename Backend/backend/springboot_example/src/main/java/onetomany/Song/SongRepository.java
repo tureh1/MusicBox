@@ -14,4 +14,8 @@ public interface SongRepository extends JpaRepository<Song, Long> {
     // Method to find songs ordered by average rating in descending order
     @Query("SELECT s FROM Song s ORDER BY s.averageRating DESC")
     List<Song> findTopRatedSongs();
+
+    // Method to find songs in random order
+    @Query("SELECT s FROM Song s ORDER BY RAND()")
+    List<Song> findSongsInRandomOrder();
 }

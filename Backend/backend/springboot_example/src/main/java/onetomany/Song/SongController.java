@@ -54,4 +54,11 @@ public class SongController {
         return ResponseEntity.ok(topRatedSongs);
     }
 
+    // Retrieve songs in random order
+    @GetMapping("/random")
+    public ResponseEntity<List<Song>> getSongsInRandomOrder() {
+        List<Song> randomSongs = songRepository.findSongsInRandomOrder();
+        return ResponseEntity.ok(randomSongs);
+    }
+
 }
