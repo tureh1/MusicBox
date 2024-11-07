@@ -41,13 +41,14 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
         holder.artistTextView.setText(song.getArtist());
         holder.averageRatingTextView.setText(String.format("Average Rating: %.1f", averageRating));
 
-        // Set the current rating for thefloat RatingBar (casting averageRating to float)
-        holder.ratingBar.setRating((float) averageRating);
+        // Set the user rating (not the average) to the RatingBar
+        holder.ratingBar.setRating(song.getUserRating()); // Bind user rating here
 
         // Set the listener for when the user changes the rating
         holder.ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -> {
             if (onRatingChangeListener != null) {
-                // Pass the song ID and new rating as an integer
+                // Update the user's rating and pass it to the listener
+                song.setUserRating(rating); // Update the Song model with the new user rating
                 onRatingChangeListener.onRatingChanged(song.getId(), (int) rating);
             }
         });
