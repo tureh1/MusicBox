@@ -1,6 +1,7 @@
 package com.example.musibox;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +32,7 @@ public class PlaylistActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private PlaylistAdapter playlistAdapter;
     private List<Song> songList;
-    private int userId;
+    private String userId;
     private long playlistId;
 
     @SuppressLint("MissingInflatedId")
@@ -42,7 +43,17 @@ public class PlaylistActivity extends AppCompatActivity {
 
         // Retrieve userId from shared preferences
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
-        userId = sharedPreferences.getInt("userId", -1);
+        String email = sharedPreferences.getString("emailId", null); // Default to null if not found
+        int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
+        if (email != null && userId != -1 ) {
+            // Use the email and userId to populate fields or make requests
+            Log.d("ChatActivity", "Logged-in email: " + email);
+        } else {
+            // Handle missing data (e.g., redirect to login)
+            Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
+
+            finish(); // Optionally finish this activity
+        }
 
         // Retrieve GroupPlaylist object passed from previous activity
         GroupPlaylist groupPlaylist = getIntent().getParcelableExtra("groupPlaylist");
@@ -81,15 +92,15 @@ public class PlaylistActivity extends AppCompatActivity {
     private void fetchSongs() {
 
         //String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
-        String url = "http://10.90.72.167:8080/users/" + userId + "/playlists/songs";
+        //String url = "http://10.90.72.167:8080/users/" + userId + "/playlists/songs";
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
-        userId = sharedPreferences.getInt("userId", -1);
+        userId = sharedPreferences.getString("userId", userId);
         playlistId = getIntent().getIntExtra("playlistId", -1);
 
         // Construct the URL with the retrieved userId and playlistId
-        //String url = "http://10.90.72.167:8080/users/" + userId + "/playlists/" + playlistId + "/songs";
+        String url = "http://10.90.72.167:8080/users/" + userId + "/playlists/" + playlistId + "/songs";
 
-        // Log the constructed URL to ensure it's correct
+            // Log the constructed URL to ensure it's correct
         Log.d("PlaylistActivity", "Fetching songs from URL: " + url);
 
         // Create a JsonArrayRequest to fetch songs from the backend
