@@ -4,9 +4,9 @@ public class Song {
     private int id;
     private String title;
     private String artist;
-    private float averageRating;
+    private double averageRating;
 
-    public Song(int id, String title, String artist, float averageRating) {
+    public Song(int id, String title, String artist, double averageRating) {
         this.id = id;
         this.title = title;
         this.artist = artist;
@@ -24,12 +24,17 @@ public class Song {
     public String getArtist() {
         return artist;
     }
+    public String setTitle(String title) {
+        return title;
+    }
+    public void setArtist(String artist) {
+    }
 
-    public float getAverageRating() {
+    public double getAverageRating() {
         return averageRating;
     }
 
-    public void setAverageRating(float averageRating) {
+    public void setAverageRating(double averageRating) {
         this.averageRating = averageRating;
     }
 

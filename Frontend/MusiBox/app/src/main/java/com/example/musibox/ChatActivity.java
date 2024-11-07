@@ -51,7 +51,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
-        String email = sharedPreferences.getString("email", null); // Default to null if not found
+        String email = sharedPreferences.getString("emailId", null); // Default to null if not found
         int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
 
         if (email != null && userId != -1) {
