@@ -2,6 +2,7 @@ package com.example.musibox;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -51,6 +52,20 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_group);
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
+        String email = sharedPreferences.getString("email", null); // Default to null if not found
+        int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
+
+        if (email != null && userId != -1) {
+            // Use the email and userId to populate fields or make requests
+            Log.d("CreateGroupActivity", "Logged-in email: " + email);
+        } else {
+            // Handle missing data (e.g., redirect to login)
+            Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish(); // Optionally finish this activity
+        }
 
         initViews();
         setupRecyclerView();
@@ -204,9 +219,15 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             return;
         }
 
-        // Generate the group name by joining selected user names with commas
-        String groupName = String.join(", ", selectedUsers);
+        // Fetch the current user's name from shared preferences
+        String currentUserName = getSharedPreferences("user_data", MODE_PRIVATE).getString("emailId", null);
+        if (currentUserName == null) {
+            Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        // Generate the group name by joining selected user names with commas and adding the current user's name
+        String groupName = currentUserName + ", " + String.join(", ", selectedUsers);
         List<String> selectedUserEmails = new ArrayList<>(selectedUsers);
 
         // Check if the user is logged in

@@ -2,6 +2,7 @@ package com.example.musibox;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,8 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -23,7 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText email;
     EditText password;
     Button loginButton;
-    Button DeleteButton;
+    Button deleteButton;
     TextView forgotPassword;
     TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
@@ -31,13 +30,12 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
         email = findViewById(R.id.username);
         password = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginButton);
-        DeleteButton = findViewById(R.id.DeleteButton);
+        deleteButton = findViewById(R.id.DeleteButton);
         forgotPassword = findViewById(R.id.forgotPassword);
         signUpLink = findViewById(R.id.signup);
 
@@ -74,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         // Delete button click listener
-        DeleteButton.setOnClickListener(v -> {
+        deleteButton.setOnClickListener(v -> {
             if (handleLogIn()) {
                 DeleteRequest(email.getText().toString().trim());
             }
@@ -124,11 +122,7 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("LoginActivity", "User ID: " + userId);
 
                             // Store user data in SharedPreferences
-                            getSharedPreferences("user_data", MODE_PRIVATE)
-                                    .edit()
-                                    .putString("email", email) // Store email
-                                    .putInt("userId", userId)   // Store user ID
-                                    .apply();
+                            storeUserDataInSharedPreferences(email, userId);
 
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
 
@@ -153,6 +147,16 @@ public class LoginActivity extends AppCompatActivity {
 
         // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+    }
+
+    // Store user data in SharedPreferences
+    private void storeUserDataInSharedPreferences(String email, int userId) {
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("emailId", email); // Store email
+        editor.putInt("userId", userId);   // Store user ID
+        editor.putBoolean("isLoggedIn", true);  // Mark user as logged in
+        editor.apply();  // Apply changes
     }
 
     // Send delete request to the backend
@@ -185,5 +189,18 @@ public class LoginActivity extends AppCompatActivity {
 
         // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+    }
+
+    // Clear SharedPreferences on logout
+    private void logoutUser() {
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();  // This will remove all entries
+        editor.apply();  // Apply changes
+
+        // Optionally, redirect to login screen after logout
+        Intent intent = new Intent(LoginActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();  // Close current activity
     }
 }

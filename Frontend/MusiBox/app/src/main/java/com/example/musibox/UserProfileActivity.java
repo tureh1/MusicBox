@@ -44,16 +44,12 @@ public class UserProfileActivity extends AppCompatActivity {
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
 
-        setupNavigationButtons();
-        friendsCount.setOnClickListener(v -> {
-                    // Action to perform when the message button is clicked
-                    Intent intent1 = new Intent(UserProfileActivity.this, CreateGroupActivity.class);
-                    startActivity(intent1);
-                });
+
+
         Intent intent = getIntent();
         String email = intent.getStringExtra("emailId");
         userId = intent.getStringExtra("userId");
-        
+        setupNavigationButtons();
         // Initialize the Volley request queue
         RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
