@@ -3,7 +3,10 @@ package com.example.musibox;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RatingBar;
 import android.widget.Toast;
@@ -39,6 +42,7 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
     private WebSocketClient webSocketClient;
     private WebSocket mWebSocket;
     private String userEmail;
+    private EditText search_barAlbum;
     private int songId;
 
 
@@ -64,7 +68,6 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
         }
 
 
-
         fetchSongData();
 
         // Start WebSocket connection
@@ -87,6 +90,7 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
         addUserButton = findViewById(R.id.navigation_adduser);
         messageButton = findViewById(R.id.navigation_message);
         userButton = findViewById(R.id.navigation_user);
+        search_barAlbum = findViewById(R.id.search_barAlbum);
 
         // Initialize RecyclerView
         recyclerView = findViewById(R.id.recyclerView);
@@ -99,7 +103,96 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
         addUserButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, CreateGroupActivity.class)));
         messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
+
+        search_barAlbum.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+                // Not needed in this case
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                // When text changes, perform search
+                String query = charSequence.toString();
+
+                // Check if the query is empty
+                if (query.length() >= 0)  {
+                    searchForSong(query);  // Fetch and display all songs if the query is empty
+                    fetchSongData();
+                } else {
+                    fetchSongData();  // Search for songs based on query
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                // Ensure we fetch all songs if the query is empty after backspacing
+                if (editable.toString().isEmpty()) {
+                    fetchSongData();
+                }
+            }
+        });
     }
+
+    private void searchForSong(String query) {
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs/search?query=" + query;
+
+        // Using JsonArrayRequest to perform the search query
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            // Clear the previous search results
+                            songList.clear();
+
+                            // Iterate through the response and add the songs to the list
+                            for (int i = 0; i < response.length(); i++) {
+                                JSONObject songObject = response.getJSONObject(i);
+                                int songId = songObject.getInt("id");
+                                String title = songObject.optString("title", "Unknown Song");
+                                String artist = songObject.optString("artist", "Unknown Artist");
+                                float avgRating = (float) songObject.optDouble("averageRating", 0);
+
+                                // Create a Song object and add it to the list
+                                Song song = new Song(songId, title, artist, avgRating);
+                                songList.add(song);
+                            }
+
+                            // Notify the adapter to update the view with the search results
+                            ratingAdapter.notifyDataSetChanged();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(MainPage.this, "Error parsing song data", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainPage.this, "Error fetching song data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        // Add the request to the queue
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     private void fetchSongData() {
         String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
@@ -247,10 +340,13 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
     public void onSongClick(int songId) {
         Song clickedSong = songMap.get(String.valueOf(songId));
         if (clickedSong != null) {
-            // Handle the song click, e.g., show a toast or navigate to a new screen
-            Toast.makeText(this, "Song clicked: " + clickedSong.getTitle(), Toast.LENGTH_SHORT).show();
+            // Optionally, pass the songId or song object to a new activity
+            Intent intent = new Intent(MainPage.this, MainPage.class);
+            intent.putExtra("songId", clickedSong.getId());
+            startActivity(intent);
         }
     }
+
 
     @Override
     public void onRatingChanged(int songId, float rating) {
