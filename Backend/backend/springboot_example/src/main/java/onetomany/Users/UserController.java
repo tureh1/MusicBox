@@ -63,20 +63,23 @@ public class UserController {
 
 
     @PostMapping(path = "/login")
-    public String loginUser(@RequestBody User user) {
+    public ResponseEntity<String> loginUser(@RequestBody User user) {
         if (user == null || user.getEmailId() == null || user.getPassword() == null ||
                 user.getEmailId().trim().isEmpty() || user.getPassword().trim().isEmpty()) {
-            return loginFailure; // Invalid input
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Invalid input\"}");
         }
 
         User existingUser = userRepository.findByEmailId(user.getEmailId());
         if (existingUser == null || !existingUser.getPassword().equals(user.getPassword())) {
-            return loginFailure; // Invalid email or password
+            // Email or password mismatch
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Invalid email or password\"}");
         }
 
-        // Login successful, send userId in the response
-        return String.format(loginSuccessTemplate, existingUser.getId()); // Assuming getId() returns the user ID
+        // Login successful, return userId and success message
+        String successMessage = String.format("{\"message\":\"Login successful\", \"userId\": %d}", existingUser.getId());
+        return ResponseEntity.ok(successMessage);
     }
+
 
     @DeleteMapping(path = "/users/{emailId}")
     public ResponseEntity<String> deleteUserByEmail(@PathVariable String emailId) {
@@ -105,3 +108,4 @@ public class UserController {
         return passwordChangeSuccess; // Password updated successfully
     }
 }
+
