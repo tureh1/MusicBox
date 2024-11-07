@@ -32,4 +32,6 @@ public class Song {
     public void setAverageRating(float averageRating) {
         this.averageRating = averageRating;
     }
+
+
 }
