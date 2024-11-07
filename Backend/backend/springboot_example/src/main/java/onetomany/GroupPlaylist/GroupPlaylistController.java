@@ -182,7 +182,7 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Add a user to an existing playlist
-    @PostMapping("/user/{userId}/playlists/{playlistId}/addUser")
+    @PostMapping("/users/{userId}/playlists/{playlistId}/addUser")
     public ResponseEntity<String> addUserToPlaylist(@PathVariable Long playlistId, @RequestBody Map<String, String> userRequest) {
         String userEmail = userRequest.get("userEmail");
 
@@ -216,7 +216,7 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Get all users in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}/users")
+    @GetMapping("/users/{userId}/playlists/{playlistId}/users")
     public ResponseEntity<Set<User>> getUsersInPlaylist(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -229,7 +229,7 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Get all songs in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}/songs")
+    @GetMapping("/users/{userId}/playlists/{playlistId}/songs")
     public ResponseEntity<Set<Song>> getSongsInPlaylist(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -249,7 +249,7 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Get both users and songs in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}")
+    @GetMapping("/users/{userId}/playlists/{playlistId}")
     public ResponseEntity<Map<String, Object>> getPlaylistDetails(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
