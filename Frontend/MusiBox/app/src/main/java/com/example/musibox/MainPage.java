@@ -96,7 +96,7 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
 
         // Button listeners (navigation)
         homeButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MainPage.class)));
-        addUserButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, ChatActivity.class)));
+        addUserButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, CreateGroupActivity.class)));
         messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
     }
