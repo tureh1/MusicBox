@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,23 +13,23 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import android.widget.ImageButton;
-import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import com.android.volley.toolbox.JsonArrayRequest;
 
-public class MainPage extends AppCompatActivity implements WebSocketListener {
-    private ImageButton homeButton;
-    private ImageButton addUserButton;
-    private ImageButton messageButton;
-    private ImageButton userButton;
+public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongClickListener {
+
+    private ImageButton homeButton, addUserButton, messageButton, userButton;
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
-    private List<Album> albumList;
-    private String albumId; // Define this at the class level
+    private List<Song> songList = new ArrayList<>();
+    private Map<String, Song> songMap = new HashMap<>();
+    private String userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +55,10 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
         addUserButton = findViewById(R.id.navigation_adduser);
         messageButton = findViewById(R.id.navigation_message);
         userButton = findViewById(R.id.navigation_user);
-        // Initialize RecyclerView and Adapter
+
+        // Set up RecyclerView
         recyclerView = findViewById(R.id.recyclerView);
-        albumList = new ArrayList<>();
-        ratingAdapter = new RatingAdapter(albumList);
+        ratingAdapter = new RatingAdapter(this, songList, this); // Pass this as the listener
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(ratingAdapter);
 
@@ -93,147 +94,60 @@ public class MainPage extends AppCompatActivity implements WebSocketListener {
         });
     }
 
-    @Override
-    public void onWebSocketOpen(ServerHandshake handshakedata) {
-        Log.d("WebSocket", "Connection opened");
-    }
+    private void fetchSongData() {
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
 
-    @Override
-    public void onWebSocketMessage(String message) {
-        try {
-            JSONObject jsonMessage = new JSONObject(message);
-            String albumId = jsonMessage.getString("albumId");
-            float avgRating = (float) jsonMessage.getDouble("averageRating");
+        // Using JsonArrayRequest instead of JsonObjectRequest
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
+                Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        try {
+                            // Log the response to check the structure
+                            Log.d("Volley Response", response.toString());
 
-            // Update the albumList and notify the adapter
-            for (Album album : albumList) {
-                if (album.getAlbumId().equals(albumId)) {
-                    album.setAverageRating(avgRating);
-                    break;
+                            // Iterate through the array and extract the required fields
+                            for (int i = 0; i < response.length(); i++) {
+                                JSONObject songObject = response.getJSONObject(i);
+                                int songId = songObject.getInt("id");
+                                String title = songObject.optString("title", "Unknown Song");
+                                String artist = songObject.optString("artist", "Unknown Artist");
+                                float avgRating = (float) songObject.optDouble("averageRating", 0);
+
+                                // Create a Song object and add it to the list
+                                Song song = new Song(songId, title, artist, avgRating);
+                                songList.add(song);
+                                songMap.put(String.valueOf(songId), song);
+                            }
+
+                            // Update the adapter with the new song list
+                            ratingAdapter.updateSongList(songList);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(MainPage.this, "Error parsing song data", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MainPage.this, "Error fetching song data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-            runOnUiThread(() -> ratingAdapter.notifyDataSetChanged());
+        );
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        // Add the request to the queue
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
     @Override
-    public void onWebSocketClose(int code, String reason, boolean remote) {
-        Log.d("WebSocket", "Connection closed: " + reason);
-    }
-
-    @Override
-    public void onWebSocketError(Exception ex) {
-        Log.e("WebSocket", "Error: " + ex.getMessage());
-    }
-
-
-    // Call this method to send the user rating to the backend
-    private void sendUserRating(String albumId, float rating) {
-        JSONObject ratingJson = new JSONObject();
-        try {
-            ratingJson.put("albumId", albumId);
-            ratingJson.put("rating", rating);
-            WebSocketManager.getInstance().sendMessage(ratingJson.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
+    public void onSongClick(int songId) {
+        Song clickedSong = songMap.get(String.valueOf(songId));
+        if (clickedSong != null) {
+            // Handle the song click, e.g., show a toast or navigate to a new screen
+            Toast.makeText(this, "Song clicked: " + clickedSong.getTitle(), Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void fetchAlbumData() {
-        addDummyAlbums();
-//        String url = "http://10.90.72.167:8080/" + albumId;
-//
-//        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-//                Request.Method.GET, url, null,
-//                new Response.Listener<JSONObject>() {
-//                    @Override
-//                    public void onResponse(JSONObject response) {
-//                        try {
-//                            // Assuming the backend provides an array of album ratings under "albums"
-//                            JSONArray albumsArray = response.getJSONArray("albums");
-//                            for (int i = 0; i < albumsArray.length(); i++) {
-//                                JSONObject albumObject = albumsArray.getJSONObject(i);
-//
-//                                // Retrieve details based on the provided backend structure
-//                                String albumId = albumObject.getString("albumId");
-//                                String albumName = albumObject.optString("albumName", "Unknown Album");
-//                                String artistName = albumObject.optString("artistName", "Unknown Artist");
-//                                float avgRating = (float) albumObject.optDouble("averageRating", 0); // Placeholder average rating
-//                                String releaseDate = albumObject.optString("releaseDate", "N/A");
-//                                String coverArtUrl = "https://coverartarchive.org/release/" + albumId + "/front"; // Assumes albumId is used for cover art URL
-//
-//                                // Add album to the list using the correct constructor order
-//                                albumList.add(new Album(coverArtUrl, albumId, albumName, artistName, releaseDate, avgRating));
-//                            }
-//
-//                            // Notify the adapter that data has changed to update RecyclerView
-//                            ratingAdapter.notifyDataSetChanged();
-//
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                            Toast.makeText(MainPage.this, "Error parsing album data", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                },
-//                new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Toast.makeText(MainPage.this, "Error fetching album data: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//        );
-//
-//        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
-//    }
-    }
-
-
-    // Method to add dummy album data
-    private void addDummyAlbums() {
-        // Adding dummy albums
-        albumList.add(new Album(
-                "https://lastfm.freetls.fastly.net/i/u/6e0bbbb097073fc4df40be2a5e270797",
-                "1", // ID
-                "The Slow Rush Remixes/B-sides", // Name
-                "Tame Impala",
-                "2020-02-14",
-                4.2f));
-
-        albumList.add(new Album(
-                "https://lastfm.freetls.fastly.net/i/u/d47d0db3893fa94639514a2aa47372b8",
-                "2", // ID
-                "Beatopia", // Name
-                "Beabadoobee",
-                "2022-07-15",
-                3.8f));
-
-        albumList.add(new Album(
-                "https://lastfm.freetls.fastly.net/i/u/e69971625c379772fb79213dccfa194f",
-                "3", // ID
-                "Hit me hard and Soft", // Name
-                "Billie Eilish",
-                "2024-04-17",
-                4.5f));
-
-        albumList.add(new Album(
-                "https://lastfm.freetls.fastly.net/i/u/1edfa1d35ec3cbe08b6f4a569b005807",
-                "4", // ID
-                "...Baby one more time", // Name
-                "Britney Spears",
-                "1999-01-12",
-                4.0f));
-
-        albumList.add(new Album(
-                "https://lastfm.freetls.fastly.net/i/u/579ed8a3dca4a0dc7c055316307a0056",
-                "5", // ID
-                "Top Shotta", // Name
-                "NLE Choppa",
-                "2020-08-07",
-                4.3f));
-        // Notify the adapter of the data change
-        ratingAdapter.notifyDataSetChanged();
     }
 }
