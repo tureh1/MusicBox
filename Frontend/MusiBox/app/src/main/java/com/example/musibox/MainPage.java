@@ -1,6 +1,7 @@
 package com.example.musibox;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageButton;
@@ -34,10 +35,22 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mainpage);
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
+        String email = sharedPreferences.getString("email", null); // Default to null if not found
+        int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
 
-        fetchSongData();
+        if (email != null && userId != -1) {
+            // Use the email and userId to populate fields or make requests
+            Log.d("CreateGroupActivity", "Logged-in email: " + email);
+        } else {
+            // Handle missing data (e.g., redirect to login)
+            Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish(); // Optionally finish this activity
+        }
 
-        // Initialize buttons and RecyclerView
+        albumId = getIntent().getStringExtra("albumId");
         homeButton = findViewById(R.id.navigation_home);
         addUserButton = findViewById(R.id.navigation_adduser);
         messageButton = findViewById(R.id.navigation_message);
@@ -49,11 +62,36 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(ratingAdapter);
 
-        // Button listeners (navigation)
-        homeButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MainPage.class)));
-        addUserButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, FriendsActivity.class)));
-        messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
-        userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
+        // Initialize WebSocket
+        // Establish WebSocket connection and set listener
+        String serverUrl = "ws://10.90.72.167:8080/${albumId}/rating";
+
+        WebSocketManager.getInstance().connectWebSocket(serverUrl);
+        WebSocketManager.getInstance().setWebSocketListener(MainPage.this);
+
+
+        // Set albumId before calling fetchAlbumData
+        albumId = "albumId"; // Replace with actual value
+        fetchAlbumData();
+        homeButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, MainPage.class);
+            startActivity(intent);
+        });
+
+        addUserButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, CreateGroupActivity.class);
+            startActivity(intent);
+        });
+
+        messageButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, MessageActivity.class);
+            startActivity(intent);
+        });
+
+        userButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainPage.this, UserProfileActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void fetchSongData() {

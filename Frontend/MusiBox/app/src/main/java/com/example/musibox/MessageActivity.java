@@ -1,6 +1,7 @@
 package com.example.musibox;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -44,6 +45,21 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
+        String email = sharedPreferences.getString("email", null); // Default to null if not found
+        int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
+
+        if (email != null && userId != -1) {
+            // Use the email and userId to populate fields or make requests
+            Log.d("MessageActivity", "Logged-in email: " + email);
+        } else {
+            // Handle missing data (e.g., redirect to login)
+            Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish(); // Optionally finish this activity
+        }
+
 
         initViews();
         setupRecyclerView();
@@ -123,8 +139,8 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
 
     private void setupNavigationButtons() {
         house.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, MainPage.class)));
-        addUserButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, FriendsActivity.class)));
-        messageButton.setOnClickListener(v -> Toast.makeText(this, "You are already in Message Activity", Toast.LENGTH_SHORT).show());
+        addUserButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, CreateGroupActivity.class)));
+        messageButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, UserProfileActivity.class)));
     }
 

@@ -45,12 +45,16 @@
         <activity
             android:name=".MainPage"
             android:exported="true" />
-        <activity android:name=".FriendsActivity"
-            android:exported="true"/>
-        <activity android:name=".ChatActivity"
-            android:exported="true">
 
-        </activity>
+        <activity android:name=".CreateGroupActivity"
+            android:exported="true"/>
+
+        <activity android:name=".ChatActivity"
+            android:exported="true"/>
+        <activity android:name=".PlaylistActivity"
+            android:exported="true"/>
+
+
 
         <activity
             android:name=".MessageActivity"

@@ -1,11 +1,15 @@
 package com.example.musibox;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -39,11 +43,28 @@ public class ChatActivity extends AppCompatActivity {
     private List<ChatMessage> messageList;
     private Button sendButton;
     private ImageButton backButton;
+    private TextView friendName;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
+        String email = sharedPreferences.getString("email", null); // Default to null if not found
+        int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
+
+        if (email != null && userId != -1) {
+            // Use the email and userId to populate fields or make requests
+            Log.d("ChatActivity", "Logged-in email: " + email);
+        } else {
+            // Handle missing data (e.g., redirect to login)
+            Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish(); // Optionally finish this activity
+        }
+
 
         // Initialize views and variables
         friendEmail = getIntent().getStringExtra("friendEmail");
@@ -53,12 +74,13 @@ public class ChatActivity extends AppCompatActivity {
         sendButton = findViewById(R.id.sendButton);
         backButton = findViewById(R.id.back);
         recyclerView = findViewById(R.id.recyclerView);
+        friendName = findViewById(R.id.friendname);
 
         messageList = new ArrayList<>();
         chatAdapter = new ChatAdapter(messageList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(chatAdapter);
-
+        friendName.setText(friendEmail);
         // Fetch old messages and set up WebSocket
         fetchOldMessages();
         setupWebSocket();

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private TextView friendsCount;
     private Button saveBio, deleteBio;
     private String userId; // Added field for userId
+    private ImageButton house, addUserButton, messageButton, userButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,16 +39,17 @@ public class UserProfileActivity extends AppCompatActivity {
         saveBio = findViewById(R.id.save_bio_text);
         deleteBio = findViewById(R.id.delete_bio_text);
         friendsCount = findViewById(R.id.friends_count);
+        house = findViewById(R.id.home);
+        addUserButton = findViewById(R.id.adduser);
+        messageButton = findViewById(R.id.message);
+        userButton = findViewById(R.id.user);
 
-        friendsCount.setOnClickListener(v -> {
-                    // Action to perform when the message button is clicked
-                    Intent intent1 = new Intent(UserProfileActivity.this, FriendsActivity.class);
-                    startActivity(intent1);
-                });
+
+
         Intent intent = getIntent();
         String email = intent.getStringExtra("emailId");
         userId = intent.getStringExtra("userId");
-        
+        setupNavigationButtons();
         // Initialize the Volley request queue
         RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
 
@@ -57,6 +60,7 @@ public class UserProfileActivity extends AppCompatActivity {
         }
 
         getBio();
+
 
 
         saveBio.setOnClickListener(new View.OnClickListener() {
@@ -79,6 +83,12 @@ public class UserProfileActivity extends AppCompatActivity {
         });
 
 
+    }
+    private void setupNavigationButtons() {
+        house.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, MainPage.class)));
+        addUserButton.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, CreateGroupActivity.class)));
+        messageButton.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, MessageActivity.class)));
+        userButton.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, UserProfileActivity.class)));
     }
 
     private void getBio(){
