@@ -55,10 +55,9 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         String email = sharedPreferences.getString("emailId", null); // Default to null if not found
         int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
-
-        if (email != null && userId != -1) {
+        if (email != null && userId != -1 ) {
             // Use the email and userId to populate fields or make requests
-            Log.d("CreateGroupActivity", "Logged-in email: " + email);
+            Log.d("ChatActivity", "Logged-in email: " + email);
         } else {
             // Handle missing data (e.g., redirect to login)
             Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
@@ -332,8 +331,6 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
             searchBar.getText().clear();
         }
     }
-
-
 
 
     @Override

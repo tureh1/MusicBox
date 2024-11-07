@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-
     <ImageView
         android:id="@+id/album_cover"
         android:layout_width="382dp"
@@ -14,7 +13,6 @@
         android:scaleType="centerCrop"
         android:src="@drawable/cover" />
 
-    <!-- Album name and average rating in a horizontal layout -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -37,26 +35,23 @@
             android:textSize="16sp"
             android:layout_gravity="center_vertical"
             android:text="Avg: 4.2"
-           android:layout_marginStart="8dp" />
+            android:layout_marginStart="8dp" />
     </LinearLayout>
 
-    <!-- Release Date -->
     <TextView
         android:id="@+id/artist_name"
         android:layout_width="107dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Tame Lmpala"
+        android:text="Tame Impala"
         android:textSize="16sp" />
 
-
-    <!-- Rating Bar for User Rating -->
     <RatingBar
         android:id="@+id/rating_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="20dp"
         android:numStars="5"
         android:rating="0"
         android:stepSize="1" />

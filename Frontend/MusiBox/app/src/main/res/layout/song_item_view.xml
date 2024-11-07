@@ -6,6 +6,15 @@
     android:padding="8dp"
     android:gravity="center_vertical">
 
+    <!-- Image on the left -->
+    <ImageView
+        android:id="@+id/songImageView"
+        android:layout_width="103dp"
+        android:layout_height="125dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/anri" />
+
+    <!-- Song details (TextViews) -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -29,6 +38,7 @@
             android:text="Artist Name" />
     </LinearLayout>
 
+    <!-- Remove Button -->
     <Button
         android:id="@+id/removeButton"
         android:layout_width="wrap_content"
@@ -38,4 +48,3 @@
         android:backgroundTint="@android:color/darker_gray"
         android:padding="8dp"/>
 </LinearLayout>
-
