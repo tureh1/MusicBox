@@ -127,6 +127,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                         try {
                             JSONObject jsonMessage = new JSONObject(message);
                             updateAverageRatingUI(jsonMessage);
+                            fetchSongData();
                         } catch (JSONException e) {
                             Log.e("WebSocket", "Error parsing WebSocket message", e);
                         }
@@ -183,19 +184,22 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         try {
             int songId = jsonMessage.getInt("songId");
             double newAverageRating = jsonMessage.getDouble("averageRating");
+            fetchSongData();
+            Log.d("WebSocket", "Updating song ID: " + songId + " with new rating: " + newAverageRating);
 
             for (Song song : songList) {
                 if (song.getId() == songId) {
-                    song.setAverageRating(newAverageRating);
+                    song.setAverageRating(newAverageRating); // Update the song's rating
                     break;
                 }
             }
 
-            ratingAdapter.notifyDataSetChanged();
+            ratingAdapter.notifyDataSetChanged(); // Notify the adapter to refresh the UI
         } catch (JSONException e) {
             Log.e("WebSocket", "Error updating rating UI", e);
         }
     }
+
 
     // Fetch song data (this could trigger WebSocket activity or server calls)
     private void fetchSongData() {
@@ -236,6 +240,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                 ratingUpdate.put("songId", songId);
                 ratingUpdate.put("rating", rating);
                 webSocketClient.send(ratingUpdate.toString());
+                fetchSongData(); // Fetch data to refresh the list
             } catch (JSONException e) {
                 Log.e("WebSocket", "Failed to send rating update", e);
             }
@@ -254,6 +259,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
     public void onWebSocketOpen(ServerHandshake handshakedata) {
         // Called when the WebSocket connection is opened
         Log.d("WebSocket", "Connection opened: " + handshakedata);
+        fetchSongData(); // Fetch data when the WebSocket connection is opened
     }
 
     @Override
@@ -264,6 +270,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                 // Assuming the message is a JSON string that includes song rating info
                 JSONObject jsonMessage = new JSONObject(message);
                 updateAverageRatingUI(jsonMessage);  // Custom method to update the UI
+                fetchSongData(); // Fetch data to refresh the list
             } catch (JSONException e) {
                 Log.e("WebSocket", "Error parsing WebSocket message", e);
             }
