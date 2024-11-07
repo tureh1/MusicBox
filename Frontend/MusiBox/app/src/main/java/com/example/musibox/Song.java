@@ -13,6 +13,11 @@ public class Song {
         this.averageRating = averageRating;
     }
 
+    public Song(String title, String artist) {
+        this.title = title;
+        this.artist = artist;
+    }
+
     public int getId() {
         return id;
     }

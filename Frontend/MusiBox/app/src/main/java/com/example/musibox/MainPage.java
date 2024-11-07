@@ -41,8 +41,6 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
     private String userEmail;
     private int songId;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +60,6 @@ public class MainPage extends AppCompatActivity implements RatingAdapter.OnSongC
             startActivity(loginIntent);
             finish(); // Optionally finish this activity
         }
-
-
 
         fetchSongData();
 

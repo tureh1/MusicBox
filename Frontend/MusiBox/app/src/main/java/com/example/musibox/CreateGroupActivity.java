@@ -334,8 +334,6 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     }
 
 
-
-
     @Override
     public void onGroupClick(Group group) {
         // Start PlaylistActivity when a group is clicked
