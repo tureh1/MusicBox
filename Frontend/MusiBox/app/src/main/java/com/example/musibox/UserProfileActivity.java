@@ -152,7 +152,7 @@ public class UserProfileActivity extends AppCompatActivity {
             }
         };
 
-          // Add the request to the Volley queue
+        // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
         // Add the request to the Volley queue
 

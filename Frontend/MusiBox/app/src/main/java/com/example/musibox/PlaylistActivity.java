@@ -23,7 +23,7 @@ public class PlaylistActivity extends AppCompatActivity {
         if (groupName != null)
             usernames.setText(groupName);
         setupButtons();
-        }
+    }
 
 
     private void setupButtons() {
