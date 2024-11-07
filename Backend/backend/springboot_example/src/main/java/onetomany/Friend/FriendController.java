@@ -73,19 +73,12 @@ public class FriendController {
 
         // Check if the friend entry already exists
         Friend friendEntry = friendRepository.findByUserIdAndFriendEmail(userId, friendEmail);
-
-        // Allow re-adding if the friend exists but is not accepted
-        if (friendEntry != null && !friendEntry.isAccepted()) {
-            friendEntry.setAccepted(true);
+        if (friendEntry == null) {
+            friendEntry = new Friend(user, friendEmail, false);
             friendRepository.save(friendEntry);
-            return ResponseEntity.ok("{\"message\": \"Friend re-added successfully\"}");
-        } else if (friendEntry != null && friendEntry.isAccepted()) {
+        } else if (friendEntry.isAccepted()) {
             return ResponseEntity.badRequest().body("{\"error\": \"Friend already exists\"}");
         }
-
-        // If no entry exists, create a new friend entry
-        friendEntry = new Friend(user, friendEmail, false);
-        friendRepository.save(friendEntry);
 
         // Check for mutual friend entry
         User friendUser = userRepository.findByEmailId(friendEmail);
@@ -144,4 +137,3 @@ public class FriendController {
 
 
 }
-
