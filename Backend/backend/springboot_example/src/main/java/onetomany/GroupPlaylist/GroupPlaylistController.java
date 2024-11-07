@@ -109,6 +109,7 @@ public class GroupPlaylistController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseMessage);
     }
 */
+
 @PostMapping("/users/{userId}/playlists")
 public ResponseEntity<String> createPlaylist(
         @PathVariable int userId,

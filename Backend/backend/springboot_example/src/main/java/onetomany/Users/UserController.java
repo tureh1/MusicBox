@@ -3,7 +3,6 @@ package onetomany.Users;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,26 +63,20 @@ public class UserController {
 
 
     @PostMapping(path = "/login")
-    public ResponseEntity<String> loginUser(@RequestBody User user, HttpSession session) {
+    public String loginUser(@RequestBody User user) {
         if (user == null || user.getEmailId() == null || user.getPassword() == null ||
                 user.getEmailId().trim().isEmpty() || user.getPassword().trim().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Invalid input\"}");
+            return loginFailure; // Invalid input
         }
 
         User existingUser = userRepository.findByEmailId(user.getEmailId());
         if (existingUser == null || !existingUser.getPassword().equals(user.getPassword())) {
-            // Email or password mismatch
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Invalid email or password\"}");
+            return loginFailure; // Invalid email or password
         }
 
-        // Login successful, store user in session
-        session.setAttribute("currentUser", existingUser); // Store the logged-in user in session
-
-        // Return success message with userId
-        String successMessage = String.format("{\"message\":\"Login successful\", \"userId\": %d}", existingUser.getId());
-        return ResponseEntity.ok(successMessage);
+        // Login successful, send userId in the response
+        return String.format(loginSuccessTemplate, existingUser.getId()); // Assuming getId() returns the user ID
     }
-
 
     @DeleteMapping(path = "/users/{emailId}")
     public ResponseEntity<String> deleteUserByEmail(@PathVariable String emailId) {
@@ -112,4 +105,3 @@ public class UserController {
         return passwordChangeSuccess; // Password updated successfully
     }
 }
-
