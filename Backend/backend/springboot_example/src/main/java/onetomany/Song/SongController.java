@@ -60,4 +60,10 @@ public class SongController {
         return ResponseEntity.ok(randomSongs);
     }
 
+    //search for a song
+    @GetMapping("/search")
+    public ResponseEntity<List<Song>> searchSongs(@RequestParam String query) {
+        List<Song> songs = songRepo.findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(query, query);
+        return ResponseEntity.ok(songs);
+    }
 }
