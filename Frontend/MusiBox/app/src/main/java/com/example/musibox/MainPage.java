@@ -56,8 +56,7 @@ public class MainPage extends AppCompatActivity implements  WebSocketListener, R
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         String email = sharedPreferences.getString("emailId", null); // Default to null if not found
         int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
-
-        if (email != null && userId != -1) {
+        if (email != null && userId != -1 ) {
             // Use the email and userId to populate fields or make requests
             Log.d("ChatActivity", "Logged-in email: " + email);
         } else {
@@ -68,7 +67,6 @@ public class MainPage extends AppCompatActivity implements  WebSocketListener, R
             finish(); // Optionally finish this activity
         }
         userEmail = email;
-
         // Start the WebSocket connection immediately after the page loads
 
 
@@ -250,6 +248,7 @@ public class MainPage extends AppCompatActivity implements  WebSocketListener, R
                         try {
                             // Parse the received song data
                             JSONObject songData = new JSONObject(message);
+                            int songId = songData.getInt("id");
                             String title = songData.optString("title", null);
                             String artist = songData.optString("artist", null);
                             // Parse the average rating. If it's not available, it should return a valid number, not -1.0
@@ -264,10 +263,10 @@ public class MainPage extends AppCompatActivity implements  WebSocketListener, R
                                 songList.add(song);
                             } else {
                                 // If it's an existing song, update its details
-
                                 song.setTitle(title);
                                 song.setArtist(artist);
-                                song.setAverageRating(avgRating);
+
+                            ;
                             }
 
                             // Notify the adapter to refresh the RecyclerView
@@ -323,10 +322,11 @@ public class MainPage extends AppCompatActivity implements  WebSocketListener, R
         Log.e("WebSocket", "WebSocket error: ", ex);
     }
 
+    // RatingAdapter.OnRatingChangeListener method
     @Override
     public void onRatingChanged(int songId, int rating) {
         if (userEmail != null) {
-            URI uri = URI.create("ws://coms-3090-048.class.las.iastate.edu:8080/rate/" + userEmail + "/" + songId);
+            URI uri = URI.create("ws://coms-3090-048.class.las.iastate.edu:8080/rate/" + userEmail);
 
             // Create a WebSocketClient for sending the rating
             WebSocketClient webSocketClient = new WebSocketClient(uri) {
@@ -337,7 +337,7 @@ public class MainPage extends AppCompatActivity implements  WebSocketListener, R
                     // Create a JSON object for the rating update
                     JSONObject jsonMessage = new JSONObject();
                     try {
-                        jsonMessage.put("songId", songId);
+                        jsonMessage.put("songId", songId);  // Use the passed songId here
                         jsonMessage.put("rating", rating);
                         send(jsonMessage.toString());
                         Log.d("WebSocket", "Sent rating update: " + jsonMessage.toString());
