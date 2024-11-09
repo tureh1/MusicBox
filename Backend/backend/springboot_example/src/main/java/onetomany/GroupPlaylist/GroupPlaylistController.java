@@ -16,6 +16,8 @@ import java.util.*;
 //@RequestMapping("/playlists")
 public class GroupPlaylistController {
 
+
+
     @Autowired
     private GroupPlaylistRepository playlistRepo;
 
@@ -24,6 +26,9 @@ public class GroupPlaylistController {
 
     @Autowired
     private UserRepository userRepository;
+
+
+
 /*
     @PostMapping("/users/{userId}/playlists")
     public ResponseEntity<String> createPlaylist(@RequestBody CreatePlaylistRequest playlistRequest) {
@@ -229,8 +234,8 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Get all songs in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}/songs")
-    public ResponseEntity<Set<Song>> getSongsInPlaylist(@PathVariable Long playlistId) {
+    @GetMapping("/users/{userId}/playlists/{playlistId}/songs")
+    public ResponseEntity<Set<Song>> getSongsInPlaylist(@PathVariable Long playlistId, @PathVariable String userId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -249,23 +254,23 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Get both users and songs in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}")
-    public ResponseEntity<Map<String, Object>> getPlaylistDetails(@PathVariable Long playlistId) {
-        Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
-        if (!playlistOpt.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-
-        GroupPlaylist playlist = playlistOpt.get();
-        Set<Song> songs = playlist.getSongs();
-        Set<User> users = playlist.getUsers();
-
-        Map<String, Object> details = new HashMap<>();
-        details.put("users", users);
-        details.put("songs", songs);
-
-        return ResponseEntity.ok(details);
-    }
+//    @GetMapping("/user/{userId}/playlists/{playlistId}")
+//    public ResponseEntity<Map<String, Object>> getPlaylistDetails(@PathVariable Long playlistId) {
+//        Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
+//        if (!playlistOpt.isPresent()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//
+//        GroupPlaylist playlist = playlistOpt.get();
+//        Set<Song> songs = playlist.getSongs();
+//        Set<User> users = playlist.getUsers();
+//
+//        Map<String, Object> details = new HashMap<>();
+//        details.put("users", users);
+//        details.put("songs", songs);
+//
+//        return ResponseEntity.ok(details);
+//    }
 
     // Method to get the currently logged-in user by ID
     private User getCurrentUserById(int userId) {

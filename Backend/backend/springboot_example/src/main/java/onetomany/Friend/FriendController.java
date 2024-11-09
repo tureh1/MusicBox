@@ -61,39 +61,54 @@ public class FriendController {
         User user = userOpt.get();
         String friendEmail = friendRequest.get("friendEmail");
 
-        // Prevent self-addition
+        // Prevent adding oneself
         if (user.getEmailId().equals(friendEmail)) {
             return ResponseEntity.badRequest().body("{\"error\": \"Cannot add yourself as a friend\"}");
         }
 
-        // Validate friend email
+        // Ensure friendEmail is provided
         if (friendEmail == null || friendEmail.trim().isEmpty()) {
             return ResponseEntity.badRequest().body("{\"error\": \"Friend email is required\"}");
         }
 
-        // Check if the friend entry already exists
+        // Check if a friend request already exists (user -> friend)
         Friend friendEntry = friendRepository.findByUserIdAndFriendEmail(userId, friendEmail);
-        if (friendEntry == null) {
-            friendEntry = new Friend(user, friendEmail, false);
-            friendRepository.save(friendEntry);
-        } else if (friendEntry.isAccepted()) {
+        if (friendEntry != null && friendEntry.isAccepted()) {
             return ResponseEntity.badRequest().body("{\"error\": \"Friend already exists\"}");
         }
 
-        // Check for mutual friend entry
+        // Check if there is a mutual friend request (friend -> user)
         User friendUser = userRepository.findByEmailId(friendEmail);
         if (friendUser != null) {
             Friend mutualEntry = friendRepository.findByUserIdAndFriendEmail(friendUser.getId(), user.getEmailId());
 
+            // If mutualEntry exists and is pending, accept both requests
             if (mutualEntry != null && !mutualEntry.isAccepted()) {
-                friendEntry.setAccepted(true);
+                // Accept the mutual request and the current request
+                if (friendEntry == null) {
+                    // Create a new friend entry for the current user
+                    friendEntry = new Friend(user, friendEmail, true);
+                } else {
+                    // If a request already exists but is pending, update it to accepted
+                    friendEntry.setAccepted(true);
+                }
+
+                // Accept the mutual entry
                 mutualEntry.setAccepted(true);
                 friendRepository.saveAll(List.of(friendEntry, mutualEntry));
-                return ResponseEntity.ok("{\"message\": \"Friend added and accepted\"}");
+
+                return ResponseEntity.ok("{\"message\": \"Friend request accepted and mutual friendship established\"}");
             }
         }
 
-        return ResponseEntity.ok("{\"message\": \"Friend request pending mutual acceptance\"}");
+        // Create a new pending friend request if no mutual entry exists
+        if (friendEntry == null) {
+            friendEntry = new Friend(user, friendEmail, false);
+            friendRepository.save(friendEntry);
+            return ResponseEntity.ok("{\"message\": \"Friend request pending mutual acceptance\"}");
+        }
+
+        return ResponseEntity.ok("{\"message\": \"Friend request already sent, waiting for mutual acceptance\"}");
     }
 
 
@@ -117,22 +132,29 @@ public class FriendController {
 
     @DeleteMapping(path = "/users/{userId}/friends/{friendEmail}")
     public ResponseEntity<String> deleteFriend(@PathVariable int userId, @PathVariable String friendEmail) {
-        // Check if the user exists
         Optional<User> userOpt = Optional.ofNullable(userRepository.findById(userId));
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
         }
 
         // Find the friend entry for the specified user and email
         Friend friend = friendRepository.findByUserIdAndFriendEmail(userId, friendEmail);
         if (friend != null) {
-            // Update isAccepted to false instead of deleting
-            friend.setAccepted(false);
-            friendRepository.save(friend);
+            // Remove the mutual friendship (on both sides) if it exists
+            User friendUser = userRepository.findByEmailId(friendEmail);
+            if (friendUser != null) {
+                Friend mutualFriend = friendRepository.findByUserIdAndFriendEmail(friendUser.getId(), userOpt.get().getEmailId());
+                if (mutualFriend != null) {
+                    friendRepository.delete(mutualFriend); // Delete the mutual friend entry
+                }
+            }
+
+            // Delete the friend entry for the user
+            friendRepository.delete(friend);
             return ResponseEntity.ok(success);
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure); // Friend not found
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure);
     }
 
 
