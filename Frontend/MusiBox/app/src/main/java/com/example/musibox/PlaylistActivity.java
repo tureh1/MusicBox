@@ -40,7 +40,6 @@ public class PlaylistActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
-
         // Retrieve userId from shared preferences
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         String email = sharedPreferences.getString("emailId", null); // Default to null if not found
@@ -90,17 +89,11 @@ public class PlaylistActivity extends AppCompatActivity {
     }
 
     private void fetchSongs() {
-
-        //String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
-        //String url = "http://10.90.72.167:8080/users/" + userId + "/playlists/songs";
+        // URL to fetch songs from
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         userId = sharedPreferences.getString("userId", userId);
         playlistId = getIntent().getIntExtra("playlistId", -1);
-
-        // Construct the URL with the retrieved userId and playlistId
-        String url = "http://10.90.72.167:8080/users/" + userId + "/playlists/" + playlistId + "/songs";
-
-            // Log the constructed URL to ensure it's correct
         Log.d("PlaylistActivity", "Fetching songs from URL: " + url);
 
         // Create a JsonArrayRequest to fetch songs from the backend
@@ -116,6 +109,7 @@ public class PlaylistActivity extends AppCompatActivity {
 
                         // Iterate through the array of songs
                         for (int i = 0; i < response.length(); i++) {
+
                             JSONObject songJson = response.getJSONObject(i);
 
                             // Get song details, ensuring null checks
@@ -123,7 +117,8 @@ public class PlaylistActivity extends AppCompatActivity {
                             String artist = songJson.optString("artist", "Unknown Artist");  // Default if null
 
                             // Create a new Song object and add it to the list
-                            Song song = new Song(title, artist);
+                            Song song = new Song( title, artist);
+
                             songList.add(song);
                         }
 
@@ -162,4 +157,8 @@ public class PlaylistActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
+
 }
+
+
+

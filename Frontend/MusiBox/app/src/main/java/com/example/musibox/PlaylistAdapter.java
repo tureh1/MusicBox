@@ -69,3 +69,4 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.SongVi
         notifyItemInserted(songList.size() - 1);
     }
 }
+
