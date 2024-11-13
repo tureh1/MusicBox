@@ -1,13 +1,12 @@
-package onetomany.Rating;
+package onetomany.Song;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
-import onetomany.Song.Song;
-import onetomany.Song.SongRepository;
-import onetomany.Song.SongSocket;
+import onetomany.Rating.Rating;
+import onetomany.Rating.RatingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,11 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Controller
-@ServerEndpoint("/rate/{email}/{songId}")
-public class RatingSocket {
+@ServerEndpoint("/rate/{email}")
+public class SongSocket {
 
     private static RatingRepository ratingRepository;
     private static SongRepository songRepository;
@@ -43,17 +41,19 @@ public class RatingSocket {
     // ObjectMapper for parsing JSON
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    // When the user connects, send the details of all songs
     @OnOpen
-    public void onOpen(Session session, @PathParam("email") String email, @PathParam("songId") int songId) {
+    public void onOpen(Session session, @PathParam("email") String email) {
         logger.info("User connected: " + email);
         sessionEmailMap.put(session, email);
 
-        // Send song details when the WebSocket connection is established
-        sendSongDetails(session, songId);
+        // Send details of all songs when the WebSocket connection is established
+        sendAllSongDetails(session);
     }
 
+    // When a message is received from the client (rating a song)
     @OnMessage
-    public void onMessage(Session session, @PathParam("songId") int songId, String message) throws IOException {
+    public void onMessage(Session session, @PathParam("email") String email, String message) throws IOException {
         logger.info("Message received: " + message);
 
         // Parse the incoming JSON message
@@ -76,17 +76,21 @@ public class RatingSocket {
 
         String userEmail = sessionEmailMap.get(session);
 
+        // Extract songId from the message
+        int songId = jsonMessage.get("songId").asInt();
+
         // Check if the user has already rated this song
         Optional<Rating> existingRating = ratingRepository.findByUserEmailAndSongId(userEmail, songId);
 
         if (existingRating.isPresent()) {
-            // If a rating exists, update it
-            Rating ratingToUpdate = existingRating.get();
-            ratingToUpdate.setRating(rating);
-            ratingRepository.save(ratingToUpdate);
+            // If a rating exists, delete the old rating and add a new one
+            ratingRepository.delete(existingRating.get()); // Delete the old rating
+            Rating newRating = new Rating(userEmail, songId, rating);
+            ratingRepository.save(newRating);
 
+            // Recalculate the average rating and broadcast the updated rating
             updateAverageRating(songId);
-            broadcastRatingUpdate(songId);
+            broadcastUpdatedSongList();
 
             sendMessageToUser(session, createJsonResponse("success", "Your rating has been updated successfully."));
         } else {
@@ -94,66 +98,68 @@ public class RatingSocket {
             Rating newRating = new Rating(userEmail, songId, rating);
             ratingRepository.save(newRating);
 
+            // Recalculate the average rating and broadcast the updated rating
             updateAverageRating(songId);
-            broadcastRatingUpdate(songId);
+            broadcastUpdatedSongList();
 
             sendMessageToUser(session, createJsonResponse("success", "Your rating has been submitted."));
         }
     }
 
-    // Send song details to the user
-    private void sendSongDetails(Session session, int songId) {
-        Song song = songRepository.findById(songId).orElse(null);
-        if (song != null) {
-            String songDetailsMessage = String.format(
-                    "{\"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f}",
-                    song.getTitle(), song.getArtist(), song.getAverageRating());
-            sendMessageToUser(session, songDetailsMessage);
+    // Send details of all songs to the user, including average ratings
+    private void sendAllSongDetails(Session session) {
+        List<Song> songs = songRepository.findAll();
+        if (songs.isEmpty()) {
+            sendMessageToUser(session, createJsonResponse("error", "No songs available."));
         } else {
-            sendMessageToUser(session, createJsonResponse("error", "Song not found."));
+            // Send each song's details, including the songId and its average rating
+            for (Song song : songs) {
+                String songDetailsMessage = String.format(
+                        "{\"id\": %d, \"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f}",
+                        song.getId(), song.getTitle(), song.getArtist(), song.getAverageRating());
+                sendMessageToUser(session, songDetailsMessage);
+            }
         }
     }
 
-    // Calculate and update the average rating of the song
+    // Calculate and update the average rating for a song
     private void updateAverageRating(int songId) {
         List<Rating> ratings = ratingRepository.findBySongId(songId);
         double average = ratings.stream().mapToInt(Rating::getRating).average().orElse(0);
 
         Song song = songRepository.findById(songId).orElse(null);
         if (song != null) {
-            song.setAverageRating(average);
+            song.setAverageRating(average);  // Update the song's average rating
             songRepository.save(song);
         }
     }
 
-    // Broadcast updated rating to all WebSocket connections
-    private void broadcastRatingUpdate(int songId) {
-        List<Session> sessions = sessionEmailMap.keySet().stream().collect(Collectors.toList());
-        sessions.forEach(session -> {
+    // Broadcast the updated list of songs to all connected users
+    private void broadcastUpdatedSongList() {
+        List<Song> songs = songRepository.findAll();
+        for (Session session : sessionEmailMap.keySet()) {
             try {
-                String averageRatingMessage = getAverageRatingMessage(songId);
-                session.getBasicRemote().sendText(averageRatingMessage);
+                // Send all song details to each user
+                for (Song song : songs) {
+                    String songDetailsMessage = String.format(
+                            "{\"id\": %d, \"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f}",
+                            song.getId(), song.getTitle(), song.getArtist(), song.getAverageRating());
+                    session.getBasicRemote().sendText(songDetailsMessage);
+                }
             } catch (IOException e) {
-                logger.error("Error broadcasting rating update: ", e);
+                logger.error("Error broadcasting song list update: ", e);
             }
-        });
-    }
-
-    // Generate the rating message
-    private String getAverageRatingMessage(int songId) {
-        Song song = songRepository.findById(songId).orElse(null);
-        if (song != null) {
-            return "Updated average rating for " + song.getTitle() + ": " + song.getAverageRating();
         }
-        return "Song not found.";
     }
 
+    // Close the WebSocket session when a user disconnects
     @OnClose
     public void onClose(Session session) {
         String email = sessionEmailMap.remove(session);
         logger.info("User disconnected: " + email);
     }
 
+    // Handle WebSocket errors
     @OnError
     public void onError(Session session, Throwable throwable) {
         logger.error("WebSocket error", throwable);

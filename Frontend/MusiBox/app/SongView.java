@@ -1,21 +1,18 @@
-package com.example.musibox;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-public class RatingView extends LinearLayout {
+import com.example.musibox.R;
 
+public class SongView {
     private TextView songNameTextView;
     private TextView artistNameTextView;
     private TextView averageRatingTextView;
     private RatingBar userRatingBar;
 
-    public RatingView(Context context) {
+    public SongView(Context context) {
         super(context);
         initialize(context);
     }
@@ -23,7 +20,7 @@ public class RatingView extends LinearLayout {
     // Inflate the layout and initialize views
     private void initialize(Context context) {
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(R.layout.activity_rating_view, this, true);
+        View view = inflater.inflate(R.layout.activity_playlist, this, true);
 
         songNameTextView = view.findViewById(R.id.album_name);
         artistNameTextView = view.findViewById(R.id.artist_name);
@@ -60,4 +57,6 @@ public class RatingView extends LinearLayout {
         // Update average rating or save to database
         System.out.println("User rating updated to: " + rating);
     }
+}
+
 }
