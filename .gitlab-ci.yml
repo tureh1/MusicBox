@@ -18,7 +18,7 @@ stages:
      - android_tag         					#this is LINK to the docker runner on the remote-server        
     before_script:
       - export GRADLE_USER_HOME=`pwd`/.gradle
-      - chmod +x .Frontend/MusiBox/gradlew		#change directory to where you have ‘gradlew’ in your android directory
+      - chmod +x Frontend/MusiBox/gradlew		#change directory to where you have ‘gradlew’ in your android directory
     script:
       - cd Frontend/MusiBox 					#change directory to where you have your android application
       - ./gradlew assemble
