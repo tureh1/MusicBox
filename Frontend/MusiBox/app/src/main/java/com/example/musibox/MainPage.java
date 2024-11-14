@@ -111,6 +111,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
     }
 
     // WebSocket initialization and lifecycle management
+
     private void initializeWebSocket() {
         if (userEmail != null && webSocketClient == null) {
             URI uri = URI.create("ws://coms-3090-048.class.las.iastate.edu:8080/rate/" + userEmail);
@@ -199,7 +200,6 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
             Log.e("WebSocket", "Error updating rating UI", e);
         }
     }
-
 
     // Fetch song data (this could trigger WebSocket activity or server calls)
     private void fetchSongData() {

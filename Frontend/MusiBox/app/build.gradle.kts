@@ -35,7 +35,6 @@ android {
 
 dependencies {
 
-
     implementation(libs.java.websocket)
     implementation(libs.volley)
     implementation(libs.appcompat)
@@ -44,8 +43,13 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.mediarouter)
     implementation(libs.recyclerview)
+    implementation(fileTree(mapOf(
+        "dir" to "C:\\Users\\baeme\\AppData\\Local\\Android\\Sdk\\platforms\\android-34",
+        "include" to listOf("*.aar", "*.jar"),
+    )))
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(libs.recyclerview)
+
 }
