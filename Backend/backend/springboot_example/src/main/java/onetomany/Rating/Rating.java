@@ -12,7 +12,7 @@ public class Rating {
     private Long id;
 
     @Column
-    private String userEmail; // User's email_changes
+    private String userEmail; // User's email_changes by tu
 
     @Column
     private int songId; // ID of the song being rated
