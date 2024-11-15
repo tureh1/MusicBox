@@ -7,12 +7,14 @@ public class Group {
     private String name;
     private List<String> members; // List of emails of members in the group
     private String groupName;
+    private long playlistId;
 
-    public Group(String id, String name, List<String> members, String groupName) {
+    public Group(String id, String name, List<String> members, String groupName,long playlistId) {
         this.id = id;
         this.name = name;
         this.members = members;
         this.groupName = groupName;
+        this.playlistId = playlistId;
     }
 
     public Group(String groupName) {
@@ -22,6 +24,10 @@ public class Group {
     // Getters and Setters
     public String getId() {
         return id;
+    }
+
+    public long getPlaylistId() {
+        return playlistId;
     }
 
     public void setId(String id) {

@@ -182,7 +182,7 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Add a user to an existing playlist
-    @PostMapping("/user/{userId}/playlists/{playlistId}/addUser")
+    @PostMapping("/users/{userId}/playlists/{playlistId}/addUser")
     public ResponseEntity<String> addUserToPlaylist(@PathVariable Long playlistId, @RequestBody Map<String, String> userRequest) {
         String userEmail = userRequest.get("userEmail");
 
@@ -216,7 +216,7 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Get all users in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}/users")
+    @GetMapping("/users/{userId}/playlists/{playlistId}/users")
     public ResponseEntity<Set<User>> getUsersInPlaylist(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -229,7 +229,7 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Get all songs in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}/songs")
+    @GetMapping("/users/{userId}/playlists/{playlistId}/songs")
     public ResponseEntity<Set<Song>> getSongsInPlaylist(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -242,14 +242,14 @@ public ResponseEntity<String> createPlaylist(
     }
 
     // Retrieve all group playlists along with their users and songs
-    @GetMapping
+    @GetMapping("/playlists")
     public ResponseEntity<List<GroupPlaylist>> getAllPlaylists() {
         List<GroupPlaylist> playlists = playlistRepo.findAll();
         return ResponseEntity.ok(playlists);
     }
 
     // Get both users and songs in the playlist
-    @GetMapping("/user/{userId}/playlists/{playlistId}")
+    @GetMapping("/users/{userId}/playlists/{playlistId}")
     public ResponseEntity<Map<String, Object>> getPlaylistDetails(@PathVariable Long playlistId) {
         Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
         if (!playlistOpt.isPresent()) {
@@ -337,4 +337,34 @@ public ResponseEntity<String> createPlaylist(
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Playlist or Song not found\"}");
     }
+
+    //User leaving and removing themselves the current user from a specific playlist
+    @DeleteMapping("/users/{userId}/playlists/{playlistId}/remove")
+    public ResponseEntity<String> removeUserFromPlaylist(@PathVariable int userId, @PathVariable Long playlistId) {
+        // Fetch the playlist
+        Optional<GroupPlaylist> playlistOpt = playlistRepo.findById(playlistId);
+        if (!playlistOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Playlist not found\"}");
+        }
+        GroupPlaylist playlist = playlistOpt.get();
+
+        // Fetch the user
+        User user = userRepository.findById(userId);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
+        }
+
+        // Check if the user is part of the playlist
+        if (!playlist.hasUser(user)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\": \"User not in the playlist\"}");
+        }
+
+        // Remove the user from the playlist and save
+        playlist.getUsers().remove(user);
+        playlistRepo.save(playlist);
+
+        return ResponseEntity.ok("{\"message\": \"User removed from playlist\"}");
+    }
+
+
 }

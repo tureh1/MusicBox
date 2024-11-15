@@ -1,10 +1,13 @@
 package onetomany.Rating;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import onetomany.Song.Song;
 import onetomany.Song.SongRepository;
+import onetomany.Song.SongSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,27 +38,39 @@ public class RatingSocket {
     }
 
     private static Map<Session, String> sessionEmailMap = new ConcurrentHashMap<>();
-    private final Logger logger = LoggerFactory.getLogger(RatingSocket.class);
+    private final Logger logger = LoggerFactory.getLogger(SongSocket.class);
+
+    // ObjectMapper for parsing JSON
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("email") String email) {
+    public void onOpen(Session session, @PathParam("email") String email, @PathParam("songId") int songId) {
         logger.info("User connected: " + email);
         sessionEmailMap.put(session, email);
+
+        // Send song details when the WebSocket connection is established
+        sendSongDetails(session, songId);
     }
 
     @OnMessage
     public void onMessage(Session session, @PathParam("songId") int songId, String message) throws IOException {
         logger.info("Message received: " + message);
+
+        // Parse the incoming JSON message
+        JsonNode jsonMessage = objectMapper.readTree(message);
         int rating;
-        try {
-            rating = Integer.parseInt(message.trim());
-        } catch (NumberFormatException e) {
-            sendMessageToUser(session, "Invalid rating format. Please send a number between 1 and 5.");
+
+        // Check if the rating field exists and is an integer
+        if (jsonMessage.has("rating")) {
+            rating = jsonMessage.get("rating").asInt();
+        } else {
+            sendMessageToUser(session, createJsonResponse("error", "Rating field is missing."));
             return;
         }
 
+        // Validate the rating
         if (rating < 1 || rating > 5) {
-            sendMessageToUser(session, "Rating must be between 1 and 5.");
+            sendMessageToUser(session, createJsonResponse("error", "Rating must be between 1 and 5."));
             return;
         }
 
@@ -73,7 +88,7 @@ public class RatingSocket {
             updateAverageRating(songId);
             broadcastRatingUpdate(songId);
 
-            sendMessageToUser(session, "Your rating has been updated successfully.");
+            sendMessageToUser(session, createJsonResponse("success", "Your rating has been updated successfully."));
         } else {
             // If no rating exists, add a new one
             Rating newRating = new Rating(userEmail, songId, rating);
@@ -82,7 +97,20 @@ public class RatingSocket {
             updateAverageRating(songId);
             broadcastRatingUpdate(songId);
 
-            sendMessageToUser(session, "Your rating has been submitted.");
+            sendMessageToUser(session, createJsonResponse("success", "Your rating has been submitted."));
+        }
+    }
+
+    // Send song details to the user
+    private void sendSongDetails(Session session, int songId) {
+        Song song = songRepository.findById(songId).orElse(null);
+        if (song != null) {
+            String songDetailsMessage = String.format(
+                    "{\"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f}",
+                    song.getTitle(), song.getArtist(), song.getAverageRating());
+            sendMessageToUser(session, songDetailsMessage);
+        } else {
+            sendMessageToUser(session, createJsonResponse("error", "Song not found."));
         }
     }
 
@@ -111,7 +139,6 @@ public class RatingSocket {
         });
     }
 
-
     // Generate the rating message
     private String getAverageRatingMessage(int songId) {
         Song song = songRepository.findById(songId).orElse(null);
@@ -139,5 +166,10 @@ public class RatingSocket {
         } catch (IOException e) {
             logger.error("Error sending message: " + e.getMessage());
         }
+    }
+
+    // Helper function to create a JSON response message
+    private String createJsonResponse(String status, String message) {
+        return String.format("{\"status\": \"%s\", \"message\": \"%s\"}", status, message);
     }
 }

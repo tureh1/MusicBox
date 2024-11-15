@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RatingRepository extends JpaRepository<Rating, Integer> {
-    Optional<Rating> findByUserEmailAndSongId(String userEmail, int songId);
-
+    Optional<Rating> findByUserEmailAndSongId(String email, int songId);
     List<Rating> findBySongId(int songId);
 
     // New query to calculate the average rating for a specific song
