@@ -60,7 +60,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         }
         userEmail = email;
 
-        // Initialize WebSocket when the activity starts
+        // Initialize WebSocket when the activity is created
         initializeWebSocket();
 
         // Initialize buttons and RecyclerView
