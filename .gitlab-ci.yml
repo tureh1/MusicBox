@@ -10,7 +10,7 @@ maven-build:
   tags:                 # to specify which runner to execute this job
     - springboot_tag    # change to your runner's tag
   script:               # what to execute for this job
-    - cd Backend        # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
+    - cd Backend/backend/springboot_example        # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
     - mvn package       # maven package
   artifacts:            # where to output the packaged jar file, change 'Backend' to to where you have the pom.xml
     paths:
@@ -26,7 +26,7 @@ maven-test:
   tags:
      - springboot_tag   # change to your runner's tag
   script:
-     - cd Backend       # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
+     - cd Backend/backend/springboot_example       # change 'Backend' to to where you have the pom.xml (do not add / in the beginning)
      - mvn test         # maven test
   only:
     refs:
@@ -56,9 +56,9 @@ android-build:
    - android_tag                    # change to your runner's tag
   before_script:                    # enable gradlew, change 'Frontend' to where you have 'gradlew'
     - export GRADLE_USER_HOME=`pwd`/.gradle
-    - chmod +x ./Musibox/gradlew
+    - chmod +x ./Frontend/Musibox/gradlew
   script:
-    - cd Musibox                   # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
+    - cd Frontend/Musibox                   # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
     - ./gradlew build               # gradle build
   only:
     refs:
@@ -73,9 +73,9 @@ android-test:
     - android_tag                   # change to your runner's tag
   before_script:                   # enable gradlew, change 'Frontend' to where you have 'gradlew'
      - export GRADLE_USER_HOME=`pwd`/.gradle
-     - chmod +x ./MusiBox/gradlew
+     - chmod +x ./Frontend/MusiBox/gradlew
   script:
-     - cd Musibox                  # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
+     - cd Frontend/Musibox                  # change 'Frontend' to where you have 'gradlew' (do not add / in the beginning)
      - ./gradlew test               # gradle test
   only:
     refs:
