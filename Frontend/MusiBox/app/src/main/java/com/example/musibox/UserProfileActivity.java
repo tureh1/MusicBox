@@ -1,5 +1,6 @@
 package com.example.musibox;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,8 +28,9 @@ public class UserProfileActivity extends AppCompatActivity {
     private TextView friendsCount;
     private Button saveBio, deleteBio;
     private String userId; // Added field for userId
-    private ImageButton house, addUserButton, messageButton, userButton;
+    private ImageButton house, addUserButton, messageButton, userButton,settingsButton;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,6 +45,7 @@ public class UserProfileActivity extends AppCompatActivity {
         addUserButton = findViewById(R.id.adduser);
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
+        settingsButton = findViewById(R.id.settings);
 
 
 
@@ -89,6 +92,7 @@ public class UserProfileActivity extends AppCompatActivity {
         addUserButton.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, CreateGroupActivity.class)));
         messageButton.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, UserProfileActivity.class)));
+        settingsButton.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, SettingsActivity.class)));
     }
 
     private void getBio(){
