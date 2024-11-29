@@ -18,6 +18,12 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * LoginActivity handles user authentication, including login and account deletion,
+ * and navigation to other activities like Sign Up and Forgot Password.
+ * This class utilizes the Volley library for network requests and SharedPreferences
+ * for storing user session data.
+ */
 public class LoginActivity extends AppCompatActivity {
     EditText email;
     EditText password;
@@ -27,6 +33,12 @@ public class LoginActivity extends AppCompatActivity {
     TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
 
+    /**
+     * Called when the activity is first created.
+     * Sets up UI components, initializes click listeners, and configures network requests.
+     *
+     * @param savedInstanceState If the activity is being reinitialized after previously being shut down, this Bundle contains the saved data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +91,11 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // Validation for login input
+    /**
+     * Validates the user input for login credentials.
+     *
+     * @return true if the input is valid, false otherwise.
+     */
     private boolean handleLogIn() {
         String usernameInput = email.getText().toString().trim();
         String passwordInput = password.getText().toString().trim();
@@ -95,7 +111,12 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    // Send login request to the backend
+    /**
+     * Sends a login request to the backend server.
+     *
+     * @param email    The user's email address.
+     * @param password The user's password.
+     */
     private void sendLogInRequest(String email, String password) {
         String url = "http://10.90.72.167:8080/login"; // Backend URL
 
@@ -149,7 +170,12 @@ public class LoginActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    // Store user data in SharedPreferences
+    /**
+     * Stores user session data in SharedPreferences.
+     *
+     * @param email  The user's email address.
+     * @param userId The user's unique ID.
+     */
     private void storeUserDataInSharedPreferences(String email, int userId) {
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -159,7 +185,11 @@ public class LoginActivity extends AppCompatActivity {
         editor.apply();  // Apply changes
     }
 
-    // Send delete request to the backend
+    /**
+     * Sends a delete request to the backend server to delete a user account.
+     *
+     * @param email The email of the user to be deleted.
+     */
     private void DeleteRequest(String email) {
         String url = "http://10.90.72.167:8080/users/" + email; // Email passed in the URL
 
@@ -191,7 +221,9 @@ public class LoginActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    // Clear SharedPreferences on logout
+    /**
+     * Logs out the user by clearing their session data from SharedPreferences.
+     */
     private void logoutUser() {
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
