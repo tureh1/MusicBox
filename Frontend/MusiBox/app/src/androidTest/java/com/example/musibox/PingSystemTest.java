@@ -84,8 +84,8 @@ public class PingSystemTest {
     @Test
     public void userProfileNavigation() {
         logIn();
-        // Navigate to MessageActivity
-        onView(withId(R.id.navigation_message)).perform(click());
+
+        onView(withId(R.id.navigation_user)).perform(click());
         // Click the home button
         onView(withId(R.id.user)).perform(click());
 
