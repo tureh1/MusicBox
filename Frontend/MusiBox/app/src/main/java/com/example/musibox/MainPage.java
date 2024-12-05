@@ -6,8 +6,11 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -38,7 +41,7 @@ import java.util.Map;
  */
 public class MainPage extends AppCompatActivity implements WebSocketListener, RatingAdapter.OnRatingChangeListener {
 
-    private ImageButton homeButton, addUserButton, messageButton, userButton;
+    private ImageButton homeButton, addUserButton, messageButton, userButton,mainMenu;
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
     private List<Song> songList = new ArrayList<>();
@@ -81,6 +84,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         messageButton = findViewById(R.id.navigation_message);
         userButton = findViewById(R.id.navigation_user);
         search_barAlbum = findViewById(R.id.search_barAlbum);
+        mainMenu = findViewById(R.id.options_menu);
+
+
+        // Set up the ImageButton to show the menu
+        mainMenu.setOnClickListener(view -> showPopupMenu(view));
 
         // Initialize RecyclerView
         recyclerView = findViewById(R.id.recyclerView);
@@ -93,6 +101,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         addUserButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, CreateGroupActivity.class)));
         messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
+
 
         // TextWatcher for search functionality
         search_barAlbum.addTextChangedListener(new TextWatcher() {
@@ -121,6 +130,37 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         // Fetch the song data initially
         fetchSongData();
     }
+
+    /**
+     * Displays a PopupMenu when the options menu button is clicked.
+     *
+     * @param anchorView The view to anchor the menu to.
+     */
+    private void showPopupMenu(View anchorView) {
+        PopupMenu popupMenu = new PopupMenu(this, anchorView);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_main, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                int itemId = menuItem.getItemId();
+                if (itemId == R.id.trivia) {
+                    Toast.makeText(getApplicationContext(), "Trivia selected", Toast.LENGTH_SHORT).show();
+                    Intent triviaIntent = new Intent(getApplicationContext(), TriviaActivity.class);
+                    startActivity(triviaIntent); // Start the trivia activity
+                    return true;
+                } else if (itemId == R.id.playlist) {
+                    Toast.makeText(getApplicationContext(), "Favorites selected", Toast.LENGTH_SHORT).show();
+                    // Add action for logout here
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        popupMenu.show();
+    }
+
 
     /**
      * Initializes the WebSocket connection for real-time updates.

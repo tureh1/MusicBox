@@ -1,9 +1,11 @@
 package com.example.musibox;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +25,7 @@ public class TriviaActivity extends AppCompatActivity{
 
     private TextView questionText, choice1, choice2, choice3, choice4, counterText;
     private Button nextButton;
+    private ImageButton backButton;
 
     private ArrayList<JSONObject> questionsList = new ArrayList<>();
     private int currentQuestionIndex = 0;
@@ -42,6 +45,7 @@ public class TriviaActivity extends AppCompatActivity{
         choice4 = findViewById(R.id.choice4);
         counterText = findViewById(R.id.counter);
         nextButton = findViewById(R.id.nextButton);
+        backButton = findViewById(R.id.backArrow);
 
         // Fetch questions
         fetchQuestions();
@@ -58,6 +62,11 @@ public class TriviaActivity extends AppCompatActivity{
         choice3.setOnClickListener(choiceClickListener);
         choice4.setOnClickListener(choiceClickListener);
 
+        backButton.setOnClickListener(view -> {
+            Intent pageIntent = new Intent(getApplicationContext(), MainPage.class);
+            startActivity(pageIntent); // Start the trivia activity
+
+        });
         // Next button click listener
         nextButton.setOnClickListener(v -> {
             if (answered) {

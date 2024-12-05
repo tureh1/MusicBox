@@ -53,8 +53,8 @@
             android:exported="true"/>
         <activity android:name=".PlaylistActivity"
             android:exported="true"/>
-
-
+        <activity android:name=".TriviaActivity"
+            android:exported="true"/>
 
         <activity
             android:name=".MessageActivity"

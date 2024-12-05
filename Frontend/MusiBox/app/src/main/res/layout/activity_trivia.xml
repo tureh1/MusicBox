@@ -17,14 +17,16 @@
         android:fontFamily="@font/jockeyone"
         android:paddingBottom="@dimen/cardview_default_radius"
         android:textColor="@color/white"/>
-    <ImageView
+    <ImageButton
         android:id="@+id/backArrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/back"
         android:clickable="true"
         android:focusable="true"
-        android:layout_marginEnd="10dp" />
+        android:layout_marginEnd="10dp"
+        android:background="@color/NavyBlue"
+        />
 
 
     <!-- Choices -->
