@@ -31,7 +31,7 @@ public class UserController {
 
     @GetMapping(path = "/users")
     List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findAll(); // Ensure this retrieves the correct data.
     }
 
     @PostMapping(path = "/signup")
@@ -107,5 +107,19 @@ public class UserController {
         userRepository.save(existingUser);
         return passwordChangeSuccess; // Password updated successfully
     }
-}
+
+
+
+
+        @DeleteMapping(path = "/users/reset")
+        public ResponseEntity<String> resetDatabase() {
+            try {
+                userRepository.deleteAll();
+                return ResponseEntity.ok("{\"message\":\"Database reset successfully\"}");
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("{\"message\":\"Failed to reset database\"}");
+            }
+        }
+    }
 

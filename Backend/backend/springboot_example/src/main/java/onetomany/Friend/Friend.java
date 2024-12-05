@@ -15,7 +15,7 @@ public class Friend {
     private String friendName;
     private String friendEmail;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // Add cascade here
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
     private User user;

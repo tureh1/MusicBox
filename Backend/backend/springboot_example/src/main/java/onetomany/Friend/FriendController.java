@@ -1,8 +1,14 @@
 package onetomany.Friend;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 
 import onetomany.Users.User;
@@ -26,6 +32,28 @@ public class FriendController {
     private String failure = "{\"message\":\"failure\"}";
 
     @PutMapping(path = "/users/{userId}/friends/email/{friendEmail}")
+    @Operation(
+            summary = "update friend details",
+            description = "update the name of a friend"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully updated friend",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "friend not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
     public ResponseEntity<String> updateFriendByEmail(@PathVariable int userId,
                                                       @PathVariable String friendEmail,
                                                       @RequestBody Friend updatedFriend) {
@@ -52,6 +80,28 @@ public class FriendController {
 
 
     @PostMapping("/users/{userId}/addFriend")
+    @Operation(
+            summary = "Add or accept a friend request",
+            description = "Adds a new friend or accepts a mutual friend request"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully added or accepted friend",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Invalid request",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
     public ResponseEntity<String> addFriend(@PathVariable int userId, @RequestBody Map<String, String> friendRequest) {
         Optional<User> userOpt = Optional.ofNullable(userRepository.findById(userId));
         if (!userOpt.isPresent()) {
@@ -113,7 +163,30 @@ public class FriendController {
 
 
 
+
     @GetMapping(path = "/users/{userId}/friends")
+    @Operation(
+            summary = "Get a user's friends",
+            description = "Fetches the friends of a user"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved friends",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "invalid id",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
     public List<Friend> getFriendsByUser(@PathVariable int userId) {
         Optional<User> user = Optional.ofNullable(userRepository.findById(userId));
         if (user.isPresent()) {
@@ -123,14 +196,29 @@ public class FriendController {
         return Collections.emptyList();
     }
 
-    @GetMapping("/test/friends")
-    public List<Friend> testFriends() {
-        User user = new User();
-        user.setId(1); // Set the user ID you want to test
-        return friendRepository.findByUser(user);
-    }
-
     @DeleteMapping(path = "/users/{userId}/friends/{friendEmail}")
+    @Operation(
+            summary = "Delete a user's friend",
+            description = "Deletes the friend of a user from both user and friend's friend list"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully deleted friend",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Invalid id",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
     public ResponseEntity<String> deleteFriend(@PathVariable int userId, @PathVariable String friendEmail) {
         Optional<User> userOpt = Optional.ofNullable(userRepository.findById(userId));
         if (userOpt.isEmpty()) {
@@ -156,6 +244,4 @@ public class FriendController {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure);
     }
-
-
 }
