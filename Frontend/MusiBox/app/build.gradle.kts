@@ -47,19 +47,13 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.mediarouter)
     implementation(libs.recyclerview)
-    implementation(libs.runner)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.rules)
     androidTestImplementation(libs.runner)
-    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.espresso.contrib)
     androidTestImplementation(libs.espresso.intents)
-
 
 
 }
