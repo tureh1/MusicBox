@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // Validate login inputs
+    // Validate login input
     private boolean validateInputs() {
         String emailInput = email.getText().toString().trim();
         String passwordInput = password.getText().toString().trim();
