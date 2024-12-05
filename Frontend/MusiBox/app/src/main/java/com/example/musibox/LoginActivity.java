@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Delete button click listener
+        // Delete button click listeners
         deleteButton.setOnClickListener(v -> {
             if (validateInputs()) {
                 sendDeleteRequest(email.getText().toString().trim());
