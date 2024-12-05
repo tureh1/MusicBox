@@ -18,32 +18,21 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * LoginActivity handles user authentication, including login and account deletion,
- * and navigation to other activities like Sign Up and Forgot Password.
- * This class utilizes the Volley library for network requests and SharedPreferences
- * for storing user session data.
- */
 public class LoginActivity extends AppCompatActivity {
-    EditText email;
-    EditText password;
-    Button loginButton;
-    Button deleteButton;
-    TextView forgotPassword;
-    TextView signUpLink;
+    private EditText email;
+    private EditText password;
+    private Button loginButton;
+    private Button deleteButton;
+    private TextView forgotPassword;
+    private TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
 
-    /**
-     * Called when the activity is first created.
-     * Sets up UI components, initializes click listeners, and configures network requests.
-     *
-     * @param savedInstanceState If the activity is being reinitialized after previously being shut down, this Bundle contains the saved data.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Initialize views
         email = findViewById(R.id.username);
         password = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginButton);
@@ -51,6 +40,11 @@ public class LoginActivity extends AppCompatActivity {
         forgotPassword = findViewById(R.id.forgotPassword);
         signUpLink = findViewById(R.id.signup);
 
+        // Set up listeners
+        setupListeners();
+    }
+
+    private void setupListeners() {
         // Forgot Password click listener
         forgotPassword.setOnClickListener(view -> {
             Intent intent = new Intent(LoginActivity.this, ForgotActivity.class);
@@ -74,33 +68,27 @@ public class LoginActivity extends AppCompatActivity {
         email.setOnFocusChangeListener(clearTextListener);
         password.setOnFocusChangeListener(clearTextListener);
 
-        RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();
-
         // Login button click listener
         loginButton.setOnClickListener(v -> {
-            if (handleLogIn()) {
+            if (validateInputs()) {
                 sendLogInRequest(email.getText().toString().trim(), password.getText().toString().trim());
             }
         });
 
         // Delete button click listener
         deleteButton.setOnClickListener(v -> {
-            if (handleLogIn()) {
-                DeleteRequest(email.getText().toString().trim());
+            if (validateInputs()) {
+                sendDeleteRequest(email.getText().toString().trim());
             }
         });
     }
 
-    /**
-     * Validates the user input for login credentials.
-     *
-     * @return true if the input is valid, false otherwise.
-     */
-    private boolean handleLogIn() {
-        String usernameInput = email.getText().toString().trim();
+    // Validate login inputs
+    private boolean validateInputs() {
+        String emailInput = email.getText().toString().trim();
         String passwordInput = password.getText().toString().trim();
 
-        if (usernameInput.isEmpty() || passwordInput.isEmpty()) {
+        if (emailInput.isEmpty() || passwordInput.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -111,16 +99,10 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    /**
-     * Sends a login request to the backend server.
-     *
-     * @param email    The user's email address.
-     * @param password The user's password.
-     */
+    // Send login request
     private void sendLogInRequest(String email, String password) {
-        String url = "http://10.90.72.167:8080/login"; // Backend URL
+        String url = "http://10.90.72.167:8080/login"; // Update URL as needed
 
-        // Create a JSON object with the email and password
         JSONObject requestData = new JSONObject();
         try {
             requestData.put("emailId", email);
@@ -129,110 +111,70 @@ public class LoginActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        // Create the JsonObjectRequest for the POST request
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,
                 response -> {
-                    // Handle the success response here
                     try {
                         String message = response.getString("message");
                         Log.d("LoginActivity", "Response message: " + message);
 
-                        // Check the message to determine if the login was successful
                         if (message.equalsIgnoreCase("login successful")) {
-                            int userId = response.getInt("userId"); // Retrieve user ID
-                            Log.d("LoginActivity", "User ID: " + userId);
+                            int userId = response.getInt("userId");
 
-                            // Store user data in SharedPreferences
                             storeUserDataInSharedPreferences(email, userId);
 
-                            Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "Welcome!", Toast.LENGTH_SHORT).show();
 
-                            // Start MainPage activity
                             Intent intent = new Intent(LoginActivity.this, MainPage.class);
-                            Log.d("LoginActivity", "Starting MainPage");
                             startActivity(intent);
-                            finish(); // Remove login activity from the back stack
+                            finish();
                         } else {
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
-
                     } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, "Unexpected response format", Toast.LENGTH_SHORT).show();
+                        Log.e("LoginActivity", "JSON Parsing error", e);
+                        Toast.makeText(LoginActivity.this, "Invalid response from server", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
-                    // Handle the error here
-                    Toast.makeText(LoginActivity.this, "Log in Failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("LoginActivity", "Login request error", error);
+                    Toast.makeText(LoginActivity.this, "Login failed. Please try again.", Toast.LENGTH_SHORT).show();
                 });
 
-        // Add the request to the Volley queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    /**
-     * Stores user session data in SharedPreferences.
-     *
-     * @param email  The user's email address.
-     * @param userId The user's unique ID.
-     */
+    private void sendDeleteRequest(String email) {
+        String url = "http://10.90.72.167:8080/users/" + email;
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
+                response -> {
+                    try {
+                        String message = response.getString("message");
+                        if ("success".equalsIgnoreCase(message)) {
+                            Toast.makeText(this, "User deleted successfully.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        Log.e("LoginActivity", "JSON Parsing error", e);
+                        Toast.makeText(this, "Unexpected response from server.", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e("LoginActivity", "Delete request error", error);
+                    Toast.makeText(this, "Delete failed. Please try again.", Toast.LENGTH_SHORT).show();
+                });
+
+        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+    }
+
+    // Store user data in SharedPreferences
     private void storeUserDataInSharedPreferences(String email, int userId) {
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("emailId", email); // Store email
-        editor.putInt("userId", userId);   // Store user ID
-        editor.putBoolean("isLoggedIn", true);  // Mark user as logged in
-        editor.apply();  // Apply changes
-    }
-
-    /**
-     * Sends a delete request to the backend server to delete a user account.
-     *
-     * @param email The email of the user to be deleted.
-     */
-    private void DeleteRequest(String email) {
-        String url = "http://10.90.72.167:8080/users/" + email; // Email passed in the URL
-
-        // Create the JsonObjectRequest for the DELETE request
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
-                response -> {
-                    // Handle the success response here
-                    try {
-                        String message = response.getString("message");
-                        Log.d("LoginActivity", "Delete Response message: " + message);
-
-                        // Check the message to determine if the delete was successful
-                        if (message.equals("success")) {
-                            Toast.makeText(LoginActivity.this, "User deleted successfully", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(LoginActivity.this, "Unexpected response format", Toast.LENGTH_SHORT).show();
-                    }
-                },
-                error -> {
-                    // Handle the error here
-                    Toast.makeText(LoginActivity.this, "Deletion failed: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-
-        // Add the request to the Volley queue
-        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
-    }
-
-    /**
-     * Logs out the user by clearing their session data from SharedPreferences.
-     */
-    private void logoutUser() {
-        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();  // This will remove all entries
-        editor.apply();  // Apply changes
-
-        // Optionally, redirect to login screen after logout
-        Intent intent = new Intent(LoginActivity.this, LoginActivity.class);
-        startActivity(intent);
-        finish();  // Close current activity
+        editor.putString("emailId", email);
+        editor.putInt("userId", userId);
+        editor.putBoolean("isLoggedIn", true);
+        editor.apply();
     }
 }
