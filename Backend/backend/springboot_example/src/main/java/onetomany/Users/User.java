@@ -15,6 +15,7 @@ public class User {
     private String emailId;
     private String password;
     private Boolean ifActive = true;
+    private Boolean isAdmin = false;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -32,6 +33,14 @@ public class User {
     }
 
     // =============================== Getters and Setters for each field ================================== //
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 
     public int getId() {
         return id;

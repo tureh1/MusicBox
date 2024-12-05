@@ -165,14 +165,18 @@ public class UserController {
 
         User existingUser = userRepository.findByEmailId(user.getEmailId());
         if (existingUser == null || !existingUser.getPassword().equals(user.getPassword())) {
-            // Email or password mismatch
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Invalid email or password\"}");
         }
 
-        // Login successful, return userId and success message
-        String successMessage = String.format("{\"message\":\"Login successful\", \"userId\": %d}", existingUser.getId());
+        String role = existingUser.getIsAdmin() ? "admin" : "user";
+        String successMessage = String.format(
+                "{\"message\":\"Login successful\", \"userId\": %d, \"role\": \"%s\"}",
+                existingUser.getId(),
+                role
+        );
         return ResponseEntity.ok(successMessage);
     }
+
 
 
     @DeleteMapping(path = "/users/{emailId}")
@@ -231,6 +235,60 @@ public class UserController {
                     )
             )
     })
+
+    @GetMapping("/admin/users")
+    public ResponseEntity<List<User>> getAllUsersForAdmin(@RequestHeader("role") String role) {
+        if (!"admin".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        return ResponseEntity.ok(userRepository.findAll());
+    }
+
+    @DeleteMapping("/admin/users/{id}")
+    public ResponseEntity<String> deleteUserByAdmin(@RequestHeader("role") String role, @PathVariable int id) {
+        if (!"admin".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\":\"Access denied\"}");
+        }
+
+        User user = userRepository.findById(id);
+        if (user != null) {
+            userRepository.delete(user);
+            return ResponseEntity.ok("{\"message\":\"User deleted successfully\"}");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}");
+    }
+
+    @PostMapping("/admin/create")
+    public ResponseEntity<String> createAdmin(@RequestHeader("role") String role, @RequestBody User adminRequest) {
+        if (!"admin".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\":\"Access denied\"}");
+        }
+
+        if (adminRequest == null || adminRequest.getEmailId() == null || adminRequest.getPassword() == null ||
+                adminRequest.getEmailId().trim().isEmpty() || adminRequest.getPassword().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Invalid input\"}");
+        }
+
+        // Check if an account with the provided email already exists
+        User existingUser = userRepository.findByEmailId(adminRequest.getEmailId());
+        if (existingUser != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"Email already registered\"}");
+        }
+
+        // Create a new admin user
+        User newAdmin = new User();
+        newAdmin.setEmailId(adminRequest.getEmailId());
+        newAdmin.setPassword(adminRequest.getPassword());
+        newAdmin.setIsAdmin(true); // Set admin status to true
+
+        // Save the admin to the database
+        userRepository.save(newAdmin);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("{\"message\":\"Admin created successfully\"}");
+    }
+
+
+
     public String updateUserPassword(@PathVariable String emailId, @RequestBody User.UpdatePasswordRequest updateRequest) {
         User existingUser = userRepository.findByEmailId(emailId);
         if (existingUser == null) {
