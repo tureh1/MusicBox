@@ -111,7 +111,7 @@ public class ProfileController {
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "201",
+                    responseCode = "200",
                     description = "Bio created successfully",
                     content = @Content(
                             mediaType = "application/json",
