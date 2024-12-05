@@ -32,6 +32,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * The ChatActivity class provides a chat interface where users can send and receive real-time messages
+ * with their friends using WebSocket and retrieve old chat messages from a REST API.
+ */
 public class ChatActivity extends AppCompatActivity {
     private String friendEmail;
     private String userEmail;
@@ -44,6 +48,13 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton backButton;
     private TextView friendName;
 
+    /**
+     * Called when the activity is first created.
+     * Initializes views, retrieves user and friend information, and sets up WebSocket and chat functionality.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
+     *                           this contains the data most recently supplied in {@link #onSaveInstanceState}.
+     */
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +97,9 @@ public class ChatActivity extends AppCompatActivity {
         setupButtons();
     }
 
+    /**
+     * Sets up a WebSocket connection for real-time messaging.
+     */
     private void setupWebSocket() {
         String wsUrl = "ws://10.90.72.167:8080/chat/" + userEmail + "/" + friendEmail;
         URI uri;
@@ -126,6 +140,9 @@ public class ChatActivity extends AppCompatActivity {
         webSocketClient.connect();
     }
 
+    /**
+     * Fetches old messages between the user and the friend from a REST API.
+     */
     private void fetchOldMessages() {
         String url = "http://10.90.72.167:8080/messages?email=" + userEmail + "&friendEmail=" + friendEmail;
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -160,11 +177,17 @@ public class ChatActivity extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
+    /**
+     * Sets up button click listeners for sending messages and navigating back.
+     */
     private void setupButtons() {
         sendButton.setOnClickListener(v -> sendMessage());
         backButton.setOnClickListener(v -> finish());
     }
 
+    /**
+     * Sends a message via WebSocket and updates the chat UI.
+     */
     private void sendMessage() {
         String message = messageInput.getText().toString();
         if (message.isEmpty()) {
@@ -189,6 +212,11 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Formats the current timestamp into a user-friendly string.
+     *
+     * @return A formatted timestamp string.
+     */
     private String formatCurrentTimestamp() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         return dateFormat.format(new Date());

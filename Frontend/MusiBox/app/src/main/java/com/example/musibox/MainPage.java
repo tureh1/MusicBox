@@ -31,6 +31,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The MainPage class represents the main activity in the MusiBox application.
+ * It includes functionality for managing songs, fetching data, and updating
+ * ratings via WebSocket and REST API calls.
+ */
 public class MainPage extends AppCompatActivity implements WebSocketListener, RatingAdapter.OnRatingChangeListener {
 
     private ImageButton homeButton, addUserButton, messageButton, userButton;
@@ -42,6 +47,13 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
     private String userEmail;
     private EditText search_barAlbum;
 
+    /**
+     * Called when the activity is first created. Sets up UI components,
+     * initializes WebSocket connection, and fetches song data.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after
+     *                           previously being shut down, this Bundle contains the most recent data.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,8 +122,9 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         fetchSongData();
     }
 
-    // WebSocket initialization and lifecycle management
-
+    /**
+     * Initializes the WebSocket connection for real-time updates.
+     */
     private void initializeWebSocket() {
         if (userEmail != null && webSocketClient == null) {
             URI uri = URI.create("ws://coms-3090-048.class.las.iastate.edu:8080/rate/" + userEmail);
@@ -150,7 +163,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         }
     }
 
-    // Search for songs by query
+    /**
+     * Searches for songs based on the user's query and updates the song list.
+     *
+     * @param query The search query entered by the user.
+     */
     private void searchForSong(String query) {
         String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs/search?query=" + query;
 
@@ -180,7 +197,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         Volley.newRequestQueue(this).add(jsonArrayRequest);
     }
 
-    // Update average rating in the UI when received from WebSocket
+    /**
+     * Updates the UI with the average rating for a song when a new rating is received.
+     *
+     * @param jsonMessage The JSON object containing the song ID and the updated average rating.
+     */
     private void updateAverageRatingUI(JSONObject jsonMessage) {
         try {
             int songId = jsonMessage.getInt("songId");
@@ -201,7 +222,9 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         }
     }
 
-    // Fetch song data (this could trigger WebSocket activity or server calls)
+    /**
+     * Fetches all songs from the server and updates the song list.
+     */
     private void fetchSongData() {
         String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
 
@@ -231,7 +254,12 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         Volley.newRequestQueue(this).add(jsonArrayRequest);
     }
 
-    // Handle rating changes and send them through WebSocket
+    /**
+     * Handles changes to the rating of a song and sends the updated rating to the server via WebSocket.
+     *
+     * @param songId The ID of the song being rated.
+     * @param rating The new rating given by the user.
+     */
     @Override
     public void onRatingChanged(int songId, int rating) {
         if (webSocketClient != null && webSocketClient.isOpen()) {
@@ -247,6 +275,9 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         }
     }
 
+    /**
+     * Closes the WebSocket connection when the activity is destroyed.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -255,6 +286,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         }
     }
 
+    /**
+     * Called when the WebSocket connection is successfully opened.
+     *
+     * @param handshakedata The handshake data received from the server.
+     */
     @Override
     public void onWebSocketOpen(ServerHandshake handshakedata) {
         // Called when the WebSocket connection is opened
@@ -262,6 +298,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         fetchSongData(); // Fetch data when the WebSocket connection is opened
     }
 
+    /**
+     * Called when a message is received from the WebSocket server.
+     *
+     * @param message The message received as a string.
+     */
     @Override
     public void onWebSocketMessage(String message) {
         // Called when a message is received from the server
@@ -277,6 +318,13 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         });
     }
 
+    /**
+     * Called when the WebSocket connection is closed.
+     *
+     * @param code   The status code of the closure.
+     * @param reason The reason for the closure.
+     * @param remote Whether the connection was closed remotely.
+     */
     @Override
     public void onWebSocketClose(int code, String reason, boolean remote) {
         // Called when the WebSocket connection is closed
@@ -287,6 +335,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         // initializeWebSocket(); // Uncomment if you want to automatically reconnect
     }
 
+    /**
+     * Called when an error occurs with the WebSocket connection.
+     *
+     * @param ex The exception representing the error.
+     */
     @Override
     public void onWebSocketError(Exception ex) {
         // Called when there's an error with the WebSocket connection

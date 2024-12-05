@@ -16,11 +16,22 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * The SignUp activity allows the user to create a new account by entering an email, password,
+ * and confirming the password. The activity validates the input and sends the data to a backend
+ * server for registration.
+ */
 public class SignUp extends AppCompatActivity {
 
     private EditText email, password, confirm;
 
 
+    /**
+     * Called when the activity is first created. Initializes the UI components and sets up
+     * the sign-up button click listener.
+     *
+     * @param savedInstanceState The saved instance state (if the activity is being recreated).
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +57,12 @@ public class SignUp extends AppCompatActivity {
 
     }
 
+    /**
+     * Validates the user input for the sign-up process. Checks that all fields are filled in,
+     * the password is at least 6 characters, and the passwords match.
+     *
+     * @return True if the input is valid, otherwise false.
+     */
     private boolean handleSignUp() {
         String usernameInput = email.getText().toString().trim();
         String passwordInput = password.getText().toString().trim();
@@ -68,6 +85,13 @@ public class SignUp extends AppCompatActivity {
     }
 
 
+    /**
+     * Sends the sign-up request to the backend server using a POST method. It sends the user's
+     * email and password as a JSON object.
+     *
+     * @param email    The user's email.
+     * @param password The user's password.
+     */
     private void sendSignUpRequest(String email, String password) {
         String url = "http://10.90.72.167:8080/signup";
 

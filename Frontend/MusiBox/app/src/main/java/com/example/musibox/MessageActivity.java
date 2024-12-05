@@ -24,6 +24,11 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import java.util.List;
 
+/**
+ * MessageActivity handles the messaging feature of the app, allowing users to interact with their friends,
+ * send friend requests, and view or delete friends. It also provides a search feature for users to find other users
+ * by email.
+ */
 public class MessageActivity extends AppCompatActivity implements MessageAdapter.OnMessageClickListener, UserAdapter.OnUserClickListener {
     private RecyclerView recyclerView;
     private MessageAdapter messageAdapter;
@@ -40,6 +45,12 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
     private UserAdapter userAdapter;
 
 
+    /**
+     * Initializes the activity, setting up the UI components, search bar functionality, and navigation buttons.
+     * It also fetches the user's email and user ID from shared preferences.
+     *
+     * @param savedInstanceState Saved instance state bundle.
+     */
     @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +126,9 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
 
     }
 
+    /**
+     * Initializes the views of the activity.
+     */
     private void initViews() {
         recyclerView = findViewById(R.id.recyclerView);
         searchBar = findViewById(R.id.search_bar);
@@ -126,6 +140,9 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
 
     }
 
+    /**
+     * Sets up the RecyclerView for displaying messages and users.
+     */
     private void setupRecyclerView() {
         messageList = new ArrayList<>();
         messageAdapter = new MessageAdapter(messageList, this);
@@ -137,6 +154,9 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         recyclerView.setAdapter(messageAdapter);
     }
 
+    /**
+     * Sets up the navigation buttons to allow users to navigate to different activities.
+     */
     private void setupNavigationButtons() {
         house.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, MainPage.class)));
         addUserButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, CreateGroupActivity.class)));
@@ -144,6 +164,11 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         userButton.setOnClickListener(v -> startActivity(new Intent(MessageActivity.this, UserProfileActivity.class)));
     }
 
+    /**
+     * Fetches users from the server that match the search query.
+     *
+     * @param query The search query.
+     */
     private void fetchUsers(String query) {
         String url = "http://10.90.72.167:8080/users";
 
@@ -186,11 +211,21 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
+    /**
+     * Handles the click event on a user, sending a friend request to the selected user.
+     *
+     * @param email The email of the selected user.
+     */
     @Override
     public void onUserClick(String email) {
         sendFriendEmailRequest(email);
     }
 
+    /**
+     * Sends a friend request to the specified email.
+     *
+     * @param email The email of the friend.
+     */
     private void sendFriendEmailRequest(String email) {
         int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1); // Provide a default value if not found
 
@@ -226,6 +261,9 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
+    /**
+     * Fetches the user's friends list from the server.
+     */
     private void fetchFriendsEmails() {
         int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
         if (userId == -1) {
@@ -241,6 +279,11 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
+    /**
+     * Handles the response for the user's friends list.
+     *
+     * @param response The response from the server containing the list of friends.
+     */
     private void handleFriendsResponse(JSONArray response) {
         try {
             messageList.clear();
@@ -261,6 +304,11 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         }
     }
 
+    /**
+     * Handles errors when fetching the user's friends list.
+     *
+     * @param error The error encountered during the network request.
+     */
     private void handleErrorResponse(Throwable error) {
         Log.e("MessageActivity", "Error: " + error.toString());
         Toast.makeText(this, "Failed to fetch friends: " + error.getMessage(), Toast.LENGTH_SHORT).show();

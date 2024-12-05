@@ -33,6 +33,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * This activity allows the user to create a new group by selecting users from a list. It also
+ * displays a list of groups that the user is part of. It handles the search functionality for
+ * finding users, as well as navigating to different parts of the app through buttons and performing
+ * network requests to fetch user and group data.
+ */
 public class CreateGroupActivity extends AppCompatActivity implements GroupAdapter.OnGroupClickListener, UserAdapter.OnUserClickListener {
     private static final String TAG = "CreateGroupActivity";
     private RecyclerView recyclerView;
@@ -47,6 +53,10 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     private Button createGroupButton;
     private ChipGroup chipGroup;
 
+    /**
+     * Initializes the activity, sets up views, and fetches the group data.
+     * @param savedInstanceState the saved instance state of the activity
+     */
     @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,6 +166,9 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         chipGroup = findViewById(R.id.selected_users_chip_group);
     }
 
+    /**
+     * Sets up the RecyclerViews for displaying groups and users.
+     */
     private void setupRecyclerView() {
         groupList = new ArrayList<>();
         groupAdapter = new GroupAdapter(groupList, this);
@@ -167,6 +180,10 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         recyclerView.setAdapter(groupAdapter);
     }
 
+    /**
+     * Sets up navigation buttons that navigate to different activities.
+     */
+
     private void setupNavigationButtons() {
         house.setOnClickListener(v -> startActivity(new Intent(CreateGroupActivity.this, MainPage.class)));
         addUserButton.setOnClickListener(v -> startActivity(new Intent(CreateGroupActivity.this, CreateGroupActivity.class)));
@@ -174,6 +191,10 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         userButton.setOnClickListener(v -> startActivity(new Intent(CreateGroupActivity.this, UserProfileActivity.class)));
     }
 
+    /**
+     * Fetches users based on the search query.
+     * @param query the search query entered by the user
+     */
     private void fetchUsers(String query) {
         int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
         if (userId == -1) {
@@ -212,6 +233,9 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
+    /**
+     * Creates a new group with the selected users.
+     */
     private void createGroup() {
         if (selectedUsers.isEmpty()) {
             Toast.makeText(this, "Please select at least one user", Toast.LENGTH_SHORT).show();
@@ -281,7 +305,9 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-
+    /**
+     * Fetches the groups that the current user is a member of.
+     */
     private void fetchGroups() {
         int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
         if (userId == -1) {
