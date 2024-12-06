@@ -94,7 +94,6 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
 
-        // TextWatcher for search functionality
         search_barAlbum.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
@@ -104,9 +103,10 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                 String query = charSequence.toString();
-                if (query.length() >= 0) {
-                    searchForSong(query);  // Fetch and display songs based on query
-                    fetchSongData();       // Fetch data to refresh the list
+                if (query.length() >= 1) {
+                    searchForSong(query);  // Only search when query length is > 1
+                } else {
+                    fetchSongData();       // Fetch all songs if query is empty
                 }
             }
 
@@ -117,6 +117,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                 }
             }
         });
+
 
         // Fetch the song data initially
         fetchSongData();
@@ -179,11 +180,12 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject songObject = response.getJSONObject(i);
                             int songId = songObject.getInt("id");
+                            String coverUrl = songObject.optString("cover", "");
                             String title = songObject.optString("title", "Unknown Song");
                             String artist = songObject.optString("artist", "Unknown Artist");
                             double avgRating = songObject.optDouble("averageRating", 0.0);
 
-                            Song song = new Song(songId, title, artist, avgRating);
+                            Song song = new Song(songId, title, artist, avgRating,coverUrl);
                             songList.add(song);
                         }
                         ratingAdapter.notifyDataSetChanged();
@@ -236,11 +238,12 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject songObject = response.getJSONObject(i);
                             int songId = songObject.getInt("id");
+                            String coverUrl = songObject.optString("cover", "");
                             String title = songObject.optString("title", "Unknown Song");
                             String artist = songObject.optString("artist", "Unknown Artist");
                             double avgRating = songObject.optDouble("averageRating", 0.0);
 
-                            Song song = new Song(songId, title, artist, avgRating);
+                            Song song = new Song(songId, title, artist, avgRating,coverUrl);
                             songList.add(song);
                         }
                         ratingAdapter.notifyDataSetChanged();

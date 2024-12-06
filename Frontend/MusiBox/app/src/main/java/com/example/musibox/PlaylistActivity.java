@@ -117,7 +117,7 @@ public class PlaylistActivity extends AppCompatActivity {
                             String artist = songJson.optString("artist", "Unknown Artist");  // Default if null
 
                             // Create a new Song object and add it to the list
-                            Song song = new Song( title, artist);
+                            Song song = new Song(title, artist);
 
                             songList.add(song);
                         }
