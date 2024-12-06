@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RatingAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">RatingAdapter.java</span></div><h1>RatingAdapter.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.RatingBar;
+import android.widget.TextView;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.List;
+
+public class RatingAdapter extends RecyclerView.Adapter&lt;RatingAdapter.ViewHolder&gt; {
+
+    private Context context;
+    private List&lt;Song&gt; songList;
+    private OnRatingChangeListener onRatingChangeListener;
+
+    // Constructor with the listener for song clicks and rating changes
+<span class="fc" id="L21">    public RatingAdapter(Context context, List&lt;Song&gt; songList, OnRatingChangeListener ratingChangeListener) {</span>
+<span class="fc" id="L22">        this.context = context;</span>
+<span class="fc" id="L23">        this.songList = songList;</span>
+<span class="fc" id="L24">        this.onRatingChangeListener = ratingChangeListener;</span>
+<span class="fc" id="L25">    }</span>
+
+    // Create view holder
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+<span class="fc" id="L30">        View view = LayoutInflater.from(context).inflate(R.layout.activity_rating_view, parent, false);</span>
+<span class="fc" id="L31">        return new ViewHolder(view);</span>
+    }
+
+    // Bind view holder with data
+    @SuppressLint(&quot;DefaultLocale&quot;)
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+<span class="fc" id="L38">        Song song = songList.get(position);</span>
+<span class="fc" id="L39">        double averageRating = song.getAverageRating();</span>
+<span class="fc" id="L40">        holder.titleTextView.setText(song.getTitle());</span>
+<span class="fc" id="L41">        holder.artistTextView.setText(song.getArtist());</span>
+<span class="fc" id="L42">        holder.averageRatingTextView.setText(String.format(&quot;Average Rating: %.1f&quot;, averageRating));</span>
+
+        // Set the user rating (not the average) to the RatingBar
+<span class="fc" id="L45">        holder.ratingBar.setRating(song.getUserRating()); // Bind user rating here</span>
+
+        // Set the listener for when the user changes the rating
+<span class="fc" id="L48">        holder.ratingBar.setOnRatingBarChangeListener((ratingBar, rating, fromUser) -&gt; {</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">            if (onRatingChangeListener != null) {</span>
+                // Update the user's rating and pass it to the listener
+<span class="nc" id="L51">                song.setUserRating(rating); // Update the Song model with the new user rating</span>
+<span class="nc" id="L52">                onRatingChangeListener.onRatingChanged(song.getId(), (int) rating);</span>
+            }
+<span class="nc" id="L54">        });</span>
+<span class="fc" id="L55">    }</span>
+
+    @Override
+    public int getItemCount() {
+<span class="fc" id="L59">        return songList.size();</span>
+    }
+
+    // Update the song list
+    public void updateSongList(List&lt;Song&gt; updatedList) {
+<span class="nc" id="L64">        songList = updatedList;</span>
+<span class="nc" id="L65">        notifyDataSetChanged();</span>
+<span class="nc" id="L66">    }</span>
+
+
+    // ViewHolder class
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView titleTextView, artistTextView, averageRatingTextView;
+        RatingBar ratingBar;
+
+        public ViewHolder(View itemView) {
+<span class="fc" id="L75">            super(itemView);</span>
+<span class="fc" id="L76">            titleTextView = itemView.findViewById(R.id.album_name);</span>
+<span class="fc" id="L77">            artistTextView = itemView.findViewById(R.id.artist_name);</span>
+<span class="fc" id="L78">            averageRatingTextView = itemView.findViewById(R.id.average_rating);</span>
+<span class="fc" id="L79">            ratingBar = itemView.findViewById(R.id.rating_bar);</span>
+<span class="fc" id="L80">        }</span>
+    }
+
+    // Define OnRatingChangeListener interface for rating changes
+    public interface OnRatingChangeListener {
+        void onRatingChanged(int songId, int rating);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>
