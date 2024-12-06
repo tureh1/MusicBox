@@ -5,6 +5,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,6 +53,18 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
                 onRatingChangeListener.onRatingChanged(song.getId(), (int) rating);
             }
         });
+        //Handle HeartButton
+        if(song.isHeartFilled()){
+            holder.heartButton.setImageResource(R.drawable.baseline_favorite_24); // Filled heart drawable
+        } else {
+            holder.heartButton.setImageResource(R.drawable.baseline_favorite_border_24); // Empty heart drawable
+        }
+
+        holder.heartButton.setOnClickListener(v -> {
+            song.setHeartFilled(!song.isHeartFilled()); // Toggle heart state
+            notifyItemChanged(position); // Refresh the specific item
+        });
+
     }
 
     @Override
@@ -70,6 +83,7 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView titleTextView, artistTextView, averageRatingTextView;
         RatingBar ratingBar;
+        ImageButton heartButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -77,6 +91,7 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
             artistTextView = itemView.findViewById(R.id.artist_name);
             averageRatingTextView = itemView.findViewById(R.id.average_rating);
             ratingBar = itemView.findViewById(R.id.rating_bar);
+            heartButton = itemView.findViewById(R.id.heartButton);
         }
     }
 

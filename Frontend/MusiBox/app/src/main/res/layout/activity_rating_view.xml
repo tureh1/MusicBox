@@ -56,4 +56,13 @@
         android:rating="0"
         android:stepSize="1" />
 
+    <ImageButton
+        android:id="@+id/heartButton"
+        android:layout_width="42dp"
+        android:layout_height="44dp"
+        android:layout_marginLeft="320dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:src="@drawable/baseline_favorite_border_24"
+
+        />
 </LinearLayout>

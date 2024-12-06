@@ -6,12 +6,14 @@ public class Song {
     private String artist;
     private double averageRating;
     private float userRating;  // Store user rating here
+    private boolean isHeartFilled;
 
     public Song(int id, String title, String artist, double averageRating) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.averageRating = averageRating;
+        this.isHeartFilled = false;
 
     }
 
@@ -55,5 +57,12 @@ public class Song {
         this.averageRating = averageRating;
     }
 
+    public boolean isHeartFilled() {
+        return isHeartFilled;
+    }
+
+    public void setHeartFilled(boolean heartFilled) {
+        isHeartFilled = heartFilled;
+    }
 
 }

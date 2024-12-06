@@ -1,5 +1,6 @@
 package com.example.musibox;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -41,7 +42,7 @@ import java.util.Map;
  */
 public class MainPage extends AppCompatActivity implements WebSocketListener, RatingAdapter.OnRatingChangeListener {
 
-    private ImageButton homeButton, addUserButton, messageButton, userButton,mainMenu;
+    private ImageButton homeButton, addUserButton, messageButton, userButton,mainMenu,heartButton;
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
     private List<Song> songList = new ArrayList<>();
@@ -49,6 +50,8 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
     private WebSocketClient webSocketClient;
     private String userEmail;
     private EditText search_barAlbum;
+    private boolean isHeartFilled = false;
+
 
     /**
      * Called when the activity is first created. Sets up UI components,
@@ -57,6 +60,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
      * @param savedInstanceState If the activity is being re-initialized after
      *                           previously being shut down, this Bundle contains the most recent data.
      */
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +89,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         userButton = findViewById(R.id.navigation_user);
         search_barAlbum = findViewById(R.id.search_barAlbum);
         mainMenu = findViewById(R.id.options_menu);
+        heartButton = findViewById(R.id.heartButton);
 
 
         // Set up the ImageButton to show the menu
@@ -160,6 +165,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
 
         popupMenu.show();
     }
+
 
 
     /**
