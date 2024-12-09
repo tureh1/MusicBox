@@ -1,6 +1,7 @@
 package com.example.musibox;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -234,7 +235,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
     }
 
     /**
-     * Creates a new group with the selected users.
+     * Creates a new group with the selected users and save id.
      */
     private void createGroup() {
         if (selectedUsers.isEmpty()) {
@@ -272,13 +273,19 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
 
         String url = "http://10.90.72.167:8080/users/" + userId + "/playlists"; // Adjust URL if needed
 
+
         // Make the POST request
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, groupData,
                 response -> {
                     try {
                         // Assuming your backend returns a "message" field with the status
                         String message = response.getString("message");
+
+
                         Toast.makeText(CreateGroupActivity.this, message, Toast.LENGTH_SHORT).show();
+                        JSONObject jsonResponse = new JSONObject(String.valueOf(response));
+
+
 
                         // After group creation, refresh the groups list
                         fetchGroups();  // This will reload the groups
@@ -295,6 +302,7 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
                         Log.e(TAG, "Failed to parse group creation response", e);
                         Toast.makeText(CreateGroupActivity.this, "Unexpected response from server", Toast.LENGTH_SHORT).show();
                     }
+
                 },
                 error -> {
                     Log.e(TAG, "Failed to create group: " + error.getMessage());
@@ -303,6 +311,16 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
 
         // Add request to the Volley request queue
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+    }
+
+    // Function to save the group ID using SharedPreferences
+    private void saveGroupId(Long groupId) {
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("playlistId", groupId);  // Save the group ID
+        editor.apply();  // Commit the changes
+        Intent intent = new Intent(CreateGroupActivity.this, PlaylistActivity.class);
+
     }
 
     /**
@@ -361,10 +379,17 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
 
     @Override
     public void onGroupClick(Group group) {
-        // Start PlaylistActivity when a group is clicked
+        // Get the saved playlistId from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", Context.MODE_PRIVATE);
+        long playlistId = sharedPreferences.getLong("playlistId", -1); // Default to -1 if not found
+
         Intent intent = new Intent(CreateGroupActivity.this, PlaylistActivity.class);
-        intent.putExtra("groupName", group.getName()); // Pass group name as an extra
+        intent.putExtra("groupName", group.getName());
         startActivity(intent);
+
+//
+
+
     }
 
     @Override

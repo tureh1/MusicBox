@@ -59,6 +59,9 @@
         <activity
             android:name=".MessageActivity"
             android:exported="true" />
+        <activity
+            android:name=".AddSongActivity"
+            android:exported="true" />
 
 
     </application>

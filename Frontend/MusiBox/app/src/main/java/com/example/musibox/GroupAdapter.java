@@ -13,10 +13,12 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     private final List<Group> groupList;
     private final OnGroupClickListener listener;
 
+
     // Define an interface for click events
     public interface OnGroupClickListener {
         void onGroupClick(Group group);
         void onGroupDelete(Group group); // Add method for deleting a group
+
     }
 
     public GroupAdapter(List<Group> groupList, OnGroupClickListener listener) {
@@ -35,6 +37,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     public void onBindViewHolder(@NonNull GroupViewHolder holder, int position) {
         Group group = groupList.get(position);
         holder.bind(group, listener);
+
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.example.musibox;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -42,7 +41,7 @@ import java.util.Map;
  */
 public class MainPage extends AppCompatActivity implements WebSocketListener, RatingAdapter.OnRatingChangeListener {
 
-    private ImageButton homeButton, addUserButton, messageButton, userButton,mainMenu,heartButton;
+    private ImageButton homeButton, addUserButton, messageButton, userButton,mainMenu;
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
     private List<Song> songList = new ArrayList<>();
@@ -50,8 +49,6 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
     private WebSocketClient webSocketClient;
     private String userEmail;
     private EditText search_barAlbum;
-    private boolean isHeartFilled = false;
-
 
     /**
      * Called when the activity is first created. Sets up UI components,
@@ -60,7 +57,6 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
      * @param savedInstanceState If the activity is being re-initialized after
      *                           previously being shut down, this Bundle contains the most recent data.
      */
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +78,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         // Initialize WebSocket when the activity starts
         initializeWebSocket();
 
+
         // Initialize buttons and RecyclerView
         homeButton = findViewById(R.id.navigation_home);
         addUserButton = findViewById(R.id.navigation_adduser);
@@ -89,11 +86,6 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         userButton = findViewById(R.id.navigation_user);
         search_barAlbum = findViewById(R.id.search_barAlbum);
         mainMenu = findViewById(R.id.options_menu);
-        heartButton = findViewById(R.id.heartButton);
-
-
-        // Set up the ImageButton to show the menu
-        mainMenu.setOnClickListener(view -> showPopupMenu(view));
 
         // Initialize RecyclerView
         recyclerView = findViewById(R.id.recyclerView);
@@ -107,8 +99,10 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
 
+        // Set up the ImageButton to show the menu
+        mainMenu.setOnClickListener(view -> showPopupMenu(view));
 
-        // TextWatcher for search functionality
+
         search_barAlbum.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
@@ -118,9 +112,10 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                 String query = charSequence.toString();
-                if (query.length() >= 0) {
-                    searchForSong(query);  // Fetch and display songs based on query
-                    fetchSongData();       // Fetch data to refresh the list
+                if (query.length() >= 1) {
+                    searchForSong(query);  // Only search when query length is > 1
+                } else {
+                    fetchSongData();       // Fetch all songs if query is empty
                 }
             }
 
@@ -131,6 +126,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                 }
             }
         });
+
 
         // Fetch the song data initially
         fetchSongData();
@@ -165,7 +161,6 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
 
         popupMenu.show();
     }
-
 
 
     /**
@@ -225,11 +220,12 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject songObject = response.getJSONObject(i);
                             int songId = songObject.getInt("id");
+                            String coverUrl = songObject.optString("cover", "");
                             String title = songObject.optString("title", "Unknown Song");
                             String artist = songObject.optString("artist", "Unknown Artist");
                             double avgRating = songObject.optDouble("averageRating", 0.0);
 
-                            Song song = new Song(songId, title, artist, avgRating);
+                            Song song = new Song(songId, title, artist, avgRating,coverUrl);
                             songList.add(song);
                         }
                         ratingAdapter.notifyDataSetChanged();
@@ -282,11 +278,12 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject songObject = response.getJSONObject(i);
                             int songId = songObject.getInt("id");
+                            String coverUrl = songObject.optString("cover", "");
                             String title = songObject.optString("title", "Unknown Song");
                             String artist = songObject.optString("artist", "Unknown Artist");
                             double avgRating = songObject.optDouble("averageRating", 0.0);
 
-                            Song song = new Song(songId, title, artist, avgRating);
+                            Song song = new Song(songId, title, artist, avgRating,coverUrl);
                             songList.add(song);
                         }
                         ratingAdapter.notifyDataSetChanged();
