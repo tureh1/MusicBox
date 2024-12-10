@@ -27,14 +27,6 @@
 
   <dependencies>
 
-    <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
-      <version>3.0.9</version> <!-- Latest stable version -->
-    </dependency>
-
-
-
     <!-- SpringDoc OpenAPI dependency -->
     <dependency>
       <groupId>org.springdoc</groupId>

@@ -75,6 +75,7 @@ public class ProfileController {
 
 
     // Get the bio of a user
+    // set a current user variable that stores the bio the same way in the group playlist
     @GetMapping("/users/{userId}/bio")
     @Operation(
             summary = "Get a user's bio",
