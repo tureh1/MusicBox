@@ -22,11 +22,13 @@ public class AddPlaylistAdapter extends RecyclerView.Adapter<AddPlaylistAdapter.
 
     private List<Song> songList;
     private Context context;
+    private OnSongAddListener onSongAddListener; // Declare listener
 
-    // Constructor
-    public AddPlaylistAdapter(List<Song> songList, Context context) {
+    // Constructor with listener
+    public AddPlaylistAdapter(List<Song> songList, Context context, OnSongAddListener onSongAddListener) {
         this.songList = songList;
         this.context = context;
+        this.onSongAddListener = onSongAddListener;
     }
 
     @NonNull
@@ -47,7 +49,10 @@ public class AddPlaylistAdapter extends RecyclerView.Adapter<AddPlaylistAdapter.
 
         // Handle the add button click
         holder.addButton.setOnClickListener(v -> {
-            // ((AddSongActivity) context).addSongToPlaylist(song);
+            if (onSongAddListener != null) {
+                notifyItemInserted(songList.size() - 1);
+                onSongAddListener.onSongAdd(song); // Add song to playlist
+            }
         });
 
         // Load the album cover
@@ -81,10 +86,9 @@ public class AddPlaylistAdapter extends RecyclerView.Adapter<AddPlaylistAdapter.
         }
     }
 
-    // Method to add a new song to the list
-    public void addSong(Song song) {
-        songList.add(song);
-        notifyItemInserted(songList.size() - 1);
+    // Interface to handle song add action
+    public interface OnSongAddListener {
+        void onSongAdd(Song song);
     }
 
     // Helper method to load images from a URL

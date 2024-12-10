@@ -90,11 +90,6 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.SongVi
         }
     }
 
-    // Method to add a new song
-    public void addSong(Song song) {
-        songList.add(song);
-        notifyItemInserted(songList.size() - 1);
-    }
 
 
     // Helper method to load images from a URL

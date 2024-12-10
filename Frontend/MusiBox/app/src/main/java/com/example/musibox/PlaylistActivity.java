@@ -1,5 +1,6 @@
 package com.example.musibox;
 
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -158,51 +159,6 @@ public class PlaylistActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
     }
 
-
-
-    // Fetch available songs to add to the playlist
-    private void fetchAvailableSongs(List<Song> availableSongs, SongAdapter songAdapter) {
-        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        availableSongs.clear(); // Clear the list before adding new items
-                        for (int i = 0; i < response.length(); i++) {
-                            JSONObject songJson = response.getJSONObject(i);
-                            int id = (int) songJson.optLong("id", -1);
-                            String title = songJson.optString("title", "Unknown Title");
-                            String artist = songJson.optString("artist", "Unknown Artist");
-                            String coverUrl = songJson.optString("cover", "");
-
-                            availableSongs.add(new Song(id, title, artist, coverUrl));
-                        }
-                        // Notify the adapter that the data has changed
-                        runOnUiThread(songAdapter::notifyDataSetChanged);
-                    } catch (JSONException e) {
-                        Log.e("PlaylistActivity", "Error fetching available songs", e);
-                        Toast.makeText(this, "Error fetching available songs", Toast.LENGTH_SHORT).show();
-                    }
-                },
-                error -> Toast.makeText(this, "Error fetching available songs", Toast.LENGTH_SHORT).show());
-
-        VolleySingleton.getInstance(this).addToRequestQueue(request);
-    }
-
-
-    // Add song to the playlist
-    private void addSongToPlaylist(int userId, long playlistId, long songId) {
-        String url = "http://coms-3090-048.class.las.iastate.edu:8080/users/" + userId +
-                "/playlists/" + playlistId + "/songs/" + songId;
-
-        StringRequest request = new StringRequest(Request.Method.POST, url,
-                response -> {
-                    Log.d("PlaylistActivity", "Song added successfully.");
-                    fetchSongs(userId, playlistId); // Refresh playlist
-                },
-                error -> Toast.makeText(this, "Failed to add song to playlist", Toast.LENGTH_SHORT).show());
-
-        VolleySingleton.getInstance(this).addToRequestQueue(request);
-    }
 
     public void removeSong(int userId, long playlistId, int songId) {
         String url = "http://coms-3090-048.class.las.iastate.edu:8080/users/" + userId +

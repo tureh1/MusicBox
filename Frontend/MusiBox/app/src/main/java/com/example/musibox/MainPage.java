@@ -152,7 +152,8 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                     return true;
                 } else if (itemId == R.id.playlist) {
                     Toast.makeText(getApplicationContext(), "Favorites selected", Toast.LENGTH_SHORT).show();
-                    // Add action for logout here
+                    Intent favoriteIntent = new Intent(getApplicationContext(), FavoriteActivity.class);
+                    startActivity(favoriteIntent); // Start the trivia activity
                     return true;
                 }
                 return false;
