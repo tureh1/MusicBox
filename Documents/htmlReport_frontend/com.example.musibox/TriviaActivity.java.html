@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TriviaActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">TriviaActivity.java</span></div><h1>TriviaActivity.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.util.ArrayList;
+import java.util.Collections;
+
+<span class="nc" id="L22">public class TriviaActivity extends AppCompatActivity{</span>
+
+    private TextView questionText, choice1, choice2, choice3, choice4, counterText;
+    private Button nextButton;
+
+<span class="nc" id="L27">    private ArrayList&lt;JSONObject&gt; questionsList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L28">    private int currentQuestionIndex = 0;</span>
+<span class="nc" id="L29">    private int correctAnswers = 0;</span>
+<span class="nc" id="L30">    private boolean answered = false;</span>
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="nc" id="L34">        super.onCreate(savedInstanceState);</span>
+<span class="nc" id="L35">        setContentView(R.layout.activity_trivia);</span>
+
+        // Initialize views
+<span class="nc" id="L38">        questionText = findViewById(R.id.question);</span>
+<span class="nc" id="L39">        choice1 = findViewById(R.id.choice1);</span>
+<span class="nc" id="L40">        choice2 = findViewById(R.id.choice2);</span>
+<span class="nc" id="L41">        choice3 = findViewById(R.id.choice3);</span>
+<span class="nc" id="L42">        choice4 = findViewById(R.id.choice4);</span>
+<span class="nc" id="L43">        counterText = findViewById(R.id.counter);</span>
+<span class="nc" id="L44">        nextButton = findViewById(R.id.nextButton);</span>
+
+        // Fetch questions
+<span class="nc" id="L47">        fetchQuestions();</span>
+
+        // Set click listeners for choices
+<span class="nc" id="L50">        View.OnClickListener choiceClickListener = view -&gt; {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">            if (!answered) {</span>
+<span class="nc" id="L52">                checkAnswer(((TextView) view).getText().toString());</span>
+<span class="nc" id="L53">                answered = true;</span>
+            }
+<span class="nc" id="L55">        };</span>
+<span class="nc" id="L56">        choice1.setOnClickListener(choiceClickListener);</span>
+<span class="nc" id="L57">        choice2.setOnClickListener(choiceClickListener);</span>
+<span class="nc" id="L58">        choice3.setOnClickListener(choiceClickListener);</span>
+<span class="nc" id="L59">        choice4.setOnClickListener(choiceClickListener);</span>
+
+        // Next button click listener
+<span class="nc" id="L62">        nextButton.setOnClickListener(v -&gt; {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (answered) {</span>
+<span class="nc" id="L64">                currentQuestionIndex++;</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                if (currentQuestionIndex &lt; questionsList.size()) {</span>
+<span class="nc" id="L66">                    displayQuestion();</span>
+                } else {
+<span class="nc" id="L68">                    showResults();</span>
+                }
+<span class="nc" id="L70">                answered = false;</span>
+            } else {
+<span class="nc" id="L72">                Toast.makeText(this, &quot;Please answer the question first!&quot;, Toast.LENGTH_SHORT).show();</span>
+            }
+<span class="nc" id="L74">        });</span>
+<span class="nc" id="L75">    }</span>
+
+    private void fetchQuestions() {
+<span class="nc" id="L78">        String url = &quot;https://opentdb.com/api.php?amount=5&amp;category=12&amp;type=multiple&quot;;</span>
+<span class="nc" id="L79">        RequestQueue queue = Volley.newRequestQueue(this);</span>
+
+<span class="nc" id="L81">        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,</span>
+                response -&gt; {
+                    try {
+<span class="nc" id="L84">                        JSONArray results = response.getJSONArray(&quot;results&quot;);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                        for (int i = 0; i &lt; results.length(); i++) {</span>
+<span class="nc" id="L86">                            questionsList.add(results.getJSONObject(i));</span>
+                        }
+<span class="nc" id="L88">                        displayQuestion();</span>
+<span class="nc" id="L89">                    } catch (JSONException e) {</span>
+<span class="nc" id="L90">                        e.printStackTrace();</span>
+<span class="nc" id="L91">                    }</span>
+<span class="nc" id="L92">                },</span>
+<span class="nc" id="L93">                error -&gt; Toast.makeText(this, &quot;Failed to fetch questions!&quot;, Toast.LENGTH_SHORT).show()</span>
+        );
+<span class="nc" id="L95">        queue.add(request);</span>
+<span class="nc" id="L96">    }</span>
+
+    private void displayQuestion() {
+        try {
+<span class="nc" id="L100">            JSONObject questionObj = questionsList.get(currentQuestionIndex);</span>
+<span class="nc" id="L101">            String question = questionObj.getString(&quot;question&quot;).replace(&quot;&amp;quot;&quot;, &quot;\&quot;&quot;).replace(&quot;&amp;#039;&quot;, &quot;'&quot;);</span>
+<span class="nc" id="L102">            String correctAnswer = questionObj.getString(&quot;correct_answer&quot;).replace(&quot;&amp;quot;&quot;, &quot;\&quot;&quot;).replace(&quot;&amp;#039;&quot;, &quot;'&quot;);</span>
+<span class="nc" id="L103">            JSONArray incorrectAnswers = questionObj.getJSONArray(&quot;incorrect_answers&quot;);</span>
+
+<span class="nc" id="L105">            ArrayList&lt;String&gt; allAnswers = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L106">            allAnswers.add(correctAnswer);</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            for (int i = 0; i &lt; incorrectAnswers.length(); i++) {</span>
+<span class="nc" id="L108">                allAnswers.add(incorrectAnswers.getString(i).replace(&quot;&amp;quot;&quot;, &quot;\&quot;&quot;).replace(&quot;&amp;#039;&quot;, &quot;'&quot;));</span>
+            }
+<span class="nc" id="L110">            Collections.shuffle(allAnswers);</span>
+
+            // Update views
+<span class="nc" id="L113">            questionText.setText(question);</span>
+<span class="nc" id="L114">            choice1.setText(allAnswers.get(0));</span>
+<span class="nc" id="L115">            choice2.setText(allAnswers.get(1));</span>
+<span class="nc" id="L116">            choice3.setText(allAnswers.get(2));</span>
+<span class="nc" id="L117">            choice4.setText(allAnswers.get(3));</span>
+<span class="nc" id="L118">            counterText.setText((currentQuestionIndex + 1) + &quot;/5&quot;);</span>
+
+            // Reset choice colors
+<span class="nc" id="L121">            choice1.setBackgroundColor(getResources().getColor(R.color.BabyBlue));</span>
+<span class="nc" id="L122">            choice2.setBackgroundColor(getResources().getColor(R.color.BabyBlue));</span>
+<span class="nc" id="L123">            choice3.setBackgroundColor(getResources().getColor(R.color.BabyBlue));</span>
+<span class="nc" id="L124">            choice4.setBackgroundColor(getResources().getColor(R.color.BabyBlue));</span>
+<span class="nc" id="L125">        } catch (JSONException e) {</span>
+<span class="nc" id="L126">            e.printStackTrace();</span>
+<span class="nc" id="L127">        }</span>
+<span class="nc" id="L128">    }</span>
+
+    private void checkAnswer(String selectedAnswer) {
+        try {
+<span class="nc" id="L132">            String correctAnswer = questionsList.get(currentQuestionIndex).getString(&quot;correct_answer&quot;)</span>
+<span class="nc" id="L133">                    .replace(&quot;&amp;quot;&quot;, &quot;\&quot;&quot;).replace(&quot;&amp;#039;&quot;, &quot;'&quot;);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            if (selectedAnswer.equals(correctAnswer)) {</span>
+<span class="nc" id="L135">                correctAnswers++;</span>
+<span class="nc" id="L136">                Toast.makeText(this, &quot;Correct!&quot;, Toast.LENGTH_SHORT).show();</span>
+            } else {
+<span class="nc" id="L138">                Toast.makeText(this, &quot;Wrong! Correct answer: &quot; + correctAnswer, Toast.LENGTH_SHORT).show();</span>
+            }
+<span class="nc" id="L140">        } catch (JSONException e) {</span>
+<span class="nc" id="L141">            e.printStackTrace();</span>
+<span class="nc" id="L142">        }</span>
+<span class="nc" id="L143">    }</span>
+
+    private void showResults() {
+<span class="nc" id="L146">        AlertDialog.Builder builder = new AlertDialog.Builder(this);</span>
+<span class="nc" id="L147">        builder.setTitle(&quot;Trivia Results&quot;);</span>
+<span class="nc" id="L148">        builder.setMessage(&quot;You got &quot; + correctAnswers + &quot; out of 5 correct!&quot;);</span>
+<span class="nc" id="L149">        builder.setPositiveButton(&quot;Try Again&quot;, (dialog, which) -&gt; {</span>
+<span class="nc" id="L150">            currentQuestionIndex = 0;</span>
+<span class="nc" id="L151">            correctAnswers = 0;</span>
+<span class="nc" id="L152">            fetchQuestions();</span>
+<span class="nc" id="L153">        });</span>
+<span class="nc" id="L154">        builder.setNegativeButton(&quot;Exit&quot;, (dialog, which) -&gt; finish());</span>
+<span class="nc" id="L155">        builder.show();</span>
+<span class="nc" id="L156">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>

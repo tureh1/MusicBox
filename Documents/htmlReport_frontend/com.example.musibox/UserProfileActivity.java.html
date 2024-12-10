@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserProfileActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">UserProfileActivity.java</span></div><h1>UserProfileActivity.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+<span class="fc" id="L26">public class UserProfileActivity extends AppCompatActivity {</span>
+    private EditText bioProfile;
+    private TextView friendsCount;
+    private Button saveBio, deleteBio;
+    private String userId; // Added field for userId
+    private ImageButton house, addUserButton, messageButton, userButton,settingsButton;
+
+    @SuppressLint(&quot;MissingInflatedId&quot;)
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L36">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L37">        setContentView(R.layout.activity_profile);</span>
+
+<span class="fc" id="L39">        TextView usernameProfile = findViewById(R.id.username_profile);</span>
+<span class="fc" id="L40">        bioProfile = findViewById(R.id.bio_profile);</span>
+<span class="fc" id="L41">        saveBio = findViewById(R.id.save_bio_text);</span>
+<span class="fc" id="L42">        deleteBio = findViewById(R.id.delete_bio_text);</span>
+<span class="fc" id="L43">        friendsCount = findViewById(R.id.friends_count);</span>
+<span class="fc" id="L44">        house = findViewById(R.id.home);</span>
+<span class="fc" id="L45">        addUserButton = findViewById(R.id.adduser);</span>
+<span class="fc" id="L46">        messageButton = findViewById(R.id.message);</span>
+<span class="fc" id="L47">        userButton = findViewById(R.id.user);</span>
+<span class="fc" id="L48">        settingsButton = findViewById(R.id.settings);</span>
+
+
+
+<span class="fc" id="L52">        Intent intent = getIntent();</span>
+<span class="fc" id="L53">        String email = intent.getStringExtra(&quot;emailId&quot;);</span>
+<span class="fc" id="L54">        userId = intent.getStringExtra(&quot;userId&quot;);</span>
+<span class="fc" id="L55">        setupNavigationButtons();</span>
+        // Initialize the Volley request queue
+<span class="fc" id="L57">        RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();</span>
+
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (email != null) {</span>
+<span class="nc" id="L60">            usernameProfile.setText(email);</span>
+        } else {
+<span class="fc" id="L62">            usernameProfile.setText(&quot;No email provided&quot;);</span>
+        }
+
+<span class="fc" id="L65">        getBio();</span>
+
+
+
+<span class="fc" id="L69">        saveBio.setOnClickListener(new View.OnClickListener() {</span>
+            @Override
+            public void onClick(View view) {
+<span class="nc" id="L72">                String bioText = bioProfile.getText().toString().trim(); // Get bio text</span>
+<span class="nc" id="L73">                saveBio(bioText);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                if (!bioText.isEmpty()) {</span>
+                    // Call saveBio to send the POST request with bio text
+<span class="nc" id="L76">                    saveBio(bioText);</span>
+                }
+<span class="nc" id="L78">            }</span>
+        });
+
+<span class="fc" id="L81">        deleteBio.setOnClickListener(new View.OnClickListener() {</span>
+            @Override
+            public void onClick(View view) {
+<span class="nc" id="L84">                deleteBio();</span>
+<span class="nc" id="L85">            }</span>
+        });
+
+
+<span class="fc" id="L89">    }</span>
+    private void setupNavigationButtons() {
+<span class="pc" id="L91">        house.setOnClickListener(v -&gt; startActivity(new Intent(UserProfileActivity.this, MainPage.class)));</span>
+<span class="pc" id="L92">        addUserButton.setOnClickListener(v -&gt; startActivity(new Intent(UserProfileActivity.this, CreateGroupActivity.class)));</span>
+<span class="pc" id="L93">        messageButton.setOnClickListener(v -&gt; startActivity(new Intent(UserProfileActivity.this, MessageActivity.class)));</span>
+<span class="fc" id="L94">        userButton.setOnClickListener(v -&gt; startActivity(new Intent(UserProfileActivity.this, UserProfileActivity.class)));</span>
+<span class="pc" id="L95">        settingsButton.setOnClickListener(v -&gt; startActivity(new Intent(UserProfileActivity.this, SettingsActivity.class)));</span>
+<span class="fc" id="L96">    }</span>
+
+    private void getBio(){
+<span class="fc" id="L99">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/bio&quot;;</span>
+        //String url = &quot;http://10.90.72.167:8080/users/6/bio&quot;;
+
+        // Create a GET request with Volley
+<span class="fc" id="L103">        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,</span>
+                response -&gt; {
+                    // Parse the bio from the JSON response and set it to bioProfile
+                    try {
+<span class="nc" id="L107">                        String bioText = response.getString(&quot;bio&quot;); // Assuming the response has a &quot;bio&quot; field</span>
+<span class="nc" id="L108">                        bioProfile.setText(bioText); // Set the bio to the EditText</span>
+<span class="nc" id="L109">                    } catch (JSONException e) {</span>
+<span class="nc" id="L110">                        e.printStackTrace();</span>
+<span class="nc" id="L111">                        Toast.makeText(UserProfileActivity.this, &quot;Error parsing bio&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L112">                    }</span>
+<span class="nc" id="L113">                },</span>
+                error -&gt; {
+                    // Handle error response
+<span class="fc" id="L116">                    String errorMessage = &quot;Failed to fetch bio: &quot; + error.getMessage();</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                    if (error.networkResponse != null) {</span>
+<span class="fc" id="L118">                        errorMessage += &quot;\nResponse Code: &quot; + error.networkResponse.statusCode</span>
+                                + &quot;\nResponse Data: &quot; + new String(error.networkResponse.data);
+                    }
+<span class="fc" id="L121">                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();</span>
+<span class="fc" id="L122">                });</span>
+
+        // Add the request to the Volley queue
+<span class="fc" id="L125">        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);</span>
+<span class="fc" id="L126">    }</span>
+
+    private void saveBio(String bioText) {
+<span class="nc" id="L129">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/bio&quot;;</span>
+
+<span class="nc" id="L131">        JSONObject jsonBody = new JSONObject();</span>
+        try {
+<span class="nc" id="L133">            jsonBody.put(&quot;bio&quot;, bioText);  // Add bio text to JSON object</span>
+<span class="nc" id="L134">        } catch (JSONException e) {</span>
+<span class="nc" id="L135">            e.printStackTrace();</span>
+<span class="nc" id="L136">            return;</span>
+<span class="nc" id="L137">        }</span>
+
+<span class="nc" id="L139">        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, url, jsonBody,</span>
+                response -&gt; {
+                    // Handle the successful response
+<span class="nc" id="L142">                    Toast.makeText(UserProfileActivity.this, &quot;Bio updated successfully!&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L143">                    bioProfile.setText(bioText);</span>
+<span class="nc" id="L144">                },</span>
+                error -&gt; {
+                    // Handle error response
+<span class="nc" id="L147">                    String errorMessage = &quot;Failed to update bio: &quot; + error.getMessage();</span>
+<span class="nc" id="L148">                    Log.e(&quot;UserProfileActivity&quot;, errorMessage);  // Log the error for debugging</span>
+<span class="nc" id="L149">                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();</span>
+<span class="nc" id="L150">                }) {</span>
+            @Override
+            public Map&lt;String, String&gt; getHeaders() {
+<span class="nc" id="L153">                Map&lt;String, String&gt; headers = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L154">                headers.put(&quot;Content-Type&quot;, &quot;application/json&quot;);  // Set the Content-Type header</span>
+<span class="nc" id="L155">                return headers;</span>
+            }
+        };
+
+        // Add the request to the Volley queue
+<span class="nc" id="L160">        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);</span>
+        // Add the request to the Volley queue
+
+<span class="nc" id="L163">    }</span>
+    private void deleteBio() {
+
+<span class="nc" id="L166">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/bio&quot;;</span>
+
+        // Create a DELETE request with Volley
+<span class="nc" id="L169">        StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,</span>
+                response -&gt; {
+                    // Handle successful response
+<span class="nc" id="L172">                    bioProfile.setText(&quot;&quot;); // Clear the EditText after deletion</span>
+<span class="nc" id="L173">                    Toast.makeText(UserProfileActivity.this, &quot;Successfully deleted&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L174">                },</span>
+                error -&gt; {
+                    // Handle error response
+<span class="nc bnc" id="L177" title="All 2 branches missed.">                    String errorMessage = &quot;Failed to delete bio: &quot; + (error.getMessage() != null ? error.getMessage() : &quot;Unknown error&quot;);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">                    if (error.networkResponse != null) {</span>
+<span class="nc" id="L179">                        errorMessage += &quot;\nResponse Code: &quot; + error.networkResponse.statusCode</span>
+                                + &quot;\nResponse Data: &quot; + new String(error.networkResponse.data);
+                    }
+<span class="nc" id="L182">                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();</span>
+<span class="nc" id="L183">                });</span>
+
+        // Add the request to the Volley queue
+<span class="nc" id="L186">        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);</span>
+<span class="nc" id="L187">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>

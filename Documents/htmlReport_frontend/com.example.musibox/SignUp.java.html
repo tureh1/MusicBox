@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SignUp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">SignUp.java</span></div><h1>SignUp.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+/**
+ * The SignUp activity allows the user to create a new account by entering an email, password,
+ * and confirming the password. The activity validates the input and sends the data to a backend
+ * server for registration.
+ */
+<span class="fc" id="L24">public class SignUp extends AppCompatActivity {</span>
+
+    private EditText email, password, confirm;
+
+
+    /**
+     * Called when the activity is first created. Initializes the UI components and sets up
+     * the sign-up button click listener.
+     *
+     * @param savedInstanceState The saved instance state (if the activity is being recreated).
+     */
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L37">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L38">        setContentView(R.layout.activity_signup);</span>
+
+<span class="fc" id="L40">        email = findViewById(R.id.email);</span>
+<span class="fc" id="L41">        password = findViewById(R.id.password);</span>
+<span class="fc" id="L42">        confirm = findViewById(R.id.confirm);</span>
+<span class="fc" id="L43">        Button signUpButton = findViewById(R.id.SignUpButton);</span>
+
+        // Initialize the Volley request queue
+<span class="fc" id="L46">        RequestQueue requestQueue = VolleySingleton.getInstance(this).getRequestQueue();</span>
+
+<span class="fc" id="L48">        signUpButton.setOnClickListener(new View.OnClickListener() {</span>
+            @Override
+            public void onClick(View v) {
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">                if (handleSignUp()) {</span>
+                    // Send email and password to the backend
+<span class="fc" id="L53">                    sendSignUpRequest(email.getText().toString().trim(), password.getText().toString().trim());</span>
+                }
+<span class="fc" id="L55">            }</span>
+        });
+
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * Validates the user input for the sign-up process. Checks that all fields are filled in,
+     * the password is at least 6 characters, and the passwords match.
+     *
+     * @return True if the input is valid, otherwise false.
+     */
+    private boolean handleSignUp() {
+<span class="fc" id="L67">        String usernameInput = email.getText().toString().trim();</span>
+<span class="fc" id="L68">        String passwordInput = password.getText().toString().trim();</span>
+<span class="fc" id="L69">        String confirmInput = confirm.getText().toString().trim();</span>
+
+<span class="pc bpc" id="L71" title="3 of 6 branches missed.">        if (usernameInput.isEmpty() || passwordInput.isEmpty() || confirmInput.isEmpty()) {</span>
+<span class="nc" id="L72">            Toast.makeText(this, &quot;Please fill in all fields&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L73">            return false;</span>
+        }
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (passwordInput.length() &lt; 6) {</span>
+<span class="nc" id="L76">            Toast.makeText(this, &quot;Password must be at least 6 characters.&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L77">            return false;</span>
+        }
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (!passwordInput.equals(confirmInput)) {</span>
+<span class="nc" id="L80">            Toast.makeText(this, &quot;Passwords do not match&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L81">            return false;</span>
+        }
+
+<span class="fc" id="L84">        return true;</span>
+    }
+
+
+    /**
+     * Sends the sign-up request to the backend server using a POST method. It sends the user's
+     * email and password as a JSON object.
+     *
+     * @param email    The user's email.
+     * @param password The user's password.
+     */
+    private void sendSignUpRequest(String email, String password) {
+<span class="fc" id="L96">        String url = &quot;http://10.90.72.167:8080/signup&quot;;</span>
+
+        // Create a JSON object with the email and password
+<span class="fc" id="L99">        JSONObject requestData = new JSONObject();</span>
+        try {
+<span class="fc" id="L101">            requestData.put(&quot;emailId&quot;, email);</span>
+<span class="fc" id="L102">            requestData.put(&quot;password&quot;, password);</span>
+<span class="nc" id="L103">        } catch (JSONException e) {</span>
+<span class="nc" id="L104">            e.printStackTrace();</span>
+<span class="fc" id="L105">        }</span>
+
+        // Create the JsonObjectRequest for the POST request
+<span class="fc" id="L108">        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,</span>
+                response -&gt; {
+                    // Handle the success response here
+                    try {
+<span class="fc" id="L112">                        String message = response.getString(&quot;message&quot;);</span>
+
+                        // Check the message to determine if the signup was successful
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">                        if (message.equals(&quot;signup successfully&quot;)) {</span>
+<span class="nc" id="L116">                            Toast.makeText(SignUp.this, message, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L117">                            Intent intent = new Intent(SignUp.this, LoginActivity.class);</span>
+<span class="nc" id="L118">                            startActivity(intent);</span>
+<span class="nc" id="L119">                        } else {</span>
+<span class="fc" id="L120">                            Toast.makeText(SignUp.this, message, Toast.LENGTH_SHORT).show();</span>
+                        }
+
+<span class="nc" id="L123">                    } catch (JSONException e) {</span>
+<span class="nc" id="L124">                        e.printStackTrace();</span>
+<span class="nc" id="L125">                        Toast.makeText(SignUp.this, &quot;Unexpected response format&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="fc" id="L126">                    }</span>
+<span class="fc" id="L127">                },</span>
+                error -&gt; {
+                    // Handle the error here
+<span class="nc" id="L130">                    Toast.makeText(SignUp.this, &quot;Sign Up Failed: &quot; + error.getMessage(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L131">                });</span>
+
+        // Add the request to the Volley queue
+<span class="fc" id="L134">        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);</span>
+<span class="fc" id="L135">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>
