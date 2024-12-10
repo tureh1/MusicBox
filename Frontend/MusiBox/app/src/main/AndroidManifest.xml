@@ -59,6 +59,11 @@
         <activity
             android:name=".MessageActivity"
             android:exported="true" />
+        <activity android:name=".AdminActivity"
+            android:exported="true"/>
+        <activity android:name=".AdminSongActivity"
+            android:exported="true"/>
+
 
 
     </application>

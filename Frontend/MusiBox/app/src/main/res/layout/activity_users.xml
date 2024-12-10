@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="#E0F2F1"
+    android:gravity="center_vertical"> <!-- Align all child elements vertically in the center -->
+
+    <!-- Profile Image -->
+    <ImageView
+        android:id="@+id/profileImage"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/generic_avatar"
+        android:layout_marginEnd="8dp"
+        android:contentDescription="Profile Picture" />
+
+    <!-- User Info Section -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical"> <!-- Vertically align the username -->
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User 1"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Options Icon -->
+    <ImageView
+        android:id="@+id/optionsIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/angle_small_down"
+        android:contentDescription="@string/options"
+        android:layout_gravity="center_vertical"
+        android:padding="4dp" />
+</LinearLayout>

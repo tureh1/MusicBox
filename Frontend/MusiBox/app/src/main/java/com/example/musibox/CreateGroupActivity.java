@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -211,9 +210,10 @@ public class CreateGroupActivity extends AppCompatActivity implements GroupAdapt
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject userObject = response.getJSONObject(i);
                             String email = userObject.getString("emailId");
-
+                            boolean isActive = userObject.getBoolean("ifActive");
                             if (email.toLowerCase().startsWith(query.toLowerCase())) {
-                                userList.add(new User(email));
+
+                                userList.add(new User(email, isActive));
                             }
                         }
                         userAdapter.notifyDataSetChanged();

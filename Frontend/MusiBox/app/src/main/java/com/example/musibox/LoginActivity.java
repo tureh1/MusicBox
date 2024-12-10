@@ -75,12 +75,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // Delete button click listeners
-        deleteButton.setOnClickListener(v -> {
-            if (validateInputs()) {
-                sendDeleteRequest(email.getText().toString().trim());
-            }
-        });
+
     }
 
     // Validate login input
@@ -99,7 +94,6 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
-    // Send login request
     private void sendLogInRequest(String email, String password) {
         String url = "http://10.90.72.167:8080/login"; // Update URL as needed
 
@@ -119,14 +113,24 @@ public class LoginActivity extends AppCompatActivity {
 
                         if (message.equalsIgnoreCase("login successful")) {
                             int userId = response.getInt("userId");
+                            String role = response.getString("role"); // Get the role (user/admin)
 
-                            storeUserDataInSharedPreferences(email, userId);
+                            storeUserDataInSharedPreferences(email, userId, role);
 
                             Toast.makeText(LoginActivity.this, "Welcome!", Toast.LENGTH_SHORT).show();
 
-                            Intent intent = new Intent(LoginActivity.this, MainPage.class);
-                            startActivity(intent);
-                            finish();
+                            // Redirect based on the role
+                            if (role.equalsIgnoreCase("admin")) {
+                                // Redirect to AdminActivity
+                                Intent intent = new Intent(LoginActivity.this, AdminActivity.class);
+                                startActivity(intent);
+                            } else {
+                                // Redirect to MainPage for regular users
+                                Intent intent = new Intent(LoginActivity.this, MainPage.class);
+                                startActivity(intent);
+                            }
+
+                            finish(); // Close LoginActivity
                         } else {
                             Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                         }
@@ -143,37 +147,13 @@ public class LoginActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    private void sendDeleteRequest(String email) {
-        String url = "http://10.90.72.167:8080/users/" + email;
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
-                response -> {
-                    try {
-                        String message = response.getString("message");
-                        if ("success".equalsIgnoreCase(message)) {
-                            Toast.makeText(this, "User deleted successfully.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        Log.e("LoginActivity", "JSON Parsing error", e);
-                        Toast.makeText(this, "Unexpected response from server.", Toast.LENGTH_SHORT).show();
-                    }
-                },
-                error -> {
-                    Log.e("LoginActivity", "Delete request error", error);
-                    Toast.makeText(this, "Delete failed. Please try again.", Toast.LENGTH_SHORT).show();
-                });
-
-        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
-    }
-
-    // Store user data in SharedPreferences
-    private void storeUserDataInSharedPreferences(String email, int userId) {
+    // Store user data and role in SharedPreferences
+    private void storeUserDataInSharedPreferences(String email, int userId, String role) {
         SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("emailId", email);
         editor.putInt("userId", userId);
+        editor.putString("role", role);  // Store the role (user/admin)
         editor.putBoolean("isLoggedIn", true);
         editor.apply();
     }
