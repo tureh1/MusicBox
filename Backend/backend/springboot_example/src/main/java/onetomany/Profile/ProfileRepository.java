@@ -7,7 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface ProfileRepository extends JpaRepository<Profile, Integer> {
-
-    // Custom method to find a profile by userId
     Optional<Profile> findByUserId(int userId);
 }

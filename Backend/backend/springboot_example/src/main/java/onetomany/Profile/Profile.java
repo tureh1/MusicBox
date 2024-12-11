@@ -1,8 +1,8 @@
 package onetomany.Profile;
+
 import jakarta.persistence.*;
 import onetomany.Users.User;
 
-import java.util.Date;
 @Entity
 @Table(name = "profile")
 public class Profile {
@@ -16,25 +16,16 @@ public class Profile {
 
     private String bio;
 
-   // @ManyToOne
-    //@JoinColumn(name = "profile_id")
-    //private User friend;
-
-    //private Boolean isAccepted = false; // Whether the friendship has been accepted
-
-    //@Temporal(TemporalType.TIMESTAMP)
-    //private Date createdAt;
+    private int backgroundColor = 0xFF000000; // Default color is black (ARGB hex format)
 
     // =============================== Constructors ================================== //
     public Profile() {
-     //   this.createdAt = new Date(); // Initialize creation date
+        // Default constructor
     }
 
     public Profile(User user, String bio) {
         this.user = user;
-      //  this.friend = friend;
         this.bio = bio;
-        //this.createdAt = new Date();
     }
 
     // =============================== Getters and Setters ================================== //
@@ -62,13 +53,12 @@ public class Profile {
     public void setBio(String bio) {
         this.bio = bio;
     }
-/*
-    public Date getCreatedAt() {
-        return createdAt;
+
+    public int getBackgroundColor() {
+        return backgroundColor;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
- */
 }
