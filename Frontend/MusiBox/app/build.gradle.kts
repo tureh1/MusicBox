@@ -48,7 +48,9 @@ dependencies {
     implementation(libs.mediarouter)
     implementation(libs.recyclerview)
     testImplementation(libs.junit)
+
     implementation (libs.colorpicker)
+
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.rules)
