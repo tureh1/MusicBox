@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="366dp"
+    android:height="216dp"
+    android:viewportWidth="366"
+    android:viewportHeight="216"
+    android:id="@+id/profilebackground">
+  <path
+      android:pathData="M0,0H366V54V54C338.12,269.37 25.44,269.67 0,54V54V0Z"
+      android:fillColor="@color/black"/>
+</vector>
