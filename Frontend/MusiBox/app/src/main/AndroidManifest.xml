@@ -54,11 +54,16 @@
         <activity android:name=".PlaylistActivity"
             android:exported="true"/>
 
-
-
         <activity
             android:name=".MessageActivity"
             android:exported="true" />
+        <activity android:name=".AdminActivity"
+            android:exported="true"/>
+        <activity android:name=".AdminSongActivity"
+            android:exported="true"/>
+        <activity android:name=".SettingsActivity"
+            android:exported="true"/>
+
 
 
     </application>

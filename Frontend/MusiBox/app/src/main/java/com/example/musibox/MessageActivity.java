@@ -153,7 +153,8 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
 
                             // Filter users by checking if the email starts with the search query
                             if (email.toLowerCase().startsWith(query.toLowerCase())) {
-                                userList.add(new User(email));
+                                boolean isActive = userObject.getBoolean("ifActive");
+                                userList.add(new User(email, isActive));
                             }
                         }
 

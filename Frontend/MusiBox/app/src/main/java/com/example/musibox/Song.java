@@ -6,13 +6,13 @@ public class Song {
     private String artist;
     private double averageRating;
     private float userRating;  // Store user rating here
-
-    public Song(int id, String title, String artist, double averageRating) {
+    private String coverUrl;
+    public Song(int id, String title, String artist, double averageRating, String coverUrl) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.averageRating = averageRating;
-
+        this.coverUrl = coverUrl;
     }
 
     public Song(String title, String artist) {
@@ -49,6 +49,13 @@ public class Song {
 
     public double getAverageRating() {
         return averageRating;
+    }
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
     }
 
     public void setAverageRating(double averageRating) {
