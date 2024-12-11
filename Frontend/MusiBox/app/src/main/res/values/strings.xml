@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">MusiBox</string>
     <string name="username">UserName</string>
+    <string name="album_cover" />
+    <string name="options">Options</string>
+    <string name="delete_song">Delete song</string>
 </resources>

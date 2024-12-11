@@ -82,5 +82,41 @@ public class BaeSystemTest {
         onView(withId(R.id.recyclerView)).check(matches(isDisplayed()));
     }
 
+    @Test
+    public void testGroupButtonNavigation() {
+        testLogin();
+        // Navigate to MessageActivity
+        // Click the home button
+        onView(withId(R.id.navigation_adduser)).perform(click());
+
+        // Verify if the MainPage activity is launched
+        onView(ViewMatchers.withId(R.id.search_bar)) // assuming MainPage has this ID
+                .check(matches(ViewMatchers.isDisplayed()));
+    }
+
+    @Test
+    public void testHomeButtonNavigation() {
+        testLogin();
+        // Click the home button
+        onView(withId(R.id.navigation_home)).perform(click());
+
+        // Verify if the MainPage activity is launched
+        onView(ViewMatchers.withId(R.id.search_barAlbum)) // assuming MainPage has this ID
+                .check(matches(ViewMatchers.isDisplayed()));
+    }
+
+    @Test
+    public void userProfileNavigation() {
+        testLogin();
+        // Navigate to MessageActivity
+        onView(withId(R.id.navigation_user)).perform(click());
+        // Click the home button
+        onView(withId(R.id.user)).perform(click());
+
+        // Verify if the MainPage activity is launched
+        onView(ViewMatchers.withId(R.id.settings)) // assuming MainPage has this ID
+                .check(matches(ViewMatchers.isDisplayed()));
+    }
 }
+
 

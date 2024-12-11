@@ -45,4 +45,3 @@ rules = { module = "androidx.test:rules", version.ref = "rules" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-

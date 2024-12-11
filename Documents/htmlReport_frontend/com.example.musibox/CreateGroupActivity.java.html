@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateGroupActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">CreateGroupActivity.java</span></div><h1>CreateGroupActivity.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+/**
+ * This activity allows the user to create a new group by selecting users from a list. It also
+ * displays a list of groups that the user is part of. It handles the search functionality for
+ * finding users, as well as navigating to different parts of the app through buttons and performing
+ * network requests to fetch user and group data.
+ */
+<span class="fc" id="L42">public class CreateGroupActivity extends AppCompatActivity implements GroupAdapter.OnGroupClickListener, UserAdapter.OnUserClickListener {</span>
+    private static final String TAG = &quot;CreateGroupActivity&quot;;
+    private RecyclerView recyclerView;
+    private AutoCompleteTextView searchBar;
+    private HashSet&lt;String&gt; selectedUsers;
+    private GroupAdapter groupAdapter;
+    private List&lt;Group&gt; groupList;
+    private ImageButton house, addUserButton, messageButton, userButton;
+    private RecyclerView friendsList;
+    private List&lt;User&gt; userList;
+    private UserAdapter userAdapter;
+    private Button createGroupButton;
+    private ChipGroup chipGroup;
+
+    /**
+     * Initializes the activity, sets up views, and fetches the group data.
+     * @param savedInstanceState the saved instance state of the activity
+     */
+    @SuppressLint({&quot;MissingInflatedId&quot;, &quot;ClickableViewAccessibility&quot;})
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L63">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L64">        setContentView(R.layout.activity_create_group);</span>
+<span class="fc" id="L65">        SharedPreferences sharedPreferences = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE);</span>
+<span class="fc" id="L66">        String email = sharedPreferences.getString(&quot;emailId&quot;, null); // Default to null if not found</span>
+<span class="fc" id="L67">        int userId = sharedPreferences.getInt(&quot;userId&quot;, -1); // Default to -1 if not found</span>
+<span class="pc bpc" id="L68" title="2 of 4 branches missed.">        if (email != null &amp;&amp; userId != -1 ) {</span>
+            // Use the email and userId to populate fields or make requests
+<span class="fc" id="L70">            Log.d(&quot;ChatActivity&quot;, &quot;Logged-in email: &quot; + email);</span>
+        } else {
+            // Handle missing data (e.g., redirect to login)
+<span class="nc" id="L73">            Toast.makeText(this, &quot;Please log in first&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L74">            Intent loginIntent = new Intent(this, LoginActivity.class);</span>
+<span class="nc" id="L75">            startActivity(loginIntent);</span>
+<span class="nc" id="L76">            finish(); // Optionally finish this activity</span>
+        }
+
+<span class="fc" id="L79">        initViews();</span>
+<span class="fc" id="L80">        setupRecyclerView();</span>
+<span class="fc" id="L81">        setupNavigationButtons();</span>
+
+<span class="fc" id="L83">        fetchGroups();</span>
+<span class="fc" id="L84">        selectedUsers = new HashSet&lt;&gt;();</span>
+
+<span class="fc" id="L86">        createGroupButton.setOnClickListener(v -&gt; {</span>
+            // Handle create group functionality
+<span class="nc" id="L88">            createGroup();</span>
+            // Show the group list again after creating a group
+<span class="nc" id="L90">            recyclerView.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L91">            friendsList.setVisibility(View.GONE);</span>
+<span class="nc" id="L92">            createGroupButton.setVisibility(View.GONE);</span>
+<span class="nc" id="L93">            chipGroup.setVisibility(View.GONE);</span>
+<span class="nc" id="L94">            chipGroup.removeAllViews();</span>
+<span class="nc" id="L95">            selectedUsers.clear();</span>
+<span class="nc" id="L96">            searchBar.getText().clear();</span>
+<span class="nc" id="L97">        });</span>
+<span class="fc" id="L98">        searchBar.addTextChangedListener(new TextWatcher() {</span>
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+<span class="fc" id="L101">            }</span>
+
+            @SuppressLint(&quot;NotifyDataSetChanged&quot;)
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">                if (s.length() &gt; 0) {</span>
+                    // Fetch users based on search query
+<span class="fc" id="L108">                    fetchUsers(s.toString());</span>
+                } else {
+<span class="nc" id="L110">                    userList.clear();</span>
+<span class="nc" id="L111">                    userAdapter.notifyDataSetChanged();</span>
+<span class="nc" id="L112">                    friendsList.setVisibility(View.GONE);</span>
+<span class="nc" id="L113">                    createGroupButton.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L114">                    chipGroup.setVisibility(View.VISIBLE);</span>
+                }
+<span class="fc" id="L116">            }</span>
+
+            @Override
+            public void afterTextChanged(Editable s) {
+<span class="fc" id="L120">            }</span>
+        });
+
+        // Hide group list when search bar is focused
+<span class="fc" id="L124">        searchBar.setOnFocusChangeListener((v, hasFocus) -&gt; {</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">            if (hasFocus) {</span>
+<span class="fc" id="L126">                recyclerView.setVisibility(View.GONE); // Hide group list when searching</span>
+<span class="fc" id="L127">                friendsList.setVisibility(View.VISIBLE);</span>
+<span class="fc" id="L128">                createGroupButton.setVisibility(View.VISIBLE);</span>
+<span class="fc" id="L129">                chipGroup.setVisibility(View.VISIBLE);</span>
+            } else {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                if (searchBar.getText().toString().isEmpty()) {</span>
+                    // Show the group list again if search bar is not focused and empty
+<span class="nc" id="L133">                    recyclerView.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L134">                    friendsList.setVisibility(View.GONE);</span>
+<span class="nc" id="L135">                    createGroupButton.setVisibility(View.GONE);</span>
+<span class="nc" id="L136">                    chipGroup.setVisibility(View.GONE);</span>
+                }
+            }
+<span class="fc" id="L139">        });</span>
+
+        // Handle clicks outside the search bar (on white space)
+<span class="fc" id="L142">        findViewById(R.id.create_group_activity_root).setOnTouchListener((v, event) -&gt; {</span>
+<span class="nc bnc" id="L143" title="All 4 branches missed.">            if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_CANCEL) {</span>
+                // If the search bar is focused and the user taps outside, hide search results and show group list again
+<span class="nc bnc" id="L145" title="All 2 branches missed.">                if (searchBar.hasFocus()) {</span>
+<span class="nc" id="L146">                    friendsList.setVisibility(View.GONE);</span>
+<span class="nc" id="L147">                    createGroupButton.setVisibility(View.GONE);</span>
+<span class="nc" id="L148">                    chipGroup.setVisibility(View.GONE);</span>
+<span class="nc" id="L149">                    recyclerView.setVisibility(View.VISIBLE); // Show group list again</span>
+<span class="nc" id="L150">                    searchBar.clearFocus(); // Clear focus from search bar</span>
+                }
+            }
+<span class="nc" id="L153">            return true;</span>
+        });
+<span class="fc" id="L155">    }</span>
+
+    private void initViews() {
+<span class="fc" id="L158">        recyclerView = findViewById(R.id.recyclerView);</span>
+<span class="fc" id="L159">        searchBar = findViewById(R.id.search_bar);</span>
+<span class="fc" id="L160">        friendsList = findViewById(R.id.friend_list);</span>
+<span class="fc" id="L161">        house = findViewById(R.id.home);</span>
+<span class="fc" id="L162">        addUserButton = findViewById(R.id.adduser);</span>
+<span class="fc" id="L163">        messageButton = findViewById(R.id.message);</span>
+<span class="fc" id="L164">        userButton = findViewById(R.id.user);</span>
+<span class="fc" id="L165">        createGroupButton = findViewById(R.id.create_group_button);</span>
+<span class="fc" id="L166">        chipGroup = findViewById(R.id.selected_users_chip_group);</span>
+<span class="fc" id="L167">    }</span>
+
+    /**
+     * Sets up the RecyclerViews for displaying groups and users.
+     */
+    private void setupRecyclerView() {
+<span class="fc" id="L173">        groupList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L174">        groupAdapter = new GroupAdapter(groupList, this);</span>
+<span class="fc" id="L175">        userList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L176">        userAdapter = new UserAdapter(userList, this);</span>
+<span class="fc" id="L177">        friendsList.setLayoutManager(new LinearLayoutManager(this));</span>
+<span class="fc" id="L178">        friendsList.setAdapter(userAdapter);</span>
+<span class="fc" id="L179">        recyclerView.setLayoutManager(new LinearLayoutManager(this));</span>
+<span class="fc" id="L180">        recyclerView.setAdapter(groupAdapter);</span>
+<span class="fc" id="L181">    }</span>
+
+    /**
+     * Sets up navigation buttons that navigate to different activities.
+     */
+
+    private void setupNavigationButtons() {
+<span class="pc" id="L188">        house.setOnClickListener(v -&gt; startActivity(new Intent(CreateGroupActivity.this, MainPage.class)));</span>
+<span class="pc" id="L189">        addUserButton.setOnClickListener(v -&gt; startActivity(new Intent(CreateGroupActivity.this, CreateGroupActivity.class)));</span>
+<span class="pc" id="L190">        messageButton.setOnClickListener(v -&gt; startActivity(new Intent(CreateGroupActivity.this, MessageActivity.class)));</span>
+<span class="pc" id="L191">        userButton.setOnClickListener(v -&gt; startActivity(new Intent(CreateGroupActivity.this, UserProfileActivity.class)));</span>
+<span class="fc" id="L192">    }</span>
+
+    /**
+     * Fetches users based on the search query.
+     * @param query the search query entered by the user
+     */
+    private void fetchUsers(String query) {
+<span class="fc" id="L199">        int userId = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getInt(&quot;userId&quot;, -1);</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if (userId == -1) {</span>
+<span class="nc" id="L201">            Toast.makeText(this, &quot;No user logged in&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L202">            return;</span>
+        }
+
+<span class="fc" id="L205">        String url = &quot;http://10.90.72.167:8080/users&quot;; // Adjust the backend URL if needed</span>
+
+<span class="fc" id="L207">        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,</span>
+                response -&gt; {
+                    try {
+<span class="fc" id="L210">                        userList.clear();</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">                        for (int i = 0; i &lt; response.length(); i++) {</span>
+<span class="fc" id="L212">                            JSONObject userObject = response.getJSONObject(i);</span>
+<span class="fc" id="L213">                            String email = userObject.getString(&quot;emailId&quot;);</span>
+
+<span class="fc bfc" id="L215" title="All 2 branches covered.">                            if (email.toLowerCase().startsWith(query.toLowerCase())) {</span>
+<span class="fc" id="L216">                                userList.add(new User(email));</span>
+                            }
+                        }
+<span class="fc" id="L219">                        userAdapter.notifyDataSetChanged();</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">                        friendsList.setVisibility(userList.isEmpty() ? View.GONE : View.VISIBLE);</span>
+<span class="fc" id="L221">                        recyclerView.setVisibility(View.GONE);</span>
+<span class="fc" id="L222">                        createGroupButton.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L223">                    } catch (JSONException e) {</span>
+<span class="nc" id="L224">                        Log.e(TAG, &quot;Failed to parse users&quot;, e);</span>
+<span class="nc" id="L225">                        Toast.makeText(CreateGroupActivity.this, &quot;Failed to parse users&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="fc" id="L226">                    }</span>
+<span class="fc" id="L227">                },</span>
+                error -&gt; {
+<span class="nc" id="L229">                    Log.e(TAG, &quot;Failed to fetch users: &quot; + error.getMessage());</span>
+<span class="nc" id="L230">                    Toast.makeText(CreateGroupActivity.this, &quot;Failed to fetch users&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L231">                });</span>
+
+<span class="fc" id="L233">        VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);</span>
+<span class="fc" id="L234">    }</span>
+
+    /**
+     * Creates a new group with the selected users.
+     */
+    private void createGroup() {
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        if (selectedUsers.isEmpty()) {</span>
+<span class="nc" id="L241">            Toast.makeText(this, &quot;Please select at least one user&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L242">            return;</span>
+        }
+
+        // Fetch the current user's name from shared preferences
+<span class="nc" id="L246">        String currentUserName = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getString(&quot;emailId&quot;, null);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (currentUserName == null) {</span>
+<span class="nc" id="L248">            Toast.makeText(this, &quot;No user logged in&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L249">            return;</span>
+        }
+
+        // Generate the group name by joining selected user names with commas and adding the current user's name
+<span class="nc" id="L253">        String groupName = currentUserName + &quot;, &quot; + String.join(&quot;, &quot;, selectedUsers);</span>
+<span class="nc" id="L254">        List&lt;String&gt; selectedUserEmails = new ArrayList&lt;&gt;(selectedUsers);</span>
+
+        // Check if the user is logged in
+<span class="nc" id="L257">        int userId = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getInt(&quot;userId&quot;, -1);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (userId == -1) {</span>
+<span class="nc" id="L259">            Toast.makeText(this, &quot;No user logged in&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L260">            return;</span>
+        }
+
+        // Construct the JSON request payload
+<span class="nc" id="L264">        JSONObject groupData = new JSONObject();</span>
+        try {
+<span class="nc" id="L266">            groupData.put(&quot;name&quot;, groupName); // Group name</span>
+<span class="nc" id="L267">            groupData.put(&quot;users&quot;, new JSONArray(selectedUserEmails)); // Selected users' emails</span>
+<span class="nc" id="L268">        } catch (JSONException e) {</span>
+<span class="nc" id="L269">            e.printStackTrace();</span>
+<span class="nc" id="L270">            return;</span>
+<span class="nc" id="L271">        }</span>
+
+<span class="nc" id="L273">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/playlists&quot;; // Adjust URL if needed</span>
+
+        // Make the POST request
+<span class="nc" id="L276">        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, groupData,</span>
+                response -&gt; {
+                    try {
+                        // Assuming your backend returns a &quot;message&quot; field with the status
+<span class="nc" id="L280">                        String message = response.getString(&quot;message&quot;);</span>
+<span class="nc" id="L281">                        Toast.makeText(CreateGroupActivity.this, message, Toast.LENGTH_SHORT).show();</span>
+
+                        // After group creation, refresh the groups list
+<span class="nc" id="L284">                        fetchGroups();  // This will reload the groups</span>
+
+                        // Reset the UI
+<span class="nc" id="L287">                        recyclerView.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L288">                        friendsList.setVisibility(View.GONE);</span>
+<span class="nc" id="L289">                        createGroupButton.setVisibility(View.GONE);</span>
+<span class="nc" id="L290">                        chipGroup.setVisibility(View.GONE);</span>
+<span class="nc" id="L291">                        chipGroup.removeAllViews();</span>
+<span class="nc" id="L292">                        selectedUsers.clear();</span>
+<span class="nc" id="L293">                        searchBar.getText().clear();</span>
+<span class="nc" id="L294">                    } catch (JSONException e) {</span>
+<span class="nc" id="L295">                        Log.e(TAG, &quot;Failed to parse group creation response&quot;, e);</span>
+<span class="nc" id="L296">                        Toast.makeText(CreateGroupActivity.this, &quot;Unexpected response from server&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L297">                    }</span>
+<span class="nc" id="L298">                },</span>
+                error -&gt; {
+<span class="nc" id="L300">                    Log.e(TAG, &quot;Failed to create group: &quot; + error.getMessage());</span>
+<span class="nc" id="L301">                    Toast.makeText(CreateGroupActivity.this, &quot;Failed to create group&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L302">                });</span>
+
+        // Add request to the Volley request queue
+<span class="nc" id="L305">        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);</span>
+<span class="nc" id="L306">    }</span>
+
+    /**
+     * Fetches the groups that the current user is a member of.
+     */
+    private void fetchGroups() {
+<span class="fc" id="L312">        int userId = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getInt(&quot;userId&quot;, -1);</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">        if (userId == -1) {</span>
+<span class="nc" id="L314">            Toast.makeText(this, &quot;No user logged in&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L315">            return;</span>
+        }
+
+<span class="fc" id="L318">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/playlists/myPlaylists&quot;; // Adjust URL if needed</span>
+
+<span class="fc" id="L320">        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,</span>
+                response -&gt; {
+                    try {
+<span class="fc" id="L323">                        groupList.clear();</span>
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">                        for (int i = 0; i &lt; response.length(); i++) {</span>
+<span class="nc" id="L325">                            JSONObject groupObject = response.getJSONObject(i);</span>
+<span class="nc" id="L326">                            String groupName = groupObject.getString(&quot;name&quot;);</span>
+<span class="nc" id="L327">                            Group group = new Group(groupName);</span>
+<span class="nc" id="L328">                            groupList.add(group);</span>
+                        }
+<span class="fc" id="L330">                        groupAdapter.notifyDataSetChanged();</span>
+<span class="nc" id="L331">                    } catch (JSONException e) {</span>
+<span class="nc" id="L332">                        Log.e(TAG, &quot;Failed to parse groups&quot;, e);</span>
+<span class="nc" id="L333">                        Toast.makeText(CreateGroupActivity.this, &quot;Failed to load groups&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="fc" id="L334">                    }</span>
+<span class="fc" id="L335">                },</span>
+                error -&gt; {
+<span class="nc" id="L337">                    Log.e(TAG, &quot;Failed to fetch groups: &quot; + error.getMessage());</span>
+<span class="nc" id="L338">                    Toast.makeText(CreateGroupActivity.this, &quot;Failed to fetch groups&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L339">                });</span>
+
+<span class="fc" id="L341">        VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);</span>
+<span class="fc" id="L342">    }</span>
+
+
+
+    @Override
+    public void onUserClick(String email) {
+<span class="nc bnc" id="L348" title="All 2 branches missed.">        if (selectedUsers.add(email)) {</span>
+<span class="nc" id="L349">            Chip chip = new Chip(this);</span>
+<span class="nc" id="L350">            chip.setText(email);</span>
+<span class="nc" id="L351">            chip.setCloseIconVisible(true);</span>
+<span class="nc" id="L352">            chip.setOnCloseIconClickListener(v -&gt; {</span>
+<span class="nc" id="L353">                selectedUsers.remove(email);</span>
+<span class="nc" id="L354">                chipGroup.removeView(chip);</span>
+<span class="nc" id="L355">            });</span>
+<span class="nc" id="L356">            chipGroup.addView(chip);</span>
+<span class="nc" id="L357">            searchBar.getText().clear();</span>
+        }
+<span class="nc" id="L359">    }</span>
+
+
+    @Override
+    public void onGroupClick(Group group) {
+        // Start PlaylistActivity when a group is clicked
+<span class="nc" id="L365">        Intent intent = new Intent(CreateGroupActivity.this, PlaylistActivity.class);</span>
+<span class="nc" id="L366">        intent.putExtra(&quot;groupName&quot;, group.getName()); // Pass group name as an extra</span>
+<span class="nc" id="L367">        startActivity(intent);</span>
+<span class="nc" id="L368">    }</span>
+
+    @Override
+    public void onGroupDelete(Group group) {
+        // Handle group delete
+<span class="nc" id="L373">        Toast.makeText(this, &quot;Group deleted: &quot; + group.getName(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L374">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>

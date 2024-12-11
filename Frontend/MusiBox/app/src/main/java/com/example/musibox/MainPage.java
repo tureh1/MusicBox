@@ -6,11 +6,8 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -41,7 +38,7 @@ import java.util.Map;
  */
 public class MainPage extends AppCompatActivity implements WebSocketListener, RatingAdapter.OnRatingChangeListener {
 
-    private ImageButton homeButton, addUserButton, messageButton, userButton,mainMenu;
+    private ImageButton homeButton, addUserButton, messageButton, userButton;
     private RecyclerView recyclerView;
     private RatingAdapter ratingAdapter;
     private List<Song> songList = new ArrayList<>();
@@ -78,14 +75,12 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         // Initialize WebSocket when the activity starts
         initializeWebSocket();
 
-
         // Initialize buttons and RecyclerView
         homeButton = findViewById(R.id.navigation_home);
         addUserButton = findViewById(R.id.navigation_adduser);
         messageButton = findViewById(R.id.navigation_message);
         userButton = findViewById(R.id.navigation_user);
         search_barAlbum = findViewById(R.id.search_barAlbum);
-        mainMenu = findViewById(R.id.options_menu);
 
         // Initialize RecyclerView
         recyclerView = findViewById(R.id.recyclerView);
@@ -99,10 +94,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
         messageButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, MessageActivity.class)));
         userButton.setOnClickListener(v -> startActivity(new Intent(MainPage.this, UserProfileActivity.class)));
 
-        // Set up the ImageButton to show the menu
-        mainMenu.setOnClickListener(view -> showPopupMenu(view));
-
-
+        // TextWatcher for search functionality
         search_barAlbum.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
@@ -112,10 +104,9 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
                 String query = charSequence.toString();
-                if (query.length() >= 1) {
-                    searchForSong(query);  // Only search when query length is > 1
-                } else {
-                    fetchSongData();       // Fetch all songs if query is empty
+                if (query.length() >= 0) {
+                    searchForSong(query);  // Fetch and display songs based on query
+                    fetchSongData();       // Fetch data to refresh the list
                 }
             }
 
@@ -127,42 +118,9 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
             }
         });
 
-
         // Fetch the song data initially
         fetchSongData();
     }
-
-    /**
-     * Displays a PopupMenu when the options menu button is clicked.
-     *
-     * @param anchorView The view to anchor the menu to.
-     */
-    private void showPopupMenu(View anchorView) {
-        PopupMenu popupMenu = new PopupMenu(this, anchorView);
-        popupMenu.getMenuInflater().inflate(R.menu.menu_main, popupMenu.getMenu());
-
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                int itemId = menuItem.getItemId();
-                if (itemId == R.id.trivia) {
-                    Toast.makeText(getApplicationContext(), "Trivia selected", Toast.LENGTH_SHORT).show();
-                    Intent triviaIntent = new Intent(getApplicationContext(), TriviaActivity.class);
-                    startActivity(triviaIntent); // Start the trivia activity
-                    return true;
-                } else if (itemId == R.id.playlist) {
-                    Toast.makeText(getApplicationContext(), "Favorites selected", Toast.LENGTH_SHORT).show();
-                    Intent favoriteIntent = new Intent(getApplicationContext(), FavoriteActivity.class);
-                    startActivity(favoriteIntent); // Start the trivia activity
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        popupMenu.show();
-    }
-
 
     /**
      * Initializes the WebSocket connection for real-time updates.
@@ -221,12 +179,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject songObject = response.getJSONObject(i);
                             int songId = songObject.getInt("id");
-                            String coverUrl = songObject.optString("cover", "");
                             String title = songObject.optString("title", "Unknown Song");
                             String artist = songObject.optString("artist", "Unknown Artist");
                             double avgRating = songObject.optDouble("averageRating", 0.0);
 
-                            Song song = new Song(songId, title, artist, avgRating,coverUrl);
+                            Song song = new Song(songId, title, artist, avgRating);
                             songList.add(song);
                         }
                         ratingAdapter.notifyDataSetChanged();
@@ -279,12 +236,11 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
                         for (int i = 0; i < response.length(); i++) {
                             JSONObject songObject = response.getJSONObject(i);
                             int songId = songObject.getInt("id");
-                            String coverUrl = songObject.optString("cover", "");
                             String title = songObject.optString("title", "Unknown Song");
                             String artist = songObject.optString("artist", "Unknown Artist");
                             double avgRating = songObject.optDouble("averageRating", 0.0);
 
-                            Song song = new Song(songId, title, artist, avgRating,coverUrl);
+                            Song song = new Song(songId, title, artist, avgRating);
                             songList.add(song);
                         }
                         ratingAdapter.notifyDataSetChanged();

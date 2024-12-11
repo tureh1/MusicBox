@@ -1,6 +1,12 @@
 package onetomany.Chat;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +20,28 @@ public class MessageController {
     private MessageRepository messageRepository;
 
     @GetMapping("/messages")
+    @Operation(
+            summary = "Get messages between users",
+            description = "Fetches the the messages between users"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved messages",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "invalid request",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
     public List<FormattedMessage> getMessagesBetweenUsers(@RequestParam String email, @RequestParam String friendEmail) {
         List<Message> messagesFromSender = messageRepository.findByUserNameAndFriendEmail(email, friendEmail);
         List<Message> messagesFromRecipient = messageRepository.findByUserNameAndFriendEmail(friendEmail, email);

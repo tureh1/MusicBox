@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ForgotActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">ForgotActivity.java</span></div><h1>ForgotActivity.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+<span class="nc" id="L18">public class ForgotActivity extends AppCompatActivity {</span>
+
+    private EditText newemail, newpassword, newconfirm;
+    private RequestQueue requestQueue;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="nc" id="L25">        super.onCreate(savedInstanceState);</span>
+<span class="nc" id="L26">        setContentView(R.layout.activity_forgotpassword);</span>
+
+<span class="nc" id="L28">        newemail = findViewById(R.id.newemail);</span>
+<span class="nc" id="L29">        newpassword = findViewById(R.id.newpassword);</span>
+<span class="nc" id="L30">        newconfirm = findViewById(R.id.newconfirm);</span>
+<span class="nc" id="L31">        Button update = findViewById(R.id.update);</span>
+
+<span class="nc" id="L33">        requestQueue = com.example.musibox.VolleySingleton.getInstance(this).getRequestQueue();</span>
+
+<span class="nc" id="L35">        update.setOnClickListener(new View.OnClickListener() {</span>
+            @Override
+            public void onClick(View v) {
+<span class="nc bnc" id="L38" title="All 2 branches missed.">                if (handleUpdate()) {</span>
+                    // Send email and password to the backend
+<span class="nc" id="L40">                    sendPasswordRequest(newemail.getText().toString().trim(), newpassword.getText().toString().trim());</span>
+                }
+<span class="nc" id="L42">            }</span>
+        });
+<span class="nc" id="L44">    }</span>
+
+    private boolean handleUpdate() {
+<span class="nc" id="L47">        String usernameInput = newemail.getText().toString().trim();</span>
+<span class="nc" id="L48">        String passwordInput = newpassword.getText().toString().trim();</span>
+<span class="nc" id="L49">        String confirmInput = newconfirm.getText().toString().trim();</span>
+
+<span class="nc bnc" id="L51" title="All 6 branches missed.">        if (usernameInput.isEmpty() || passwordInput.isEmpty() || confirmInput.isEmpty()) {</span>
+<span class="nc" id="L52">            Toast.makeText(this, &quot;Please fill in all fields&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L53">            return false;</span>
+        }
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if (passwordInput.length() &lt; 6) {</span>
+<span class="nc" id="L56">            Toast.makeText(this, &quot;Password must be at least 6 characters.&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L57">            return false;</span>
+        }
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (!passwordInput.equals(confirmInput)) {</span>
+<span class="nc" id="L60">            Toast.makeText(this, &quot;Passwords do not match&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L61">            return false;</span>
+        }
+
+<span class="nc" id="L64">        return true;</span>
+    }
+    private void sendPasswordRequest(String email, String password) {
+<span class="nc" id="L67">        String url = &quot;http://10.90.72.167:8080/newpass/&quot; + email;</span>
+
+        // Create a JSON object with the new password
+<span class="nc" id="L70">        JSONObject requestData = new JSONObject();</span>
+        try {
+<span class="nc" id="L72">            requestData.put(&quot;newPassword&quot;, password); // Include only the new password</span>
+<span class="nc" id="L73">        } catch (JSONException e) {</span>
+<span class="nc" id="L74">            e.printStackTrace();</span>
+<span class="nc" id="L75">        }</span>
+
+        // Create the JsonObjectRequest for the PUT request
+<span class="nc" id="L78">        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, url, requestData,</span>
+                response -&gt; {
+                    // Handle the success response
+                    try {
+<span class="nc" id="L82">                        String message = response.getString(&quot;message&quot;);</span>
+<span class="nc" id="L83">                        Toast.makeText(ForgotActivity.this, message, Toast.LENGTH_SHORT).show();</span>
+
+                        // Navigate to LoginActivity
+<span class="nc" id="L86">                        Intent intent = new Intent(ForgotActivity.this, LoginActivity.class);</span>
+<span class="nc" id="L87">                        startActivity(intent);</span>
+<span class="nc" id="L88">                    } catch (JSONException e) {</span>
+<span class="nc" id="L89">                        e.printStackTrace();</span>
+<span class="nc" id="L90">                        Toast.makeText(ForgotActivity.this, &quot;Unexpected response format&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L91">                    }</span>
+<span class="nc" id="L92">                },</span>
+                error -&gt; {
+                    // Handle the error response
+<span class="nc" id="L95">                    Toast.makeText(ForgotActivity.this, &quot;Failed to update password: &quot; + error.getMessage(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L96">                });</span>
+
+        // Add the request to the Volley queue
+<span class="nc" id="L99">        com.example.musibox.VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);</span>
+<span class="nc" id="L100">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>

@@ -1,12 +1,14 @@
 package onetomany.Users;
 
 import jakarta.persistence.*;
+
 import java.util.List;
+
 import onetomany.Friend.Friend;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
-public class User {
+public class User{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,6 +17,12 @@ public class User {
     private String emailId;
     private String password;
     private Boolean ifActive = true;
+    private Boolean isAdmin = false;
+ //   private String color = "#000000"; // Default color is black (hexadecimal)
+
+   // private static final Map<String, String> userBackgroundColorMap = new HashMap<>();
+
+    private int backgroundColor = 0xFF000000; // Default color is black (ARGB hex format)
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -32,6 +40,14 @@ public class User {
     }
 
     // =============================== Getters and Setters for each field ================================== //
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
 
     public int getId() {
         return id;
@@ -72,6 +88,15 @@ public class User {
 
     public void setFriends(List<Friend> friends) {
         this.friends = friends;
+    }
+
+    // Getters and Setters
+    public int getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(int backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 
     // ==================== Static class for updating password (as before) ======================== //

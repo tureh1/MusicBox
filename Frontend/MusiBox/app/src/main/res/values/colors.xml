@@ -6,5 +6,11 @@
     <color name="BabyBlue">#BFDBE5</color>
     <color name="Grey">#D9D9D9</color>
     <color name="LightBlue">#88B0FE</color>
+    <color name="LightGrey">#F2F2F2</color>
+    <color name="gray">#E0E0E0</color>
+    <color name="blue">#1976D2</color>
+    <color name="red">#D32F2F</color>
+
+
 
 </resources>

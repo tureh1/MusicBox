@@ -35,6 +35,15 @@ public class Song {
         this.coverUrl = coverUrl;
     }
 
+    public Song(int songId, String title, String artist, double avgRating) {
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.averageRating = averageRating;
+        this.coverUrl = coverUrl;
+        this.isHeartFilled = false;
+        this.selected = false;
+    }
 
 
     public int getId() {
