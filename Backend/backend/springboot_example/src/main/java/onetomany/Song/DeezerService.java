@@ -9,6 +9,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/*
+@author Tu Reh
+API implemented, API is from deezer a music API
+Grabs Song Data, title, artist, and cover url
+Generates songs from api
+Implemented by Tu Reh in backend
+ */
+
 @Service
 public class DeezerService {
     private static final String DEEZER_TRACK_URL = "https://api.deezer.com/track/";
