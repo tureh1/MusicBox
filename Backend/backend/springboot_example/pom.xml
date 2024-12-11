@@ -26,6 +26,7 @@
   </properties>
 
   <dependencies>
+
     <!-- SpringDoc OpenAPI dependency -->
     <dependency>
       <groupId>org.springdoc</groupId>

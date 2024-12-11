@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">MessageActivity.java</span></div><h1>MessageActivity.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.MotionEvent;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.util.ArrayList;
+import android.text.Editable;
+import android.text.TextWatcher;
+import java.util.List;
+
+<span class="fc" id="L27">public class MessageActivity extends AppCompatActivity implements MessageAdapter.OnMessageClickListener, UserAdapter.OnUserClickListener {</span>
+    private RecyclerView recyclerView;
+    private MessageAdapter messageAdapter;
+    private List&lt;Message&gt; messageList;
+    private ImageButton house;
+    private ImageButton addUserButton;
+    private ImageButton messageButton;
+    private ImageButton userButton;
+    private String userEmail;
+
+    private EditText searchBar;
+    private RecyclerView friendsList;
+    private List&lt;User&gt; userList;
+    private UserAdapter userAdapter;
+
+
+    @SuppressLint({&quot;MissingInflatedId&quot;, &quot;ClickableViewAccessibility&quot;})
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="fc" id="L46">        super.onCreate(savedInstanceState);</span>
+<span class="fc" id="L47">        setContentView(R.layout.activity_message);</span>
+<span class="fc" id="L48">        SharedPreferences sharedPreferences = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE);</span>
+<span class="fc" id="L49">        String email = sharedPreferences.getString(&quot;emailId&quot;, null); // Default to null if not found</span>
+<span class="fc" id="L50">        int userId = sharedPreferences.getInt(&quot;userId&quot;, -1); // Default to -1 if not found</span>
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">        if (email != null &amp;&amp; userId != -1) {</span>
+<span class="fc" id="L52">            Log.d(&quot;MessageActivity&quot;, &quot;Logged-in email: &quot; + email);</span>
+        } else {
+<span class="nc" id="L54">            Toast.makeText(this, &quot;Please log in first&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L55">            startActivity(new Intent(this, LoginActivity.class));</span>
+<span class="nc" id="L56">            finish();</span>
+        }
+
+<span class="fc" id="L59">        initViews();</span>
+<span class="fc" id="L60">        setupRecyclerView();</span>
+<span class="fc" id="L61">        setupNavigationButtons();</span>
+<span class="fc" id="L62">        fetchFriendsEmails();</span>
+        // Set up the search bar
+<span class="fc" id="L64">        searchBar.addTextChangedListener(new TextWatcher() {</span>
+            @Override
+<span class="fc" id="L66">            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }</span>
+
+            @SuppressLint(&quot;NotifyDataSetChanged&quot;)
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">                if (s.length() &gt; 0) {</span>
+<span class="fc" id="L72">                    fetchUsers(s.toString());</span>
+                } else {
+<span class="nc" id="L74">                    userList.clear();</span>
+<span class="nc" id="L75">                    userAdapter.notifyDataSetChanged();</span>
+<span class="nc" id="L76">                    friendsList.setVisibility(View.GONE); // Hide if no input</span>
+                }
+<span class="fc" id="L78">            }</span>
+
+            @Override
+<span class="fc" id="L81">            public void afterTextChanged(Editable s) { }</span>
+        });
+<span class="fc" id="L83">        findViewById(R.id.message_activity_root).setOnTouchListener((v, event) -&gt; {</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">            if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_CANCEL) {</span>
+<span class="nc bnc" id="L85" title="All 4 branches missed.">                if (friendsList.getVisibility() == View.VISIBLE || friendsList.getVisibility() == View.GONE) {</span>
+<span class="nc" id="L86">                    friendsList.setVisibility(View.GONE);</span>
+<span class="nc" id="L87">                    recyclerView.setVisibility(View.VISIBLE);</span>
+<span class="nc" id="L88">                    searchBar.clearFocus(); // Clear focus from search bar</span>
+                }
+            }
+<span class="nc" id="L91">            return true;</span>
+        });
+
+
+<span class="fc" id="L95">        searchBar.setOnFocusChangeListener((v, hasFocus) -&gt; {</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            if (hasFocus) {</span>
+<span class="fc" id="L97">                friendsList.setVisibility(View.VISIBLE);</span>
+<span class="fc" id="L98">                recyclerView.setVisibility(View.GONE);</span>
+            } else {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">                if (userList.isEmpty()) {</span>
+<span class="nc" id="L101">                    friendsList.setVisibility(View.GONE);</span>
+                }
+
+<span class="nc" id="L104">                recyclerView.setVisibility(View.VISIBLE);</span>
+            }
+<span class="fc" id="L106">        });</span>
+
+
+
+
+<span class="fc" id="L111">    }</span>
+
+    private void initViews() {
+<span class="fc" id="L114">        recyclerView = findViewById(R.id.recyclerView);</span>
+<span class="fc" id="L115">        searchBar = findViewById(R.id.search_bar);</span>
+<span class="fc" id="L116">        friendsList = findViewById(R.id.friend_list);</span>
+<span class="fc" id="L117">        house = findViewById(R.id.home);</span>
+<span class="fc" id="L118">        addUserButton = findViewById(R.id.adduser);</span>
+<span class="fc" id="L119">        messageButton = findViewById(R.id.message);</span>
+<span class="fc" id="L120">        userButton = findViewById(R.id.user);</span>
+
+<span class="fc" id="L122">    }</span>
+
+    private void setupRecyclerView() {
+<span class="fc" id="L125">        messageList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L126">        messageAdapter = new MessageAdapter(messageList, this);</span>
+<span class="fc" id="L127">        userList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L128">        userAdapter = new UserAdapter(userList, this);</span>
+<span class="fc" id="L129">        friendsList.setLayoutManager(new LinearLayoutManager(this));</span>
+<span class="fc" id="L130">        friendsList.setAdapter(userAdapter);</span>
+<span class="fc" id="L131">        recyclerView.setLayoutManager(new LinearLayoutManager(this));</span>
+<span class="fc" id="L132">        recyclerView.setAdapter(messageAdapter);</span>
+<span class="fc" id="L133">    }</span>
+
+    private void setupNavigationButtons() {
+<span class="fc" id="L136">        house.setOnClickListener(v -&gt; startActivity(new Intent(MessageActivity.this, MainPage.class)));</span>
+<span class="fc" id="L137">        addUserButton.setOnClickListener(v -&gt; startActivity(new Intent(MessageActivity.this, CreateGroupActivity.class)));</span>
+<span class="pc" id="L138">        messageButton.setOnClickListener(v -&gt; startActivity(new Intent(MessageActivity.this, MessageActivity.class)));</span>
+<span class="fc" id="L139">        userButton.setOnClickListener(v -&gt; startActivity(new Intent(MessageActivity.this, UserProfileActivity.class)));</span>
+<span class="fc" id="L140">    }</span>
+
+    private void fetchUsers(String query) {
+<span class="fc" id="L143">        String url = &quot;http://10.90.72.167:8080/users&quot;;</span>
+
+<span class="fc" id="L145">        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,</span>
+                response -&gt; {
+                    try {
+<span class="fc" id="L148">                        userList.clear();</span>
+
+<span class="fc bfc" id="L150" title="All 2 branches covered.">                        for (int i = 0; i &lt; response.length(); i++) {</span>
+<span class="fc" id="L151">                            JSONObject userObject = response.getJSONObject(i);</span>
+<span class="fc" id="L152">                            String email = userObject.getString(&quot;emailId&quot;);</span>
+
+                            // Filter users by checking if the email starts with the search query
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                            if (email.toLowerCase().startsWith(query.toLowerCase())) {</span>
+<span class="fc" id="L156">                                userList.add(new User(email));</span>
+                            }
+                        }
+
+                        // Notify adapter of data change
+<span class="fc" id="L161">                        userAdapter.notifyDataSetChanged();</span>
+
+                        // Show user list if there are results
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">                        if (!userList.isEmpty()) {</span>
+<span class="fc" id="L165">                            friendsList.setVisibility(View.VISIBLE);</span>
+                        } else {
+<span class="nc" id="L167">                            friendsList.setVisibility(View.GONE);</span>
+                        }
+
+                        // Hide main friends RecyclerView
+<span class="fc" id="L171">                        recyclerView.setVisibility(View.GONE);</span>
+<span class="nc" id="L172">                    } catch (JSONException e) {</span>
+<span class="nc" id="L173">                        e.printStackTrace();</span>
+<span class="nc" id="L174">                        Toast.makeText(MessageActivity.this, &quot;Failed to parse users&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="fc" id="L175">                    }</span>
+<span class="fc" id="L176">                },</span>
+                error -&gt; {
+<span class="nc" id="L178">                    Toast.makeText(MessageActivity.this, &quot;Failed to fetch users: &quot; + error.getMessage(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L179">                });</span>
+
+<span class="fc" id="L181">        VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);</span>
+<span class="fc" id="L182">    }</span>
+
+    @Override
+    public void onUserClick(String email) {
+<span class="nc" id="L186">        sendFriendEmailRequest(email);</span>
+<span class="nc" id="L187">    }</span>
+
+    private void sendFriendEmailRequest(String email) {
+<span class="nc" id="L190">        int userId = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getInt(&quot;userId&quot;, -1); // Provide a default value if not found</span>
+
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if (userId == -1) {</span>
+<span class="nc" id="L193">            Toast.makeText(this, &quot;No user is logged in.&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L194">            return;</span>
+        }
+
+<span class="nc" id="L197">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/addFriend&quot;;</span>
+<span class="nc" id="L198">        JSONObject requestData = new JSONObject();</span>
+        try {
+<span class="nc" id="L200">            requestData.put(&quot;friendEmail&quot;, email);</span>
+<span class="nc" id="L201">        } catch (JSONException e) {</span>
+<span class="nc" id="L202">            e.printStackTrace();</span>
+<span class="nc" id="L203">        }</span>
+
+<span class="nc" id="L205">        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, requestData,</span>
+                response -&gt; {
+                    try {
+<span class="nc" id="L208">                        String message = response.getString(&quot;message&quot;);</span>
+<span class="nc" id="L209">                        Toast.makeText(MessageActivity.this, message, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L210">                        Intent intent = new Intent(MessageActivity.this, MessageActivity.class);</span>
+<span class="nc" id="L211">                        startActivity(intent);</span>
+<span class="nc" id="L212">                    } catch (JSONException e) {</span>
+<span class="nc" id="L213">                        e.printStackTrace();</span>
+<span class="nc" id="L214">                        Toast.makeText(MessageActivity.this, &quot;Unexpected response format&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L215">                    }</span>
+<span class="nc" id="L216">                },</span>
+                error -&gt; {
+<span class="nc" id="L218">                    Toast.makeText(MessageActivity.this, &quot;Request Failed: &quot; + error.getMessage(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L219">                });</span>
+
+<span class="nc" id="L221">        VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);</span>
+<span class="nc" id="L222">    }</span>
+
+    private void fetchFriendsEmails() {
+<span class="fc" id="L225">        int userId = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getInt(&quot;userId&quot;, -1);</span>
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (userId == -1) {</span>
+<span class="nc" id="L227">            Toast.makeText(this, &quot;No user logged in&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L228">            return;</span>
+        }
+
+<span class="fc" id="L231">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/friends&quot;;</span>
+<span class="fc" id="L232">        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null,</span>
+                this::handleFriendsResponse,
+                this::handleErrorResponse);
+
+<span class="fc" id="L236">        VolleySingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);</span>
+<span class="fc" id="L237">    }</span>
+
+    private void handleFriendsResponse(JSONArray response) {
+        try {
+<span class="fc" id="L241">            messageList.clear();</span>
+<span class="pc bpc" id="L242" title="1 of 2 branches missed.">            if (response.length() == 0) {</span>
+<span class="fc" id="L243">                Toast.makeText(this, &quot;No friends found&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="fc" id="L244">                return;</span>
+            }
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            for (int i = 0; i &lt; response.length(); i++) {</span>
+<span class="nc" id="L247">                JSONObject friendObject = response.getJSONObject(i);</span>
+<span class="nc" id="L248">                String friendEmail = friendObject.getString(&quot;friendEmail&quot;);</span>
+<span class="nc" id="L249">                String messageContent = &quot;Message from &quot; + friendEmail; // Placeholder for actual messages</span>
+<span class="nc" id="L250">                messageList.add(new Message(friendEmail, messageContent));</span>
+            }
+<span class="nc" id="L252">            messageAdapter.notifyDataSetChanged();</span>
+<span class="nc" id="L253">        } catch (JSONException e) {</span>
+<span class="nc" id="L254">            Log.e(&quot;MessageActivity&quot;, &quot;JSON parsing error: &quot; + e.getMessage());</span>
+<span class="nc" id="L255">            Toast.makeText(this, &quot;Failed to parse friends&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L256">        }</span>
+<span class="nc" id="L257">    }</span>
+
+    private void handleErrorResponse(Throwable error) {
+<span class="nc" id="L260">        Log.e(&quot;MessageActivity&quot;, &quot;Error: &quot; + error.toString());</span>
+<span class="nc" id="L261">        Toast.makeText(this, &quot;Failed to fetch friends: &quot; + error.getMessage(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L262">    }</span>
+
+    void deleteFriend(String friendEmail) {
+<span class="nc" id="L265">        int userId = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getInt(&quot;userId&quot;, -1);</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        if (userId == -1) {</span>
+<span class="nc" id="L267">            Toast.makeText(this, &quot;No user logged in&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L268">            return;</span>
+        }
+
+<span class="nc" id="L271">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId + &quot;/friends/&quot; + friendEmail;</span>
+
+<span class="nc" id="L273">        StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, url,</span>
+                response -&gt; {
+<span class="nc" id="L275">                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);</span>
+<span class="nc" id="L276">                    Toast.makeText(this, &quot;Friend deleted successfully&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L277">                    startActivity(intent);</span>
+<span class="nc" id="L278">                },</span>
+                error -&gt; {
+<span class="nc" id="L280">                    Log.e(&quot;MessageActivity&quot;, &quot;Error deleting friend: &quot; + error.toString());</span>
+<span class="nc" id="L281">                    Toast.makeText(this, &quot;Failed to delete friend: &quot; + error.getMessage(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L282">                }</span>
+        );
+
+<span class="nc" id="L285">        VolleySingleton.getInstance(this).addToRequestQueue(deleteRequest);</span>
+<span class="nc" id="L286">    }</span>
+
+    @Override
+    public void onMessageClick(String friendEmail) {
+<span class="nc" id="L290">        int userId = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE).getInt(&quot;userId&quot;, -1);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        if (userId != -1) {</span>
+<span class="nc" id="L292">            fetchUserEmail(userId, email -&gt; {</span>
+<span class="nc bnc" id="L293" title="All 4 branches missed.">                if (friendEmail != null &amp;&amp; !friendEmail.isEmpty()) {</span>
+<span class="nc" id="L294">                    Intent intent = new Intent(MessageActivity.this, ChatActivity.class);</span>
+<span class="nc" id="L295">                    intent.putExtra(&quot;friendEmail&quot;, friendEmail);</span>
+<span class="nc" id="L296">                    intent.putExtra(&quot;userEmail&quot;, email);</span>
+<span class="nc" id="L297">                    startActivity(intent);</span>
+<span class="nc" id="L298">                } else {</span>
+<span class="nc" id="L299">                    Toast.makeText(this, &quot;Friend email is missing&quot;, Toast.LENGTH_SHORT).show();</span>
+                }
+<span class="nc" id="L301">            });</span>
+        } else {
+<span class="nc" id="L303">            Toast.makeText(this, &quot;No user logged in&quot;, Toast.LENGTH_SHORT).show();</span>
+        }
+<span class="nc" id="L305">    }</span>
+
+    @Override
+    public void onFriendDelete(Message friend) {
+<span class="nc" id="L309">        deleteFriend(friend.getUsername());</span>
+<span class="nc" id="L310">    }</span>
+
+    private void fetchUserEmail(int userId, UserEmailCallback callback) {
+<span class="nc" id="L313">        String url = &quot;http://10.90.72.167:8080/users/&quot; + userId;</span>
+
+<span class="nc" id="L315">        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</span>
+                response -&gt; {
+                    try {
+<span class="nc" id="L318">                        JSONObject jsonObject = new JSONObject(response);</span>
+<span class="nc" id="L319">                        userEmail = jsonObject.getString(&quot;emailId&quot;);</span>
+<span class="nc" id="L320">                        callback.onEmailFetched(userEmail);</span>
+<span class="nc" id="L321">                    } catch (JSONException e) {</span>
+<span class="nc" id="L322">                        Log.e(&quot;MessageActivity&quot;, &quot;Error parsing user email: &quot; + e.getMessage());</span>
+<span class="nc" id="L323">                    }</span>
+<span class="nc" id="L324">                },</span>
+                error -&gt; {
+<span class="nc" id="L326">                    Log.e(&quot;MessageActivity&quot;, &quot;Error fetching user email: &quot; + error.toString());</span>
+<span class="nc" id="L327">                    Toast.makeText(this, &quot;Failed to fetch user email: &quot; + error.getMessage(), Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L328">                }</span>
+        );
+
+<span class="nc" id="L331">        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);</span>
+<span class="nc" id="L332">    }</span>
+
+    public interface UserEmailCallback {
+        void onEmailFetched(String email);
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>

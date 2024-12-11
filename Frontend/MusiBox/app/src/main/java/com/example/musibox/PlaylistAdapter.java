@@ -1,10 +1,14 @@
 
 package com.example.musibox;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.musibox.R;
 import com.example.musibox.Song;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.SongViewHolder> {
@@ -39,10 +46,25 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.SongVi
 
         // Handle remove button click
         holder.removeButton.setOnClickListener(v -> {
-            songList.remove(position);
-            notifyItemRemoved(position);
-            notifyItemRangeChanged(position, songList.size());
+            if (context instanceof PlaylistActivity) {
+                ((PlaylistActivity) context).removeSong(
+                        ((PlaylistActivity) context).userId,
+                        ((PlaylistActivity) context).playlistId,
+                        song.getId()
+                );
+            }
         });
+
+
+        // Load the album cover
+        if (song.getCoverUrl() != null && !song.getCoverUrl().isEmpty()) {
+            new Thread(() -> {
+                Bitmap bitmap = getBitmapFromURL(song.getCoverUrl());
+                holder.albumCoverImageView.post(() -> holder.albumCoverImageView.setImageBitmap(bitmap));
+            }).start();
+        } else {
+            holder.albumCoverImageView.setImageResource(R.drawable.anri);
+        }
     }
 
     @Override
@@ -50,23 +72,39 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.SongVi
         return songList.size();
     }
 
+
     public static class SongViewHolder extends RecyclerView.ViewHolder {
         TextView songNameTextView;
         TextView artistNameTextView;
         Button removeButton;
+        ImageView albumCoverImageView;
+        ImageButton addButton;
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
             songNameTextView = itemView.findViewById(R.id.songNameTextView);
             artistNameTextView = itemView.findViewById(R.id.artistNameTextView);
             removeButton = itemView.findViewById(R.id.removeButton);
+            addButton = itemView.findViewById(R.id.addButton);
+            albumCoverImageView = itemView.findViewById(R.id.songImageView);
         }
     }
 
-    // Method to add a new song
-    public void addSong(Song song) {
-        songList.add(song);
-        notifyItemInserted(songList.size() - 1);
+
+
+    // Helper method to load images from a URL
+    private Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            return BitmapFactory.decodeStream(input);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
 

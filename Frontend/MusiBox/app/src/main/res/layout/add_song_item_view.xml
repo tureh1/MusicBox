@@ -1,0 +1,51 @@
+<!-- item_song.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <!-- Image on the left -->
+    <ImageView
+        android:id="@+id/songImageView"
+        android:layout_width="103dp"
+        android:layout_height="125dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/anri" />
+
+    <!-- Song details (TextViews) -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/songNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:text="Song Name" />
+
+        <TextView
+            android:id="@+id/artistNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:text="Artist Name" />
+    </LinearLayout>
+
+    <!-- Add Button -->
+    <ImageButton
+        android:id="@+id/addsongButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       android:src="@drawable/baseline_add_24"
+        android:textColor="@android:color/black"
+        android:backgroundTint="#00AAAAAA"
+        android:padding="8dp"/>
+
+</LinearLayout>

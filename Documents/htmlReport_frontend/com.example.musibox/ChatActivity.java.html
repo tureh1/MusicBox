@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatActivity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">ChatActivity.java</span></div><h1>ChatActivity.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
+import java.net.URI;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * The ChatActivity class provides a chat interface where users can send and receive real-time messages
+ * with their friends using WebSocket and retrieve old chat messages from a REST API.
+ */
+<span class="nc" id="L39">public class ChatActivity extends AppCompatActivity {</span>
+    private String friendEmail;
+    private String userEmail;
+    private WebSocketClient webSocketClient;
+    private EditText messageInput;
+    private RecyclerView recyclerView;
+    private ChatAdapter chatAdapter;
+    private List&lt;ChatMessage&gt; messageList;
+    private Button sendButton;
+    private ImageButton backButton;
+    private TextView friendName;
+
+    /**
+     * Called when the activity is first created.
+     * Initializes views, retrieves user and friend information, and sets up WebSocket and chat functionality.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
+     *                           this contains the data most recently supplied in {@link #onSaveInstanceState}.
+     */
+    @SuppressLint(&quot;MissingInflatedId&quot;)
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+<span class="nc" id="L61">        super.onCreate(savedInstanceState);</span>
+<span class="nc" id="L62">        setContentView(R.layout.activity_chat);</span>
+<span class="nc" id="L63">        SharedPreferences sharedPreferences = getSharedPreferences(&quot;user_data&quot;, MODE_PRIVATE);</span>
+<span class="nc" id="L64">        String email = sharedPreferences.getString(&quot;emailId&quot;, null); // Default to null if not found</span>
+<span class="nc" id="L65">        int userId = sharedPreferences.getInt(&quot;userId&quot;, -1); // Default to -1 if not found</span>
+
+<span class="nc bnc" id="L67" title="All 4 branches missed.">        if (email != null &amp;&amp; userId != -1) {</span>
+            // Use the email and userId to populate fields or make requests
+<span class="nc" id="L69">            Log.d(&quot;ChatActivity&quot;, &quot;Logged-in email: &quot; + email);</span>
+        } else {
+            // Handle missing data (e.g., redirect to login)
+<span class="nc" id="L72">            Toast.makeText(this, &quot;Please log in first&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L73">            Intent loginIntent = new Intent(this, LoginActivity.class);</span>
+<span class="nc" id="L74">            startActivity(loginIntent);</span>
+<span class="nc" id="L75">            finish(); // Optionally finish this activity</span>
+        }
+
+
+        // Initialize views and variables
+<span class="nc" id="L80">        friendEmail = getIntent().getStringExtra(&quot;friendEmail&quot;);</span>
+<span class="nc" id="L81">        userEmail = getIntent().getStringExtra(&quot;userEmail&quot;);</span>
+
+<span class="nc" id="L83">        messageInput = findViewById(R.id.messageInput);</span>
+<span class="nc" id="L84">        sendButton = findViewById(R.id.sendButton);</span>
+<span class="nc" id="L85">        backButton = findViewById(R.id.back);</span>
+<span class="nc" id="L86">        recyclerView = findViewById(R.id.recyclerView);</span>
+<span class="nc" id="L87">        friendName = findViewById(R.id.friendname);</span>
+
+<span class="nc" id="L89">        messageList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L90">        chatAdapter = new ChatAdapter(messageList);</span>
+<span class="nc" id="L91">        recyclerView.setLayoutManager(new LinearLayoutManager(this));</span>
+<span class="nc" id="L92">        recyclerView.setAdapter(chatAdapter);</span>
+<span class="nc" id="L93">        friendName.setText(friendEmail);</span>
+        // Fetch old messages and set up WebSocket
+<span class="nc" id="L95">        fetchOldMessages();</span>
+<span class="nc" id="L96">        setupWebSocket();</span>
+<span class="nc" id="L97">        setupButtons();</span>
+<span class="nc" id="L98">    }</span>
+
+    /**
+     * Sets up a WebSocket connection for real-time messaging.
+     */
+    private void setupWebSocket() {
+<span class="nc" id="L104">        String wsUrl = &quot;ws://10.90.72.167:8080/chat/&quot; + userEmail + &quot;/&quot; + friendEmail;</span>
+        URI uri;
+        try {
+<span class="nc" id="L107">            uri = new URI(wsUrl);</span>
+<span class="nc" id="L108">        } catch (Exception e) {</span>
+<span class="nc" id="L109">            Log.e(&quot;ChatActivity&quot;, &quot;Invalid WebSocket URL&quot;, e);</span>
+<span class="nc" id="L110">            return;</span>
+<span class="nc" id="L111">        }</span>
+
+<span class="nc" id="L113">        webSocketClient = new WebSocketClient(uri) {</span>
+            @Override
+            public void onOpen(ServerHandshake handshakedata) {
+<span class="nc" id="L116">                Log.d(&quot;ChatActivity&quot;, &quot;WebSocket opened&quot;);</span>
+<span class="nc" id="L117">            }</span>
+
+            @Override
+            public void onMessage(String message) {
+<span class="nc" id="L121">                runOnUiThread(() -&gt; {</span>
+<span class="nc" id="L122">                    String currentTimestamp = formatCurrentTimestamp();</span>
+<span class="nc" id="L123">                    messageList.add(new ChatMessage(message, false, currentTimestamp));</span>
+<span class="nc" id="L124">                    chatAdapter.notifyItemInserted(messageList.size() - 1);</span>
+<span class="nc" id="L125">                    recyclerView.scrollToPosition(messageList.size() - 1);</span>
+<span class="nc" id="L126">                });</span>
+<span class="nc" id="L127">            }</span>
+
+            @Override
+            public void onClose(int code, String reason, boolean remote) {
+<span class="nc" id="L131">                Log.d(&quot;ChatActivity&quot;, &quot;WebSocket closed: &quot; + reason);</span>
+<span class="nc" id="L132">            }</span>
+
+            @Override
+            public void onError(Exception ex) {
+<span class="nc" id="L136">                Log.e(&quot;ChatActivity&quot;, &quot;WebSocket error: &quot;, ex);</span>
+<span class="nc" id="L137">            }</span>
+        };
+
+<span class="nc" id="L140">        webSocketClient.connect();</span>
+<span class="nc" id="L141">    }</span>
+
+    /**
+     * Fetches old messages between the user and the friend from a REST API.
+     */
+    private void fetchOldMessages() {
+<span class="nc" id="L147">        String url = &quot;http://10.90.72.167:8080/messages?email=&quot; + userEmail + &quot;&amp;friendEmail=&quot; + friendEmail;</span>
+<span class="nc" id="L148">        RequestQueue queue = Volley.newRequestQueue(this);</span>
+
+<span class="nc" id="L150">        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,</span>
+                response -&gt; {
+                    try {
+<span class="nc" id="L153">                        JSONArray messagesArray = new JSONArray(response);</span>
+
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                        for (int i = 0; i &lt; messagesArray.length(); i++) {</span>
+<span class="nc" id="L156">                            JSONObject messageObject = messagesArray.getJSONObject(i);</span>
+<span class="nc" id="L157">                            String sender = messageObject.getString(&quot;sender&quot;);</span>
+<span class="nc" id="L158">                            String content = messageObject.getString(&quot;content&quot;);</span>
+<span class="nc" id="L159">                            String timestamp = messageObject.getString(&quot;timestamp&quot;); // Make sure this is correct</span>
+
+                            // Determine if the message was sent by the user
+<span class="nc" id="L162">                            boolean isSentByUser = sender.equals(userEmail);</span>
+
+                            // Create ChatMessage with the correct timestamp from the backend
+<span class="nc" id="L165">                            messageList.add(new ChatMessage(content, isSentByUser, timestamp));</span>
+                        }
+
+                        // Notify the adapter and scroll to the last message
+<span class="nc" id="L169">                        chatAdapter.notifyDataSetChanged();</span>
+<span class="nc" id="L170">                        recyclerView.scrollToPosition(messageList.size() - 1);</span>
+<span class="nc" id="L171">                    } catch (JSONException e) {</span>
+<span class="nc" id="L172">                        Log.e(&quot;ChatActivity&quot;, &quot;JSON Parsing error: &quot;, e);</span>
+<span class="nc" id="L173">                    }</span>
+<span class="nc" id="L174">                },</span>
+<span class="nc" id="L175">                error -&gt; Log.e(&quot;ChatActivity&quot;, &quot;Volley error: &quot;, error));</span>
+
+<span class="nc" id="L177">        queue.add(stringRequest);</span>
+<span class="nc" id="L178">    }</span>
+
+    /**
+     * Sets up button click listeners for sending messages and navigating back.
+     */
+    private void setupButtons() {
+<span class="nc" id="L184">        sendButton.setOnClickListener(v -&gt; sendMessage());</span>
+<span class="nc" id="L185">        backButton.setOnClickListener(v -&gt; finish());</span>
+<span class="nc" id="L186">    }</span>
+
+    /**
+     * Sends a message via WebSocket and updates the chat UI.
+     */
+    private void sendMessage() {
+<span class="nc" id="L192">        String message = messageInput.getText().toString();</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (message.isEmpty()) {</span>
+<span class="nc" id="L194">            Toast.makeText(this, &quot;Message cannot be empty&quot;, Toast.LENGTH_SHORT).show();</span>
+<span class="nc" id="L195">            return;</span>
+        }
+
+<span class="nc bnc" id="L198" title="All 4 branches missed.">        if (webSocketClient != null &amp;&amp; webSocketClient.isOpen()) {</span>
+            try {
+<span class="nc" id="L200">                webSocketClient.send(message);</span>
+
+<span class="nc" id="L202">                String currentTimestamp = formatCurrentTimestamp();</span>
+<span class="nc" id="L203">                messageList.add(new ChatMessage(message, true, currentTimestamp));</span>
+<span class="nc" id="L204">                chatAdapter.notifyItemInserted(messageList.size() - 1);</span>
+<span class="nc" id="L205">                recyclerView.scrollToPosition(messageList.size() - 1);</span>
+<span class="nc" id="L206">                messageInput.setText(&quot;&quot;);</span>
+<span class="nc" id="L207">            } catch (Exception e) {</span>
+<span class="nc" id="L208">                Log.e(&quot;ChatActivity&quot;, &quot;Error sending message: &quot;, e);</span>
+<span class="nc" id="L209">            }</span>
+        } else {
+<span class="nc" id="L211">            Toast.makeText(this, &quot;Unable to send message&quot;, Toast.LENGTH_SHORT).show();</span>
+        }
+<span class="nc" id="L213">    }</span>
+
+    /**
+     * Formats the current timestamp into a user-friendly string.
+     *
+     * @return A formatted timestamp string.
+     */
+    private String formatCurrentTimestamp() {
+<span class="nc" id="L221">        SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;hh:mm a&quot;, Locale.getDefault());</span>
+<span class="nc" id="L222">        return dateFormat.format(new Date());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>

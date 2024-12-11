@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=0;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">debug</a> &gt; <a href="index.source.html" class="el_package">com.example.musibox</a> &gt; <span class="el_source">MessageAdapter.java</span></div><h1>MessageAdapter.java</h1><pre class="source lang-java linenums">package com.example.musibox;
+
+import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.List;
+
+public class MessageAdapter extends RecyclerView.Adapter&lt;MessageAdapter.MessageViewHolder&gt; {
+    private final List&lt;Message&gt; messageList;
+    private final OnMessageClickListener listener;
+
+    // Define an interface for click events
+    public interface OnMessageClickListener {
+        void onMessageClick(String friendEmail);
+        void onFriendDelete(Message friend); // Add method for deleting a friend
+    }
+
+<span class="fc" id="L25">    public MessageAdapter(List&lt;Message&gt; messageList, OnMessageClickListener listener) {</span>
+<span class="fc" id="L26">        this.messageList = messageList;</span>
+<span class="fc" id="L27">        this.listener = listener;</span>
+<span class="fc" id="L28">    }</span>
+
+    @NonNull
+    @Override
+    public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+<span class="nc" id="L33">        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_message_veiw, parent, false);</span>
+<span class="nc" id="L34">        return new MessageViewHolder(view);</span>
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
+<span class="nc" id="L39">        Message message = messageList.get(position);</span>
+<span class="nc" id="L40">        holder.bind(message, listener);</span>
+<span class="nc" id="L41">    }</span>
+
+    @Override
+    public int getItemCount() {
+<span class="fc" id="L45">        return messageList.size();</span>
+    }
+
+    public static class MessageViewHolder extends RecyclerView.ViewHolder {
+        private final TextView friendEmailView;
+        private final ImageView optionsIcon;
+
+        public MessageViewHolder(View itemView) {
+<span class="nc" id="L53">            super(itemView);</span>
+<span class="nc" id="L54">            friendEmailView = itemView.findViewById(R.id.username);</span>
+<span class="nc" id="L55">            optionsIcon = itemView.findViewById(R.id.optionsIcon); // Reference to the options icon</span>
+<span class="nc" id="L56">        }</span>
+
+        public void bind(Message message, OnMessageClickListener listener) {
+<span class="nc" id="L59">            friendEmailView.setText(message.getUsername());</span>
+<span class="nc" id="L60">            itemView.setOnClickListener(v -&gt; listener.onMessageClick(message.getUsername()));</span>
+
+<span class="nc" id="L62">            optionsIcon.setOnClickListener(v -&gt; {</span>
+                // Show a popup menu with the &quot;Delete Friend&quot; option
+<span class="nc" id="L64">                PopupMenu popupMenu = new PopupMenu(v.getContext(), optionsIcon);</span>
+<span class="nc" id="L65">                MenuInflater inflater = popupMenu.getMenuInflater();</span>
+<span class="nc" id="L66">                inflater.inflate(R.menu.friend_dropdown, popupMenu.getMenu());</span>
+
+<span class="nc" id="L68">                popupMenu.setOnMenuItemClickListener(item -&gt; {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                    if (item.getItemId() == R.id.action_delete_friend) {</span>
+<span class="nc" id="L70">                        listener.onFriendDelete(message); // Call onFriendDelete</span>
+<span class="nc" id="L71">                        return true;</span>
+                    }
+<span class="nc" id="L73">                    return false;</span>
+                });
+<span class="nc" id="L75">                popupMenu.show();</span>
+<span class="nc" id="L76">            });</span>
+<span class="nc" id="L77">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span>Generated by the Android Gradle plugin 8.5.2</div></body></html>

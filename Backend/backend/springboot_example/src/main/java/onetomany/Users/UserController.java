@@ -1,6 +1,8 @@
 package onetomany.Users;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,9 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
+
+    // Default color is black (#000000 or 0x000000)
+    private static final int DEFAULT_COLOR = 0x000000;
 
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
@@ -335,6 +341,94 @@ public class UserController {
                 : "{\"message\":\"User successfully banned\"}";
 
         return ResponseEntity.ok(responseMessage);
+    }
+    /*
+    @PutMapping(path = "/users/{id}/color")
+    public ResponseEntity<String> updateUserColor(@PathVariable int id, @RequestBody String color) {
+        Optional<User> userOpt = Optional.ofNullable(userRepository.findById(id));
+
+        return userOpt.map(user -> {
+            // Update the user's color
+            user.setColor(color);
+            userRepository.save(user);
+            return ResponseEntity.ok("{\"message\":\"Color updated successfully\"}");
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}"));
+    }
+
+    @GetMapping(path = "/users/{id}/color")
+    public ResponseEntity<String> getUserColor(@PathVariable int id) {
+        Optional<User> userOpt = Optional.ofNullable(userRepository.findById(id));
+
+        // Return the color if found, otherwise return the default color "0x000000"
+        return userOpt.map(user -> {
+            // Get the user's color or return the default "0x000000" if it's not set
+            String color = user.getColor();
+            String formattedColor = (color != null && color.startsWith("#")) ? "0x" + color.substring(1) : "0x000000";
+            return ResponseEntity.ok(formattedColor);
+        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("0x000000"));
+    }
+*/
+    /*
+    @PutMapping("/users/{userId}/color")
+    public ResponseEntity<String> updateUserColor(@PathVariable int userId, @RequestBody String colorHex) {
+        try {
+            if (!colorHex.matches("^#[0-9A-Fa-f]{8}$")) {
+                return ResponseEntity.badRequest().body("Invalid color format");
+            }
+            User user = userRepository.findById(userId);//.orElseThrow(() -> new RuntimeException("User not found"));
+            user.setColor(colorHex);
+            userRepository.save(user);
+            return ResponseEntity.ok("Color updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating color");
+        }
+    }
+
+    @GetMapping("/users/{userId}/color")
+    public ResponseEntity<String> getUserColor(@PathVariable int userId) {
+        try {
+            User user = userRepository.findById(userId);//.orElseThrow(() -> new RuntimeException("User not found"));
+            return ResponseEntity.ok(user.getColor());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching color");
+        }
+    }
+*/
+
+    @PutMapping("/users/{userId}/color")
+    @Transactional
+    public ResponseEntity<String> updateUserColor(@PathVariable int userId, @RequestBody ColorUpdateRequest request) {
+        // Convert the hex color string to an integer
+        int color = (int) Long.parseLong(request.getBackgroundColor(), 16);
+
+        // Find the user by ID using the custom repository method
+        Optional<User> userOptional = Optional.ofNullable(userRepository.findById(userId));
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setBackgroundColor(color);  // Update the color field
+            userRepository.save(user);  // Save the updated user
+            return ResponseEntity.ok("Color updated successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+    }
+
+    @GetMapping("/users/{userId}/color")
+    public ResponseEntity<Map<String, String>> getUserColor(@PathVariable int userId) {
+        Optional<User> userOptional = Optional.ofNullable(userRepository.findById(userId));
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            int color = user.getBackgroundColor();
+
+            // Convert the integer color back to a hex string (AARRGGBB)
+            String colorHex = String.format("%08X", color);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("backgroundColor", colorHex);
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 }
 

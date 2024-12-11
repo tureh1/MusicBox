@@ -6,19 +6,45 @@ public class Song {
     private String artist;
     private double averageRating;
     private float userRating;  // Store user rating here
+    private String coverUrl;
+    private boolean selected;
+    private boolean isHeartFilled;
 
-    public Song(int id, String title, String artist, double averageRating) {
+
+    public Song(int id, String title, String artist, double averageRating, String coverUrl) {
         this.id = id;
         this.title = title;
         this.artist = artist;
         this.averageRating = averageRating;
+        this.coverUrl = coverUrl;
+        this.isHeartFilled = false;
+        this.selected = false;
 
     }
 
-    public Song(String title, String artist) {
+    public Song(String title, String artist, String coverUrl) {
         this.title = title;
         this.artist = artist;
+        this.coverUrl = coverUrl;
     }
+
+    public Song(int id, String title, String artist, String coverUrl) {
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.coverUrl = coverUrl;
+    }
+
+    public Song(int songId, String title, String artist, double avgRating) {
+        this.id = id;
+        this.title = title;
+        this.artist = artist;
+        this.averageRating = averageRating;
+        this.coverUrl = coverUrl;
+        this.isHeartFilled = false;
+        this.selected = false;
+    }
+
 
     public int getId() {
         return id;
@@ -55,5 +81,29 @@ public class Song {
         this.averageRating = averageRating;
     }
 
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
+    }
+
+
+    public boolean isHeartFilled() {
+        return isHeartFilled;
+    }
+
+    public void setHeartFilled(boolean heartFilled) {
+        isHeartFilled = heartFilled;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
 
 }
