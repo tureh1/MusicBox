@@ -26,7 +26,8 @@ espresso = "3.6.1"
 
 [libraries]
 #noinspection SimilarGradleDependency
-colorpicker = { module = "com.github.QuadFlask:colorpicker", version.ref = "colorpicker" }
+colorpicker = { module = "com.github.QuadFlask:colorpicker", version = "0.0.15" }
+
 #noinspection SimilarGradleDependency
 colorpicker-v0013 = { module = "com.github.QuadFlask:colorpicker", version.ref = "colorpickerVersion" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
