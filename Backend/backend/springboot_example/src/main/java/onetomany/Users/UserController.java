@@ -338,4 +338,32 @@ public class UserController {
 
         return ResponseEntity.ok(responseMessage);
     }
+
+
+    @PutMapping(path = "/users/{id}/emailId")
+    public ResponseEntity<String> updateUserEmail(@PathVariable int id, @RequestBody User userRequest) {
+        // Validate input emailId
+        if (userRequest == null || userRequest.getEmailId() == null || userRequest.getEmailId().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"message\":\"Invalid input\"}");
+        }
+
+        // Check if the user exists
+        Optional<User> existingUserOpt = Optional.ofNullable(userRepository.findById(id));
+        if (!existingUserOpt.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}");
+        }
+
+        // Check if the new email already exists
+        User existingEmailUser = userRepository.findByEmailId(userRequest.getEmailId());
+        if (existingEmailUser != null && existingEmailUser.getId() != id) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"Email already exists\"}");
+        }
+
+        // Update the email
+        User userToUpdate = existingUserOpt.get();
+        userToUpdate.setEmailId(userRequest.getEmailId());
+        userRepository.save(userToUpdate);
+
+        return ResponseEntity.ok("{\"message\":\"Email updated successfully\"}");
+    }
 }
