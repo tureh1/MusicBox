@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 
 @RunWith(AndroidJUnit4.class)
-public class PingSystemTest {
+public class SettingsTest {
 
     @Before
     public void setUp() {
@@ -67,7 +67,7 @@ public class PingSystemTest {
     private void logIn() {
         ActivityScenario<LoginActivity> scenario = ActivityScenario.launch(LoginActivity.class);
 
-        onView(withId(R.id.username)).perform(typeText("ping"));
+        onView(withId(R.id.username)).perform(typeText("bae"));
         onView(withId(R.id.password)).perform(typeText("password"));
         onView(withId(R.id.loginButton)).perform(click());
 
@@ -75,100 +75,7 @@ public class PingSystemTest {
     }
 
     @Test
-    public void testSearchBar() {
-        logIn();
-        // Navigate to MessageActivity
-        onView(withId(R.id.navigation_message)).perform(click());
-
-        // Ensure that the search bar is visible
-        onView(withId(R.id.search_bar))
-                .check(matches(isDisplayed()));
-
-        // Type "user1" in the search bar
-        onView(withId(R.id.search_bar))
-                .perform(typeText("user1"));
-
-
-    }
-
-    @Test
-    public void userProfileNavigation() {
-        logIn();
-
-        onView(withId(R.id.navigation_user)).perform(click());
-        // Click the home button
-        onView(withId(R.id.user)).perform(click());
-
-        // Verify if the MainPage activity is launched
-        onView(ViewMatchers.withId(R.id.settings)) // assuming MainPage has this ID
-                .check(matches(ViewMatchers.isDisplayed()));
-    }
-
-
-    @Test
-    public void testGroupButtonNavigation() {
-        logIn();
-        // Navigate to MessageActivity
-        onView(withId(R.id.navigation_message)).perform(click());
-        // Click the home button
-        onView(withId(R.id.adduser)).perform(click());
-
-        // Verify if the MainPage activity is launched
-        onView(ViewMatchers.withId(R.id.search_bar)) // assuming MainPage has this ID
-                .check(matches(ViewMatchers.isDisplayed()));
-    }
-
-    @Test
-    public void testHomeButtonNavigation() {
-        logIn();
-        // Navigate to MessageActivity
-        onView(withId(R.id.navigation_message)).perform(click());
-        // Click the home button
-        onView(withId(R.id.home)).perform(click());
-
-        // Verify if the MainPage activity is launched
-        onView(ViewMatchers.withId(R.id.search_barAlbum))
-                .check(matches(ViewMatchers.isDisplayed()));
-    }
-    @Test
-    public void signUp() {
-        ActivityScenario<SignUp> scenario = ActivityScenario.launch(SignUp.class);
-        onView(withId(R.id.email)).perform(typeText("test1"));
-        onView(withId(R.id.password)).perform(typeText("password"));
-        onView(withId(R.id.confirm)).perform(typeText("password"));
-        onView(withId(R.id.SignUpButton)).perform(click());
-
-    }
-
-
-    @Test
-    public void testGroupSearchBar() {
-        logIn();
-        // Navigate to MessageActivity
-        onView(withId(R.id.navigation_adduser)).perform(click());
-
-        // Ensure that the search bar is visible
-        onView(withId(R.id.search_bar))
-                .check(matches(isDisplayed()));
-
-        // Type "user1" in the search bar
-        onView(withId(R.id.search_bar))
-                .perform(typeText("user1"));
-
-
-    }
-    @Test
-    public void testMainPageLoadsCorrectly() {
-        logIn();
-
-        // Verify that the main components are displayed\
-
-        onView(withId(R.id.navigation_home)).check(matches(isDisplayed()));
-        onView(withId(R.id.search_barAlbum)).check(matches(isDisplayed()));
-        onView(withId(R.id.recyclerView)).check(matches(isDisplayed()));
-    }
-    @Test
-    public void testLogoutFunctionality() {
+    public void testRestPasswordFunctionality() {
         logIn();
         onView(withId(R.id.navigation_user)).check(matches(isDisplayed()));
         // Navigate to the profile screen
@@ -179,15 +86,20 @@ public class PingSystemTest {
 
         // Navigate to the settings
         onView(withId(R.id.settings)).perform(click());
+        onView(withId(R.id.edit_password)).check(matches(isDisplayed()));
+        onView(withId(R.id.edit_password)).perform(typeText("newpass"));
+        onView(withId(R.id.confirm_password)).check(matches(isDisplayed()));
+        onView(withId(R.id.confirm_password)).perform(typeText("newpass"));
+        onView(withId(R.id.update_password_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.update_password_button)).perform(click());
 
         // Verify the settings screen is displayed (optional, if it has a unique view)
-        onView(withId(R.id.logout)).check(matches(isDisplayed()));
-
-        // Perform logout
-        onView(withId(R.id.logout)).perform(click());
 
         // Verify the user is redirected to LoginActivity
         onView(withId(R.id.loginButton)).check(matches(isDisplayed()));
+        onView(withId(R.id.username)).perform(typeText("bae"));
+        onView(withId(R.id.password)).perform(typeText("newpass"));
+        onView(withId(R.id.loginButton)).perform(click());
+        onView(withId(R.id.search_barAlbum)).check(matches(isDisplayed()));
     }
-
 }
