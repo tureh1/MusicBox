@@ -210,7 +210,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 response -> {
-                    // Log the raw response for debugging
+
                     Log.d("UserProfileActivity", "Raw Response: " + response);
 
                     // Check if the response is in JSON format (starts with "{" and ends with "}")
