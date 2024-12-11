@@ -136,8 +136,8 @@ public class UserController {
 
     @PostMapping(path = "/login")
     @Operation(
-            summary = "user login",
-            description = "a user logs in with email and password"
+            summary = "User login",
+            description = "A user logs in with email and password"
     )
     @ApiResponses({
             @ApiResponse(
@@ -149,8 +149,16 @@ public class UserController {
                     )
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "invalid request",
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)
@@ -168,6 +176,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Invalid email or password\"}");
         }
 
+        if (!existingUser.getIfActive()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Account is inactive\"}");
+        }
+
         String role = existingUser.getIsAdmin() ? "admin" : "user";
         String successMessage = String.format(
                 "{\"message\":\"Login successful\", \"userId\": %d, \"role\": \"%s\"}",
@@ -176,7 +188,6 @@ public class UserController {
         );
         return ResponseEntity.ok(successMessage);
     }
-
 
 
     @DeleteMapping(path = "/users/{emailId}")
@@ -236,26 +247,19 @@ public class UserController {
             )
     })
 
-    @GetMapping("/admin/users")
-    public ResponseEntity<List<User>> getAllUsersForAdmin(@RequestHeader("role") String role) {
-        if (!"admin".equals(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+    public String updateUserPassword(@PathVariable String emailId, @RequestBody User.UpdatePasswordRequest updateRequest) {
+        User existingUser = userRepository.findByEmailId(emailId);
+        if (existingUser == null) {
+            return passwordChangeFailure; // User not found
         }
-        return ResponseEntity.ok(userRepository.findAll());
-    }
-
-    @DeleteMapping("/admin/users/{id}")
-    public ResponseEntity<String> deleteUserByAdmin(@RequestHeader("role") String role, @PathVariable int id) {
-        if (!"admin".equals(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\":\"Access denied\"}");
+        String newPassword = updateRequest.getNewPassword();
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return passwordChangeFailure; // Invalid password
         }
 
-        User user = userRepository.findById(id);
-        if (user != null) {
-            userRepository.delete(user);
-            return ResponseEntity.ok("{\"message\":\"User deleted successfully\"}");
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}");
+        existingUser.setPassword(newPassword);
+        userRepository.save(existingUser);
+        return passwordChangeSuccess; // Password updated successfully
     }
 
     @PostMapping("/admin/create")
@@ -288,20 +292,49 @@ public class UserController {
     }
 
 
-
-    public String updateUserPassword(@PathVariable String emailId, @RequestBody User.UpdatePasswordRequest updateRequest) {
-        User existingUser = userRepository.findByEmailId(emailId);
-        if (existingUser == null) {
-            return passwordChangeFailure; // User not found
+    @PostMapping("/users/{emailId}/status")
+    @Operation(
+            summary = "Toggle user's active status",
+            description = "Toggle a user's active status between 1 (active) and 0 (inactive)"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully toggled active status",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    public ResponseEntity<String> toggleUserStatus(@PathVariable String emailId) {
+        User user = userRepository.findByEmailId(emailId);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}");
         }
-        String newPassword = updateRequest.getNewPassword();
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            return passwordChangeFailure; // Invalid password
-        }
 
-        existingUser.setPassword(newPassword);
-        userRepository.save(existingUser);
-        return passwordChangeSuccess; // Password updated successfully
+        // Toggle the active status, ensuring that it's either true or false
+        Boolean currentStatus = user.getIfActive();
+        if (currentStatus == null) {
+            currentStatus = false; // Default to false if it's null
+        }
+        user.setIfActive(!currentStatus);  // Switch the status (if it was true, set it to false and vice versa)
+        userRepository.save(user);
+
+        // Determine the response message based on the new status
+        String responseMessage = user.getIfActive()
+                ? "{\"message\":\"User successfully unbanned\"}"
+                : "{\"message\":\"User successfully banned\"}";
+
+        return ResponseEntity.ok(responseMessage);
     }
 }
 

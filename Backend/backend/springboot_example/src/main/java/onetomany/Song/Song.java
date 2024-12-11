@@ -22,6 +22,18 @@ public class Song {
     @Column
     private double averageRating;
 
+    private String cover;  // New field for album cover URL
+
+    // Getters and setters
+
+    public String getCover() {
+        return cover;
+    }
+
+    public void setCover(String cover) {
+        this.cover = cover;
+    }
+
     @ElementCollection
     @MapKeyColumn(name = "userEmail")
     @Column(name = "rating")

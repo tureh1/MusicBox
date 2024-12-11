@@ -14,7 +14,10 @@ public class User {
 
     private String emailId;
     private String password;
+
+    // Defaulting ifActive to true when creating a new User
     private Boolean ifActive = true;
+
     private Boolean isAdmin = false;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -67,6 +70,10 @@ public class User {
     }
 
     public Boolean getIfActive() {
+        // Ensuring ifActive never returns null by defaulting to false if it is null
+        if (ifActive == null) {
+            return false; // Default to false if null
+        }
         return ifActive;
     }
 
