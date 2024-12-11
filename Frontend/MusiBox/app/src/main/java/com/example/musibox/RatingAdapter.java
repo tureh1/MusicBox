@@ -95,7 +95,7 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
             int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
 
             // Send the song ID to the backend
-            String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs/" + userId + "/favorite/" + song.getId();
+            String url = "http://coms-3090-048.class.las.iastate.edu:8080/users/" + userId + "/favorites/songs/" + song.getId();
 
             // Create a Volley request to send the song ID
             StringRequest stringRequest = new StringRequest(Request.Method.POST, url,

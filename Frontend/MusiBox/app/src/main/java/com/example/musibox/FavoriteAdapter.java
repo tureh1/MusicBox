@@ -52,8 +52,15 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.Favori
             holder.coverImageView.setImageResource(R.drawable.anri); // Replace with your placeholder image
         }
 
-        // Handle remove button click
+// Handle remove button click
         holder.removeButton.setOnClickListener(v -> {
+            // Call the removeSongFromBackend method from the activity to remove the song from the backend
+            if (context instanceof FavoriteActivity) {
+                FavoriteActivity activity = (FavoriteActivity) context;
+                activity.removeSongFromBackend(activity.userId, song.getId()); // Pass userId and songId
+            }
+
+            // Remove song locally and update UI
             favoriteSongs.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, favoriteSongs.size());

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,16 +15,21 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UserProfileActivity extends AppCompatActivity {
@@ -32,6 +38,9 @@ public class UserProfileActivity extends AppCompatActivity {
     private Button saveBio, deleteBio;
     private int userId; // Updated to use int type
     private ImageButton house, addUserButton, messageButton, userButton, settingsButton;
+    private RecyclerView recyclerView;
+    private ProfileAdapter profileAdapter;
+    private List<Song> profileList = new ArrayList<>();
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -63,7 +72,7 @@ public class UserProfileActivity extends AppCompatActivity {
         userButton = findViewById(R.id.user);
         settingsButton = findViewById(R.id.settings);
 
-        Intent intent = getIntent();
+
 
         setupNavigationButtons();
 
@@ -86,7 +95,106 @@ public class UserProfileActivity extends AppCompatActivity {
         });
 
         deleteBio.setOnClickListener(view -> deleteBio());
+        // Add this line to find your TextView
+        TextView title = findViewById(R.id.title);
+
+        // Set the OnClickListener
+        title.setOnClickListener(view -> {
+            // Start the FavoriteActivity when the TextView is clicked
+            Intent intent = new Intent(UserProfileActivity.this, FavoriteActivity.class);
+            startActivity(intent);
+        });
+
+        recyclerView = findViewById(R.id.recyclerView); // Ensure RecyclerView is in your layout
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Initialize profileAdapter here (before setting the RecyclerView)
+        profileAdapter = new ProfileAdapter(profileList, this);
+        recyclerView.setAdapter(profileAdapter);
+
+        getProfileData();
+        getFriendsCount(userId);
     }
+
+    private void getProfileData() {
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/users/" + userId + "/favorites";
+        Log.d("UserProfileActivity", "GET Profile Data URL: " + url); // Log the GET request URL
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    Log.d("UserProfileActivity", "Raw Response: " + response);
+
+                    try {
+                        // Directly parse the response as a JSON array (assuming the response is an array of songs)
+                        JSONArray songsArray = new JSONArray(response);
+
+                        profileList.clear(); // Clear the existing list
+
+                        for (int i = 0; i < songsArray.length(); i++) {
+                            JSONObject songObject = songsArray.getJSONObject(i);
+                            String title = songObject.getString("title");
+                            String artist = songObject.getString("artist");
+                            String coverUrl = songObject.getString("coverUrl");
+
+                            // Create a Song object and add it to the list
+                            Song song = new Song(title, artist, coverUrl);
+                            profileList.add(song);
+                        }
+
+                        // Notify the adapter that data has changed
+                        profileAdapter.notifyDataSetChanged();
+
+                    } catch (JSONException e) {
+                        Log.e("UserProfileActivity", "Error parsing profile data: " + e.getMessage());
+                    }
+                },
+                error -> {
+                    String errorMessage = "Failed to fetch profile data: " + error.getMessage();
+                    if (error.networkResponse != null) {
+                        errorMessage += "\nResponse Code: " + error.networkResponse.statusCode
+                                + "\nResponse Data: " + new String(error.networkResponse.data);
+                    }
+                    Log.e("UserProfileActivity", errorMessage);
+                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                });
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+    private void getFriendsCount(int userId) {
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/profiles/users/" + userId + "/friendCount";
+
+        Log.d("UserProfileActivity", "GET Friends Count URL: " + url); // Log the GET request URL
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    Log.d("UserProfileActivity", "Friends Count Response: " + response);
+
+                    try {
+                        // Since the backend returns just an integer (the count), parse it directly
+                        int count = Integer.parseInt(response); // Convert the response to an integer
+                        friendsCount.setText("Friends: " + count); // Set the friends count in the TextView
+                    } catch (NumberFormatException e) {
+                        Log.e("UserProfileActivity", "Error parsing friends count: " + e.getMessage());
+                        friendsCount.setText("Error fetching friends count");
+                    }
+                },
+                error -> {
+                    String errorMessage = "Failed to fetch friends count: " + error.getMessage();
+                    if (error.networkResponse != null) {
+                        errorMessage += "\nResponse Code: " + error.networkResponse.statusCode
+                                + "\nResponse Data: " + new String(error.networkResponse.data);
+                    }
+                    Log.e("UserProfileActivity", errorMessage); // Log the error
+                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                });
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+
+
+
 
     private void setupNavigationButtons() {
         house.setOnClickListener(v -> startActivity(new Intent(UserProfileActivity.this, MainPage.class)));
@@ -97,7 +205,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void getBio() {
-        String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
+        String url = "http://10.90.72.167:8080/users/" + userId + "/profile/bio";
         Log.d("UserProfileActivity", "GET Bio URL: " + url); // Log the GET request URL
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -120,7 +228,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         // If the response is plain text, display it directly
                         bioProfile.setText(response);
                         Log.d("UserProfileActivity", "Raw Bio: " + response);
-                        Toast.makeText(UserProfileActivity.this, "Bio is in an unexpected format", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(UserProfileActivity.this, "Create a Bio", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
@@ -138,7 +246,7 @@ public class UserProfileActivity extends AppCompatActivity {
 
 
     private void saveBio(String bioText) {
-        String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
+        String url = "http://10.90.72.167:8080/users/" + userId + "/profile/bio";
         Log.d("UserProfileActivity", "POST Bio URL: " + url); // Log the POST request URL
 
         JSONObject jsonBody = new JSONObject();
@@ -171,7 +279,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
     private void deleteBio() {
-        String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
+        String url = "http://10.90.72.167:8080/users/" + userId + "/profile/bio";
         Log.d("UserProfileActivity", "DELETE Bio URL: " + url); // Log the DELETE request URL
 
         StringRequest stringRequest = new StringRequest(Request.Method.DELETE, url,
