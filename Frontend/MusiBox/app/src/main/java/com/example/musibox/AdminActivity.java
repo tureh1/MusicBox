@@ -205,20 +205,14 @@ public class AdminActivity extends AppCompatActivity implements AdminAdapter.OnU
         // Sending a POST request without additional parameters
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, null,
                 response -> {
-                    try {
-                        Log.d("BanUserResponse", response.toString());
+                    Log.d("BanUserResponse", response.toString());
 
-                        String message = response.getString("message");
-                        if ("User status toggled successfully".equalsIgnoreCase(message)) {
-                            Toast.makeText(this, "User status toggled successfully", Toast.LENGTH_SHORT).show();
-                            fetchUsers(""); // Refresh the list after banning/activating
-                        } else {
-                            Toast.makeText(this, "Failed to toggle user status", Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(this, "Error in toggling user status", Toast.LENGTH_SHORT).show();
-                    }
+
+                    Toast.makeText(this, "User status toggled successfully", Toast.LENGTH_SHORT).show();
+
+                    // Fetch users list (refresh after action)
+                    fetchUsers("");
+
                 },
                 error -> {
                     Log.e("BanUserError", error.toString());
