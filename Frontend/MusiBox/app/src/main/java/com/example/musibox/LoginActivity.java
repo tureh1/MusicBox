@@ -22,7 +22,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText email;
     private EditText password;
     private Button loginButton;
-    private Button deleteButton;
+
     private TextView forgotPassword;
     private TextView signUpLink;
     private boolean isFirstClick = true; // Flag to check if it's the first click
@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         email = findViewById(R.id.username);
         password = findViewById(R.id.password);
         loginButton = findViewById(R.id.loginButton);
-        deleteButton = findViewById(R.id.DeleteButton);
+
         forgotPassword = findViewById(R.id.forgotPassword);
         signUpLink = findViewById(R.id.signup);
 
