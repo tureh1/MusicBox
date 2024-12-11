@@ -8,6 +8,16 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+/*
+author @tu reh
+API Implemented fetching data from opentdb
+CRUDL implemented
+POST to fetch data from API
+GET to retrive and display fetched data
+PUT to submit answer questions
+DELETE to remove trivia data
+ */
+
 @RestController
 @RequestMapping("/trivia")
 public class TriviaController {
