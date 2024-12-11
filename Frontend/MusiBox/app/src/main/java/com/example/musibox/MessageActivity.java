@@ -1,27 +1,34 @@
 package com.example.musibox;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.ArrayList;
-import android.text.Editable;
-import android.text.TextWatcher;
 import java.util.List;
 
 public class MessageActivity extends AppCompatActivity implements MessageAdapter.OnMessageClickListener, UserAdapter.OnUserClickListener {
@@ -38,7 +45,6 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
     private RecyclerView friendsList;
     private List<User> userList;
     private UserAdapter userAdapter;
-
 
     @SuppressLint({"MissingInflatedId", "ClickableViewAccessibility"})
     @Override
@@ -63,7 +69,7 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         // Set up the search bar
         searchBar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @SuppressLint("NotifyDataSetChanged")
             @Override
@@ -78,8 +84,9 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
             }
 
             @Override
-            public void afterTextChanged(Editable s) { }
+            public void afterTextChanged(Editable s) {}
         });
+
         findViewById(R.id.message_activity_root).setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 if (friendsList.getVisibility() == View.VISIBLE || friendsList.getVisibility() == View.GONE) {
@@ -91,7 +98,6 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
             return true;
         });
 
-
         searchBar.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 friendsList.setVisibility(View.VISIBLE);
@@ -100,14 +106,9 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
                 if (userList.isEmpty()) {
                     friendsList.setVisibility(View.GONE);
                 }
-
                 recyclerView.setVisibility(View.VISIBLE);
             }
         });
-
-
-
-
     }
 
     private void initViews() {
@@ -118,7 +119,6 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         addUserButton = findViewById(R.id.adduser);
         messageButton = findViewById(R.id.message);
         userButton = findViewById(R.id.user);
-
     }
 
     private void setupRecyclerView() {
@@ -262,27 +262,33 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
         Toast.makeText(this, "Failed to fetch friends: " + error.getMessage(), Toast.LENGTH_SHORT).show();
     }
 
-    void deleteFriend(String friendEmail) {
+    public void deleteFriend(String friendEmail) {
         int userId = getSharedPreferences("user_data", MODE_PRIVATE).getInt("userId", -1);
         if (userId == -1) {
             Toast.makeText(this, "No user logged in", Toast.LENGTH_SHORT).show();
             return;
         }
-
         String url = "http://10.90.72.167:8080/users/" + userId + "/friends/" + friendEmail;
 
+        // Create a StringRequest with method DELETE
         StringRequest deleteRequest = new StringRequest(Request.Method.DELETE, url,
-                response -> {
-                    Intent intent = new Intent(MessageActivity.this, MessageActivity.class);
-                    Toast.makeText(this, "Friend deleted successfully", Toast.LENGTH_SHORT).show();
-                    startActivity(intent);
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Handle success
+                        Toast.makeText(getApplicationContext(), "Friend deleted successfully", Toast.LENGTH_SHORT).show();
+                    }
                 },
-                error -> {
-                    Log.e("MessageActivity", "Error deleting friend: " + error.toString());
-                    Toast.makeText(this, "Failed to delete friend: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Handle error
+                        Toast.makeText(getApplicationContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
                 }
         );
 
+        // Add the request to the Volley request queue
         VolleySingleton.getInstance(this).addToRequestQueue(deleteRequest);
     }
 
@@ -325,14 +331,13 @@ public class MessageActivity extends AppCompatActivity implements MessageAdapter
                 },
                 error -> {
                     Log.e("MessageActivity", "Error fetching user email: " + error.toString());
-                    Toast.makeText(this, "Failed to fetch user email: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-        );
+                    Toast.makeText(this, "Error fetching user email", Toast.LENGTH_SHORT).show();
+                });
 
         VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
     }
 
-    public interface UserEmailCallback {
+    interface UserEmailCallback {
         void onEmailFetched(String email);
     }
 }
