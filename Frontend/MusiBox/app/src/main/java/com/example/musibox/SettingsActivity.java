@@ -51,7 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
             Intent intent = new Intent(SettingsActivity.this, UserProfileActivity.class);
             startActivity(intent);
         });
-        // Set up the password update 
+        // Set up the password update
         updatePasswordButton.setOnClickListener(v -> {
             if (validatePasswordInputs()) {
                 // Send the password update request
@@ -67,7 +67,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    // Validate the password inputs
+    // Validate the password input
     private boolean validatePasswordInputs() {
         String passwordInput = editPassword.getText().toString().trim();
         String confirmInput = confirmPassword.getText().toString().trim();
