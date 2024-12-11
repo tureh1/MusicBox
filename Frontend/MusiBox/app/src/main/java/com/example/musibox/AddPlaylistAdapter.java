@@ -22,7 +22,7 @@ public class AddPlaylistAdapter extends RecyclerView.Adapter<AddPlaylistAdapter.
 
     private List<Song> songList;
     private Context context;
-    private OnSongAddListener onSongAddListener; 
+    private OnSongAddListener onSongAddListener; // Declare listener
 
     // Constructor with listener
     public AddPlaylistAdapter(List<Song> songList, Context context, OnSongAddListener onSongAddListener) {
