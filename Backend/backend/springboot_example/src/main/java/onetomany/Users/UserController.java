@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 /**
  *
  * @author Tu Reh
- * test 10
+ * User Feature for Login FInished
+ * Implemented a role for Admin within Users
+ * Login Method Checks if the role Admin exist within User
  */
 
 @RestController
