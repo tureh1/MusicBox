@@ -93,7 +93,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 saveBio(bioText);
             }
         });
-
+        // Set the OnClickListener for the delete button
         deleteBio.setOnClickListener(view -> deleteBio());
         // Add this line to find your TextView
         TextView title = findViewById(R.id.title);
