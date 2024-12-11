@@ -26,7 +26,6 @@ import java.util.List;
 
 public class AddSongActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CODE = 1;
     private RecyclerView recyclerView;
     private ImageButton backButton;
     private AddPlaylistAdapter adapter;

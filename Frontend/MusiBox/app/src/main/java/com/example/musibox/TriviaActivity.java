@@ -231,6 +231,7 @@ public class TriviaActivity extends AppCompatActivity {
         }
     }
 
+
     private void showResultsDialog() {
         String resultMessage = "You got " + correctAnswers + " out of 5 correct!";
 
