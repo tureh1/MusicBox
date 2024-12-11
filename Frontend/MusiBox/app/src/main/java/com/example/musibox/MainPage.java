@@ -269,7 +269,7 @@ public class MainPage extends AppCompatActivity implements WebSocketListener, Ra
      * Fetches all songs from the server and updates the song list.
      */
     private void fetchSongData() {
-        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs";
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs/random";
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET, url, null,

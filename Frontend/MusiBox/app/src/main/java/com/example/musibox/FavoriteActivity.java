@@ -1,5 +1,6 @@
 package com.example.musibox;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -29,11 +30,18 @@ public class FavoriteActivity extends AppCompatActivity {
     private FavoriteAdapter favoriteAdapter;
     private List<Song> favoriteSongs;
     private RequestQueue requestQueue;
+    private String userEmail;
+    int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite);
+
+        // Initialize SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE);
+        userEmail = sharedPreferences.getString("emailId", null);
+        userId = sharedPreferences.getInt("userId", -1);
 
         // Back Button
         ImageButton backButton = findViewById(R.id.backButton);
@@ -56,7 +64,8 @@ public class FavoriteActivity extends AppCompatActivity {
     }
 
     private void fetchFavoriteSongsFromBackend() {
-        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs"; // Replace with your API endpoint
+
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/users/" + userId + "/favorites";
 
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
@@ -85,8 +94,8 @@ public class FavoriteActivity extends AppCompatActivity {
         requestQueue.add(jsonArrayRequest);
     }
 
-    public void removeSongFromBackend(int songId) {
-        String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs/" + songId;
+    public void removeSongFromBackend(int userId, int songId) {
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/users/" + userId + "/favorites/songs/" + songId;
 
         StringRequest stringRequest = new StringRequest(
                 Request.Method.DELETE,

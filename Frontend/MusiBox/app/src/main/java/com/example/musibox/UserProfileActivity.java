@@ -120,7 +120,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         // If the response is plain text, display it directly
                         bioProfile.setText(response);
                         Log.d("UserProfileActivity", "Raw Bio: " + response);
-                        Toast.makeText(UserProfileActivity.this, "Bio is in an unexpected format", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(UserProfileActivity.this, "Create a Bio", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
