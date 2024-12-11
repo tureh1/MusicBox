@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp"
-    tools:context=".MainActivity">
-
+    android:background="@color/BabyBlue">
 
     <TextView
+        android:id="@+id/SplashText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/jockeyone"
@@ -18,28 +16,14 @@
         android:textAlignment="center"
         android:textColor="@color/NavyBlue"
         android:textSize="70sp"
-        android:layout_marginBottom="30dp" />
-
+        android:layout_marginBottom="10dp" />
 
     <TextView
+        android:id="@+id/SplashText1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Rate your faviorte tunes"
+        android:text="Rate your favorite tunes"
+        android:textAlignment="center"
         android:textSize="18sp"
-        android:layout_marginBottom="40dp"
-        android:textAlignment="center"/>
-
-
-    <Button
-        android:id="@+id/getStartedButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Get Started"
-        android:backgroundTint="@color/BabyBlue"
-        android:textSize="20sp" />
-
+        android:textColor="@color/NavyBlue" />
 </LinearLayout>
-
-
-
-

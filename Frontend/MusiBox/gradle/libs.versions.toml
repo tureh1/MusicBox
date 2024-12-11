@@ -1,6 +1,7 @@
 [versions]
 agp = "8.5.2"
 colorpicker = "0.0.15"
+colorpickerVersion = "0.0.13"
 glide = "4.15.1"
 hamcrestLibrary = "2.2"
 javaWebsocket = "1.5.7"
@@ -25,6 +26,7 @@ espresso = "3.6.1"
 
 [libraries]
 colorpicker = { module = "com.github.QuadFlask:colorpicker", version.ref = "colorpicker" }
+colorpicker-v0013 = { module = "com.github.QuadFlask:colorpicker", version.ref = "colorpickerVersion" }
 compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrestLibrary" }
