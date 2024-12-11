@@ -2,20 +2,32 @@ package com.example.musibox;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder> {
 
@@ -39,6 +51,7 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
     @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+
         Song song = songList.get(position);
         double averageRating = song.getAverageRating();
         holder.titleTextView.setText(song.getTitle());
@@ -64,6 +77,54 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
                 onRatingChangeListener.onRatingChanged(song.getId(), (int) rating);
             }
         });
+
+        //Handle HeartButton
+        if(song.isHeartFilled()){
+            holder.heartButton.setImageResource(R.drawable.baseline_favorite_24); // Filled heart drawable
+        } else {
+            holder.heartButton.setImageResource(R.drawable.baseline_favorite_border_24); // Empty heart drawable
+        }
+
+        holder.heartButton.setOnClickListener(v -> {
+            song.setHeartFilled(!song.isHeartFilled()); // Toggle heart state
+            notifyItemChanged(position); // Refresh the specific item
+
+            // Retrieve user data from SharedPreferences
+            SharedPreferences sharedPreferences = context.getSharedPreferences("user_data", Context.MODE_PRIVATE);
+            String email = sharedPreferences.getString("emailId", null); // Default to null if not found
+            int userId = sharedPreferences.getInt("userId", -1); // Default to -1 if not found
+
+            // Send the song ID to the backend
+            String url = "http://coms-3090-048.class.las.iastate.edu:8080/songs/" + userId + "/favorite/" + song.getId();
+
+            // Create a Volley request to send the song ID
+            StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // Handle successful response from the server (optional)
+                            Log.d("Volley", "Response: " + response);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            // Handle error response (optional)
+                            Log.e("Volley", "Error: " + error.getMessage());
+                        }
+                    }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    // Send the song ID as a parameter in the POST request
+                    Map<String, String> params = new HashMap<>();
+                    params.put("songId", String.valueOf(song.getId()));
+                    return params;
+                }
+            };
+
+            // Add the request to the Volley request queue
+            Volley.newRequestQueue(context).add(stringRequest);
+        });
     }
 
     @Override
@@ -75,6 +136,7 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
         TextView titleTextView, artistTextView, averageRatingTextView;
         RatingBar ratingBar;
         ImageView albumCoverImageView;
+        ImageButton heartButton;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -83,6 +145,7 @@ public class RatingAdapter extends RecyclerView.Adapter<RatingAdapter.ViewHolder
             averageRatingTextView = itemView.findViewById(R.id.average_rating);
             ratingBar = itemView.findViewById(R.id.rating_bar);
             albumCoverImageView = itemView.findViewById(R.id.album_cover);
+            heartButton = itemView.findViewById(R.id.heartButton);
         }
     }
 

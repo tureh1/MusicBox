@@ -4,47 +4,65 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/RateAlbumText"
-        android:layout_width="172dp"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="131dp"
-        android:layout_marginTop="89dp"
-        android:layout_marginEnd="106dp"
-        android:fontFamily="@font/joan"
-        android:shadowColor="@color/black"
-        android:shadowRadius="10"
-        android:text="Rate Songs"
-        android:textColor="@color/black"
-        android:textSize="25sp" />
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+
+        >
+
+        <TextView
+            android:id="@+id/MusiBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="16dp"
+            android:layout_weight="0"
+            android:text="MusiBox"
+            android:textColor="@color/NavyBlue"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/options_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/baseline_menu_24"
+          android:contentDescription="Options Menu"
+            android:layout_marginLeft="250dp"
+            android:background="#FFF6F6"
+          android:padding="8dp" />
+
+    </LinearLayout>
     <EditText
         android:id="@+id/search_barAlbum"
         android:layout_width="match_parent"
         android:layout_height="43dp"
-        android:layout_below="@id/RateAlbumText"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="-105dp"
+        android:layout_marginTop="70dp"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/searchbar"
         android:drawableLeft="@drawable/baseline_search_24"
         android:hint="Search for Songs" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="403dp"
         android:layout_height="511dp"
         android:layout_above="@id/bottomNavigationView"
-        android:layout_below="@+id/RateAlbumText"
+        android:layout_below="@+id/search_barAlbum"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="1dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="17dp"
         android:clipToPadding="false"
         android:paddingBottom="16dp" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"
