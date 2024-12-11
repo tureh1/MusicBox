@@ -67,7 +67,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    // Validate the password input
+    // Validate the password inputs
     private boolean validatePasswordInputs() {
         String passwordInput = editPassword.getText().toString().trim();
         String confirmInput = confirmPassword.getText().toString().trim();
