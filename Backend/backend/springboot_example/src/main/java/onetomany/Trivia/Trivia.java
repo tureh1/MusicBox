@@ -3,6 +3,10 @@ package onetomany.Trivia;
 import jakarta.persistence.*;
 import java.util.List;
 
+/*
+author @tu reh
+ */
+
 @Entity
 public class Trivia {
 
