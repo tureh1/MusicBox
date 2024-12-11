@@ -104,7 +104,7 @@ public class FriendController {
     })
     public ResponseEntity<String> addFriend(@PathVariable int userId, @RequestBody Map<String, String> friendRequest) {
         Optional<User> userOpt = Optional.ofNullable(userRepository.findById(userId));
-        if (!userOpt.isPresent()) {
+        if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
         }
 
@@ -121,46 +121,50 @@ public class FriendController {
             return ResponseEntity.badRequest().body("{\"error\": \"Friend email is required\"}");
         }
 
-        // Check if a friend request already exists (user -> friend)
+        // Check if the friend exists
+        User friendUser = userRepository.findByEmailId(friendEmail);
+        if (friendUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Friend user not found\"}");
+        }
+
+        // Check for an existing entry (user -> friend)
         Friend friendEntry = friendRepository.findByUserIdAndFriendEmail(userId, friendEmail);
+
+        // If the friendEntry exists and is already accepted, do nothing
         if (friendEntry != null && friendEntry.isAccepted()) {
             return ResponseEntity.badRequest().body("{\"error\": \"Friend already exists\"}");
         }
 
-        // Check if there is a mutual friend request (friend -> user)
-        User friendUser = userRepository.findByEmailId(friendEmail);
-        if (friendUser != null) {
-            Friend mutualEntry = friendRepository.findByUserIdAndFriendEmail(friendUser.getId(), user.getEmailId());
-
-            // If mutualEntry exists and is pending, accept both requests
-            if (mutualEntry != null && !mutualEntry.isAccepted()) {
-                // Accept the mutual request and the current request
+        // Check if a pending mutual request exists (friend -> user)
+        Friend mutualEntry = friendRepository.findByUserIdAndFriendEmail(friendUser.getId(), user.getEmailId());
+        if (mutualEntry != null) {
+            if (!mutualEntry.isAccepted()) {
+                // If the reverse request is pending, mark both as accepted
+                mutualEntry.setAccepted(true);
                 if (friendEntry == null) {
-                    // Create a new friend entry for the current user
                     friendEntry = new Friend(user, friendEmail, true);
                 } else {
-                    // If a request already exists but is pending, update it to accepted
                     friendEntry.setAccepted(true);
                 }
-
-                // Accept the mutual entry
-                mutualEntry.setAccepted(true);
                 friendRepository.saveAll(List.of(friendEntry, mutualEntry));
-
-                return ResponseEntity.ok("{\"message\": \"Friend request accepted and mutual friendship established\"}");
+                return ResponseEntity.ok("{\"message\": \"Friendship established mutually\"}");
+            } else {
+                // If the reverse request is already accepted, do nothing
+                return ResponseEntity.badRequest().body("{\"error\": \"Friendship already established\"}");
             }
         }
 
-        // Create a new pending friend request if no mutual entry exists
+        // If no mutual request exists, create or update the request as pending
         if (friendEntry == null) {
             friendEntry = new Friend(user, friendEmail, false);
             friendRepository.save(friendEntry);
-            return ResponseEntity.ok("{\"message\": \"Friend request pending mutual acceptance\"}");
+            return ResponseEntity.ok("{\"message\": \"Friend request sent\"}");
+        } else if (!friendEntry.isAccepted()) {
+            return ResponseEntity.ok("{\"message\": \"Friend request is still pending\"}");
         }
 
-        return ResponseEntity.ok("{\"message\": \"Friend request already sent, waiting for mutual acceptance\"}");
+        return ResponseEntity.badRequest().body("{\"error\": \"Unhandled state\"}");
     }
-
 
 
 
@@ -199,7 +203,7 @@ public class FriendController {
     @DeleteMapping(path = "/users/{userId}/friends/{friendEmail}")
     @Operation(
             summary = "Delete a user's friend",
-            description = "Deletes the friend of a user from both user and friend's friend list"
+            description = "Marks the friendship as pending on both sides, allowing re-addition"
     )
     @ApiResponses({
             @ApiResponse(
@@ -225,23 +229,29 @@ public class FriendController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"User not found\"}");
         }
 
-        // Find the friend entry for the specified user and email
+        // Retrieve the user and friend records
         Friend friend = friendRepository.findByUserIdAndFriendEmail(userId, friendEmail);
         if (friend != null) {
-            // Remove the mutual friendship (on both sides) if it exists
             User friendUser = userRepository.findByEmailId(friendEmail);
+
+            // Handle mutual friendship
             if (friendUser != null) {
                 Friend mutualFriend = friendRepository.findByUserIdAndFriendEmail(friendUser.getId(), userOpt.get().getEmailId());
                 if (mutualFriend != null) {
-                    friendRepository.delete(mutualFriend); // Delete the mutual friend entry
+                    // Mark mutual friendship as pending
+                    mutualFriend.setAccepted(false);
+                    friend.setAccepted(false);
+                    friendRepository.saveAll(List.of(friend, mutualFriend));
+                    return ResponseEntity.ok("{\"message\": \"Friendship marked as pending\"}");
                 }
             }
 
-            // Delete the friend entry for the user
-            friendRepository.delete(friend);
-            return ResponseEntity.ok(success);
+            // If only one side exists, mark as pending
+            friend.setAccepted(false);
+            friendRepository.save(friend);
+            return ResponseEntity.ok("{\"message\": \"Friendship marked as pending\"}");
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Friend not found\"}");
     }
 }

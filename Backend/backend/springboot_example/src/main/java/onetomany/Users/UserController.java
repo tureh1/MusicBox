@@ -1,8 +1,6 @@
 package onetomany.Users;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +25,6 @@ public class UserController {
 
     @Autowired
     UserRepository userRepository;
-
-    // Default color is black (#000000 or 0x000000)
-    private static final int DEFAULT_COLOR = 0x000000;
 
     private String success = "{\"message\":\"success\"}";
     private String failure = "{\"message\":\"failure\"}";
@@ -142,8 +136,8 @@ public class UserController {
 
     @PostMapping(path = "/login")
     @Operation(
-            summary = "user login",
-            description = "a user logs in with email and password"
+            summary = "User login",
+            description = "A user logs in with email and password"
     )
     @ApiResponses({
             @ApiResponse(
@@ -155,8 +149,16 @@ public class UserController {
                     )
             ),
             @ApiResponse(
-                    responseCode = "404",
-                    description = "invalid request",
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)
@@ -174,6 +176,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Invalid email or password\"}");
         }
 
+        if (!existingUser.getIfActive()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\":\"Account is inactive\"}");
+        }
+
         String role = existingUser.getIsAdmin() ? "admin" : "user";
         String successMessage = String.format(
                 "{\"message\":\"Login successful\", \"userId\": %d, \"role\": \"%s\"}",
@@ -182,7 +188,6 @@ public class UserController {
         );
         return ResponseEntity.ok(successMessage);
     }
-
 
 
     @DeleteMapping(path = "/users/{emailId}")
@@ -242,26 +247,19 @@ public class UserController {
             )
     })
 
-    @GetMapping("/admin/users")
-    public ResponseEntity<List<User>> getAllUsersForAdmin(@RequestHeader("role") String role) {
-        if (!"admin".equals(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+    public String updateUserPassword(@PathVariable String emailId, @RequestBody User.UpdatePasswordRequest updateRequest) {
+        User existingUser = userRepository.findByEmailId(emailId);
+        if (existingUser == null) {
+            return passwordChangeFailure; // User not found
         }
-        return ResponseEntity.ok(userRepository.findAll());
-    }
-
-    @DeleteMapping("/admin/users/{id}")
-    public ResponseEntity<String> deleteUserByAdmin(@RequestHeader("role") String role, @PathVariable int id) {
-        if (!"admin".equals(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("{\"message\":\"Access denied\"}");
+        String newPassword = updateRequest.getNewPassword();
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            return passwordChangeFailure; // Invalid password
         }
 
-        User user = userRepository.findById(id);
-        if (user != null) {
-            userRepository.delete(user);
-            return ResponseEntity.ok("{\"message\":\"User deleted successfully\"}");
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}");
+        existingUser.setPassword(newPassword);
+        userRepository.save(existingUser);
+        return passwordChangeSuccess; // Password updated successfully
     }
 
     @PostMapping("/admin/create")
@@ -294,108 +292,48 @@ public class UserController {
     }
 
 
-
-    public String updateUserPassword(@PathVariable String emailId, @RequestBody User.UpdatePasswordRequest updateRequest) {
-        User existingUser = userRepository.findByEmailId(emailId);
-        if (existingUser == null) {
-            return passwordChangeFailure; // User not found
+    @PostMapping("/users/{emailId}/status")
+    @Operation(
+            summary = "Toggle user's active status",
+            description = "Toggle a user's active status between 1 (active) and 0 (inactive)"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully toggled active status",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "User not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
+            )
+    })
+    public ResponseEntity<String> toggleUserStatus(@PathVariable String emailId) {
+        User user = userRepository.findByEmailId(emailId);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}");
         }
-        String newPassword = updateRequest.getNewPassword();
-        if (newPassword == null || newPassword.trim().isEmpty()) {
-            return passwordChangeFailure; // Invalid password
+
+        // Toggle the active status, ensuring that it's either true or false
+        Boolean currentStatus = user.getIfActive();
+        if (currentStatus == null) {
+            currentStatus = false; // Default to false if it's null
         }
+        user.setIfActive(!currentStatus);  // Switch the status (if it was true, set it to false and vice versa)
+        userRepository.save(user);
 
-        existingUser.setPassword(newPassword);
-        userRepository.save(existingUser);
-        return passwordChangeSuccess; // Password updated successfully
-    }
-    /*
-    @PutMapping(path = "/users/{id}/color")
-    public ResponseEntity<String> updateUserColor(@PathVariable int id, @RequestBody String color) {
-        Optional<User> userOpt = Optional.ofNullable(userRepository.findById(id));
+        // Determine the response message based on the new status
+        String responseMessage = user.getIfActive()
+                ? "{\"message\":\"User successfully unbanned\"}"
+                : "{\"message\":\"User successfully banned\"}";
 
-        return userOpt.map(user -> {
-            // Update the user's color
-            user.setColor(color);
-            userRepository.save(user);
-            return ResponseEntity.ok("{\"message\":\"Color updated successfully\"}");
-        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\":\"User not found\"}"));
-    }
-
-    @GetMapping(path = "/users/{id}/color")
-    public ResponseEntity<String> getUserColor(@PathVariable int id) {
-        Optional<User> userOpt = Optional.ofNullable(userRepository.findById(id));
-
-        // Return the color if found, otherwise return the default color "0x000000"
-        return userOpt.map(user -> {
-            // Get the user's color or return the default "0x000000" if it's not set
-            String color = user.getColor();
-            String formattedColor = (color != null && color.startsWith("#")) ? "0x" + color.substring(1) : "0x000000";
-            return ResponseEntity.ok(formattedColor);
-        }).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("0x000000"));
-    }
-*/
-    /*
-    @PutMapping("/users/{userId}/color")
-    public ResponseEntity<String> updateUserColor(@PathVariable int userId, @RequestBody String colorHex) {
-        try {
-            if (!colorHex.matches("^#[0-9A-Fa-f]{8}$")) {
-                return ResponseEntity.badRequest().body("Invalid color format");
-            }
-            User user = userRepository.findById(userId);//.orElseThrow(() -> new RuntimeException("User not found"));
-            user.setColor(colorHex);
-            userRepository.save(user);
-            return ResponseEntity.ok("Color updated successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating color");
-        }
-    }
-
-    @GetMapping("/users/{userId}/color")
-    public ResponseEntity<String> getUserColor(@PathVariable int userId) {
-        try {
-            User user = userRepository.findById(userId);//.orElseThrow(() -> new RuntimeException("User not found"));
-            return ResponseEntity.ok(user.getColor());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching color");
-        }
-    }
-*/
-
-    @PutMapping("/users/{userId}/color")
-    @Transactional
-    public ResponseEntity<String> updateUserColor(@PathVariable int userId, @RequestBody ColorUpdateRequest request) {
-        // Convert the hex color string to an integer
-        int color = (int) Long.parseLong(request.getBackgroundColor(), 16);
-
-        // Find the user by ID using the custom repository method
-        Optional<User> userOptional = Optional.ofNullable(userRepository.findById(userId));
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            user.setBackgroundColor(color);  // Update the color field
-            userRepository.save(user);  // Save the updated user
-            return ResponseEntity.ok("Color updated successfully!");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
-    }
-
-    @GetMapping("/users/{userId}/color")
-    public ResponseEntity<Map<String, String>> getUserColor(@PathVariable int userId) {
-        Optional<User> userOptional = Optional.ofNullable(userRepository.findById(userId));
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            int color = user.getBackgroundColor();
-
-            // Convert the integer color back to a hex string (AARRGGBB)
-            String colorHex = String.format("%08X", color);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("backgroundColor", colorHex);
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        return ResponseEntity.ok(responseMessage);
     }
 }
-

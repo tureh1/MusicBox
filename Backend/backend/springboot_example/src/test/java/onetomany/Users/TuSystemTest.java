@@ -32,6 +32,7 @@ public class TuSystemTest {
                 .delete("/users/reset"); // Ensure the `/users/reset` endpoint exists for database cleanup
     }
 
+
     @Test
     public void testUserSignup() throws JSONException {
         String uniqueEmail = "testuser_" + System.currentTimeMillis() + "@example.com";
@@ -52,26 +53,45 @@ public class TuSystemTest {
 
     @Test
     public void testUserLogin() throws JSONException {
-        // Create a user first
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("emailId", "testuser@example.com");
-        requestBody.put("password", "securepassword");
+        // Step 1: Sign up a new user
+        JSONObject signupRequest = new JSONObject();
+        signupRequest.put("emailId", "admin@example.com");
+        signupRequest.put("password", "adminpassword");
 
-        RestAssured.given()
+        Response signupResponse = RestAssured.given()
                 .header("Content-Type", "application/json")
-                .body(requestBody.toString())
+                .body(signupRequest.toString())
                 .post("/signup");
 
-        // Attempt to login
-        Response response = RestAssured.given()
+        // Debug: Check if signup was successful
+        System.out.println("Signup Response Status: " + signupResponse.getStatusCode());
+        System.out.println("Signup Response Body: " + signupResponse.getBody().asString());
+        assertEquals(200, signupResponse.getStatusCode(), "Signup failed.");
+
+        // Step 2: Login as admin
+        JSONObject loginRequest = new JSONObject();
+        loginRequest.put("emailId", "admin@example.com");
+        loginRequest.put("password", "adminpassword");
+
+        Response loginResponse = RestAssured.given()
                 .header("Content-Type", "application/json")
-                .body(requestBody.toString())
+                .body(loginRequest.toString())
                 .post("/login");
 
-        assertEquals(200, response.getStatusCode());
-        String responseBody = response.getBody().asString();
-        assertTrue(responseBody.contains("\"message\":\"Login successful\""));
+        // Debug: Print response status and body
+        System.out.println("Login Response Status: " + loginResponse.getStatusCode());
+        System.out.println("Login Response Body: " + loginResponse.getBody().asString());
+
+        // Assertions
+        assertEquals(200, loginResponse.getStatusCode(), "Login endpoint failed.");
+        assertTrue(
+                loginResponse.getBody().asString().contains("\"message\":\"Login successful\""),
+                "Login response does not contain the expected success message. Response: " + loginResponse.getBody().asString()
+        );
     }
+
+
+
 
     @Test
     public void testFetchAllUsers() throws JSONException {
@@ -97,6 +117,109 @@ public class TuSystemTest {
         assertEquals(200, response.getStatusCode());
         assertTrue(response.getBody().asString().contains("testuser@example.com"));
     }
+
+    @Test
+    public void testGetUserById() throws JSONException {
+        // Sign up a new user
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("emailId", "testuser@example.com");
+        requestBody.put("password", "securepassword");
+
+        Response signupResponse = RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(requestBody.toString())
+                .post("/signup");
+
+        // Debug: Check if signup was successful
+        System.out.println("Signup Response: " + signupResponse.getBody().asString());
+        assertEquals(200, signupResponse.getStatusCode(), "Signup failed, cannot proceed with test.");
+
+        // Manually fetch all users to find the ID (if signup response lacks it)
+        Response allUsersResponse = RestAssured.given()
+                .header("Content-Type", "application/json")
+                .get("/users");
+
+        System.out.println("All Users Response: " + allUsersResponse.getBody().asString());
+        assertEquals(200, allUsersResponse.getStatusCode());
+
+        // Extract userId for the created user
+        int userId = allUsersResponse.jsonPath().getInt("find { it.emailId == 'testuser@example.com' }.id");
+
+        // Fetch user by ID
+        Response response = RestAssured.given()
+                .header("Content-Type", "application/json")
+                .get("/users/" + userId);
+
+        // Debug: Print response body for analysis
+        System.out.println("Get User by ID Response: " + response.getBody().asString());
+
+        // Assertions
+        assertEquals(200, response.getStatusCode());
+        assertTrue(response.getBody().asString().contains("testuser@example.com"));
+    }
+
+
+    @Test
+    public void testUpdatePassword() throws JSONException {
+        // Sign up a new user
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("emailId", "testuser@example.com");
+        requestBody.put("password", "securepassword");
+
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(requestBody.toString())
+                .post("/signup");
+
+        // Change the password
+        JSONObject passwordRequest = new JSONObject();
+        passwordRequest.put("newPassword", "newsecurepassword");
+
+        Response response = RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(passwordRequest.toString())
+                .put("/newpass/testuser@example.com");
+
+        // Assertions
+        assertEquals(200, response.getStatusCode());
+        assertEquals("{\"message\":\"password reset successfully\"}", response.getBody().asString());
+    }
+
+    @Test
+    public void testToggleUserStatus() throws JSONException {
+        // Sign up a user
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("emailId", "testuser@example.com");
+        requestBody.put("password", "securepassword");
+
+        RestAssured.given()
+                .header("Content-Type", "application/json")
+                .body(requestBody.toString())
+                .post("/signup");
+
+        // Toggle user status
+        Response response = RestAssured.given()
+                .header("Content-Type", "application/json")
+                .post("/users/testuser@example.com/status");
+
+        // Assertions
+        assertEquals(200, response.getStatusCode());
+        String responseBody = response.getBody().asString();
+        assertTrue(responseBody.contains("User successfully banned") || responseBody.contains("User successfully unbanned"));
+    }
+
+    @Test
+    public void testGetAllUsers() {
+        // Fetch all users
+        Response response = RestAssured.given()
+                .header("Content-Type", "application/json")
+                .get("/users");
+
+        // Assertions
+        assertEquals(200, response.getStatusCode());
+        assertTrue(response.getBody().asString().contains("emailId"));
+    }
+
 
     @Test
     public void testDeleteUser() throws JSONException {

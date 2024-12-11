@@ -112,11 +112,10 @@ public class SongSocket {
         if (songs.isEmpty()) {
             sendMessageToUser(session, createJsonResponse("error", "No songs available."));
         } else {
-            // Send each song's details, including the songId and its average rating
             for (Song song : songs) {
                 String songDetailsMessage = String.format(
-                        "{\"id\": %d, \"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f}",
-                        song.getId(), song.getTitle(), song.getArtist(), song.getAverageRating());
+                        "{\"id\": %d, \"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f, \"cover\": \"%s\"}",
+                        song.getId(), song.getTitle(), song.getArtist(), song.getAverageRating(), song.getCover());
                 sendMessageToUser(session, songDetailsMessage);
             }
         }
@@ -139,11 +138,10 @@ public class SongSocket {
         List<Song> songs = songRepository.findAll();
         for (Session session : sessionEmailMap.keySet()) {
             try {
-                // Send all song details to each user
                 for (Song song : songs) {
                     String songDetailsMessage = String.format(
-                            "{\"id\": %d, \"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f}",
-                            song.getId(), song.getTitle(), song.getArtist(), song.getAverageRating());
+                            "{\"id\": %d, \"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f, \"cover\": \"%s\"}",
+                            song.getId(), song.getTitle(), song.getArtist(), song.getAverageRating(), song.getCover());
                     session.getBasicRemote().sendText(songDetailsMessage);
                 }
             } catch (IOException e) {
@@ -151,6 +149,21 @@ public class SongSocket {
             }
         }
     }
+
+
+    private void broadcastNewSong(Song song) {
+        for (Session session : sessionEmailMap.keySet()) {
+            try {
+                String songDetailsMessage = String.format(
+                        "{\"id\": %d, \"title\": \"%s\", \"artist\": \"%s\", \"rating\": %.1f, \"cover\": \"%s\"}",
+                        song.getId(), song.getTitle(), song.getArtist(), song.getAverageRating(), song.getCover());
+                session.getBasicRemote().sendText(songDetailsMessage);
+            } catch (IOException e) {
+                logger.error("Error broadcasting new song: ", e);
+            }
+        }
+    }
+
 
     // Close the WebSocket session when a user disconnects
     @OnClose
