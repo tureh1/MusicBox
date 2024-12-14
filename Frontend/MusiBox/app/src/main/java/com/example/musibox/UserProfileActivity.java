@@ -12,6 +12,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.toolbox.StringRequest;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import androidx.activity.result.ActivityResultLauncher;
@@ -87,22 +89,23 @@ public class UserProfileActivity extends AppCompatActivity {
             usernameProfile.setText("No email provided");
         }
 
-        getUserBackgroundColor();
-        getBio();
 
+        getUserBackgroundColor(Integer.parseInt(userId));
+        getBio(Integer.parseInt(userId));
+        getFriendsCount(Integer.parseInt(userId));
         setupNavigationButtons();
 
         saveBio.setOnClickListener(view -> {
             String bioText = bioProfile.getText().toString().trim();
             if (!bioText.isEmpty()) {
-                saveBio(bioText);
+                saveBio(bioText, Integer.parseInt(userId));
             }
         });
-        // Set OnClickListener for profilePicture to open the gallery
+
         profilePicture.setOnClickListener(v -> openGallery());
 
 
-        deleteBio.setOnClickListener(view -> deleteBio());
+        deleteBio.setOnClickListener(view -> deleteBio(Integer.parseInt(userId)));
 
         colorPickerButton.setOnClickListener(view -> openColorPickerDialog());
 
@@ -143,30 +146,23 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
 
-    private void getBio() {
-        String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+
+    private void deleteBio(int userId) {
+
+        String url = "http://10.90.72.167:8080/users/" + userId + "/profile/bio";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
                 response -> {
-                    try {
-                        String bioText = response.getString("bio");
-                        bioProfile.setText(bioText);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(UserProfileActivity.this, "Error parsing bio", Toast.LENGTH_SHORT).show();
-                    }
+                    bioProfile.setText("");
+                    Toast.makeText(UserProfileActivity.this, "Successfully deleted", Toast.LENGTH_SHORT).show();
                 },
                 error -> {
-                    String errorMessage = "Failed to fetch bio: " + error.getMessage();
-                    if (error.networkResponse != null) {
-                        errorMessage += "\nResponse Code: " + error.networkResponse.statusCode;
-                    }
-                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    String errorMessage = "Failed to delete bio: " + error.getMessage();
                 });
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    private void saveBio(String bioText) {
-        String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
+    private void saveBio(String bioText, int userId) {
+        String url = "http://10.90.72.167:8080/users/" + userId + "/profile/bio";
         JSONObject jsonBody = new JSONObject();
         try {
             jsonBody.put("bio", bioText);
@@ -187,21 +183,66 @@ public class UserProfileActivity extends AppCompatActivity {
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    private void deleteBio() {
-        String url = "http://10.90.72.167:8080/users/" + userId + "/bio";
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, url, null,
+
+    private void getBio(int userId) {
+        String url = "http://10.90.72.167:8080/users/" + userId + "/profile/bio";
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
-                    bioProfile.setText("");
-                    Toast.makeText(UserProfileActivity.this, "Successfully deleted", Toast.LENGTH_SHORT).show();
+                    try {
+                        if (!response.has("bio")) {
+
+                            return;
+                        }
+                        String bioText = response.getString("bio");
+                        bioProfile.setText(bioText);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(UserProfileActivity.this, "Error parsing bio", Toast.LENGTH_SHORT).show();
+                    }
                 },
                 error -> {
-                    String errorMessage = "Failed to delete bio: " + error.getMessage();
-                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                    String errorMessage = "Failed to fetch bio: " + error.getMessage();
+                    if (error.networkResponse != null) {
+                        errorMessage += "\nResponse Code: " + error.networkResponse.statusCode;
+                    }
                 });
         VolleySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getUserBackgroundColor() {
+
+    private void getFriendsCount(int userId) {
+        String url = "http://coms-3090-048.class.las.iastate.edu:8080/profiles/users/" + userId + "/friendCount";
+
+        Log.d("UserProfileActivity", "GET Friends Count URL: " + url); // Log the GET request URL
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                response -> {
+                    Log.d("UserProfileActivity", "Friends Count Response: " + response);
+
+                    try {
+                        // Since the backend returns just an integer (the count), parse it directly
+                        int count = Integer.parseInt(response); // Convert the response to an integer
+                        friendsCount.setText("Friends: " + count); // Set the friends count in the TextView
+                    } catch (NumberFormatException e) {
+                        Log.e("UserProfileActivity", "Error parsing friends count: " + e.getMessage());
+                        friendsCount.setText("Error fetching friends count");
+                    }
+                },
+                error -> {
+                    String errorMessage = "Failed to fetch friends count: " + error.getMessage();
+                    if (error.networkResponse != null) {
+                        errorMessage += "\nResponse Code: " + error.networkResponse.statusCode
+                                + "\nResponse Data: " + new String(error.networkResponse.data);
+                    }
+                    Log.e("UserProfileActivity", errorMessage); // Log the error
+                    Toast.makeText(UserProfileActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                });
+
+        VolleySingleton.getInstance(this).addToRequestQueue(stringRequest);
+    }
+
+
+    private void getUserBackgroundColor(int userId) {
         String url = "http://10.90.72.167:8080/users/" + userId + "/profile/color";
 
         JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -250,7 +291,7 @@ public class UserProfileActivity extends AppCompatActivity {
     }
 
 
-    private void updateUserColor(int selectedColor) {
+    private void updateUserColor(int selectedColor,int userId) {
         // Include alpha channel in the color hex
         String colorHex = String.format("%08X", selectedColor);
         String url = "http://10.90.72.167:8080/users/" + userId + "/profile/color";
@@ -281,8 +322,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         Log.e("UserProfile", errorMessage);
                     }
 
-                    // Display the error message to the user
-                    Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+                   
                 }) {
             @Override
             public Map<String, String> getHeaders() {
@@ -310,7 +350,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     // Only update when user confirms the selection
                     if (selectedColor != currentBackgroundColor) {
                         changeBackgroundColor(selectedColor);
-                        updateUserColor(selectedColor); // Now update color after selection
+                        updateUserColor(selectedColor, Integer.parseInt(userId)); // Now update color after selection
                     }
                 })
                 .setNegativeButton("Cancel", null)

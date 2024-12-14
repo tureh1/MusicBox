@@ -94,14 +94,6 @@
 
 
                     <TextView
-                        android:id="@+id/review_count"
-                        android:layout_width="89dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="16dp"
-                        android:fontFamily="@font/joan"
-                        android:text="Reviews: 25" />
-
-                    <TextView
                         android:id="@+id/friends_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -168,7 +160,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="My Reviews"
+                android:text="My Favorites"
                 android:textSize="15sp"
                 android:textColor="@color/NavyBlue"
                 android:fontFamily="@font/joan" />
@@ -181,110 +173,6 @@
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <!-- Review 1 -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-
-                    android:orientation="vertical"
-                    android:padding="5dp">
-
-                    <TextView
-                        android:id="@+id/review_1_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/joan"
-                        android:text="Song Title 1"
-                        android:textColor="@color/NavyBlue"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/review_1_artist"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Artist 1"
-                        android:textColor="#666666"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/joan"/> <!-- Grey color for artist name -->
-
-                    <TextView
-                        android:id="@+id/review_1_rating"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rating: ★★★★☆"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/joan"/>
-                </LinearLayout>
-
-                <!-- Review 2 -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:layout_marginStart="5dp"
-                    android:orientation="vertical"
-                    android:padding="5dp">
-
-                    <TextView
-                        android:id="@+id/review_2_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/joan"
-                        android:text="Song Title 2"
-                        android:textColor="@color/NavyBlue"
-                        android:textSize="18sp" />
-
-                    <TextView
-                        android:id="@+id/review_2_artist"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Artist 2"
-                        android:textColor="#666666"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/joan"/>
-
-                    <TextView
-                        android:id="@+id/review_2_rating"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rating: ★★★☆☆"
-                        android:fontFamily="@font/joan"/>
-                </LinearLayout>
-
-                <!-- Review 3 -->
-                <LinearLayout
-                    android:layout_width="148dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="5dp">
-
-                    <TextView
-                        android:id="@+id/review_3_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/joan"
-                        android:text="Song Title 3"
-                        android:textColor="@color/NavyBlue"
-                        android:textSize="18sp"/>
-
-                    <TextView
-                        android:id="@+id/review_3_artist"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Artist 3"
-                        android:textColor="#666666"
-                        android:textSize="16sp"
-                        android:fontFamily="@font/joan"/>
-
-                    <TextView
-                        android:id="@+id/review_3_rating"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Rating: ★★★★★"
-                        android:fontFamily="@font/joan"/>
-
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
