@@ -1,0 +1,291 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RatingSocket</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">onetomany.Rating</a>
+</div>
+
+<h1>Coverage Summary for Class: RatingSocket (onetomany.Rating)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RatingSocket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    26.7%
+  </span>
+  <span class="absValue">
+    (4/15)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    10.2%
+  </span>
+  <span class="absValue">
+    (6/59)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package onetomany.Rating;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.databind.JsonNode;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import jakarta.websocket.*;
+&nbsp;import jakarta.websocket.server.PathParam;
+&nbsp;import jakarta.websocket.server.ServerEndpoint;
+&nbsp;import onetomany.Song.Song;
+&nbsp;import onetomany.Song.SongRepository;
+&nbsp;import onetomany.Song.SongSocket;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Controller;
+&nbsp;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Controller
+&nbsp;@ServerEndpoint(&quot;/rate/{email}/{songId}&quot;)
+<b class="fc">&nbsp;public class RatingSocket {</b>
+&nbsp;
+&nbsp;    private static RatingRepository ratingRepository;
+&nbsp;    private static SongRepository songRepository;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public void setRatingRepository(RatingRepository repo) {
+<b class="fc">&nbsp;        ratingRepository = repo;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public void setSongRepository(SongRepository repo) {
+<b class="fc">&nbsp;        songRepository = repo;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    private static Map&lt;Session, String&gt; sessionEmailMap = new ConcurrentHashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;    private final Logger logger = LoggerFactory.getLogger(SongSocket.class);</b>
+&nbsp;
+&nbsp;    // ObjectMapper for parsing JSON
+<b class="fc">&nbsp;    private final ObjectMapper objectMapper = new ObjectMapper();</b>
+&nbsp;
+&nbsp;    @OnOpen
+&nbsp;    public void onOpen(Session session, @PathParam(&quot;email&quot;) String email, @PathParam(&quot;songId&quot;) int songId) {
+<b class="nc">&nbsp;        logger.info(&quot;User connected: &quot; + email);</b>
+<b class="nc">&nbsp;        sessionEmailMap.put(session, email);</b>
+&nbsp;
+&nbsp;        // Send song details when the WebSocket connection is established
+<b class="nc">&nbsp;        sendSongDetails(session, songId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @OnMessage
+&nbsp;    public void onMessage(Session session, @PathParam(&quot;songId&quot;) int songId, String message) throws IOException {
+<b class="nc">&nbsp;        logger.info(&quot;Message received: &quot; + message);</b>
+&nbsp;
+&nbsp;        // Parse the incoming JSON message
+<b class="nc">&nbsp;        JsonNode jsonMessage = objectMapper.readTree(message);</b>
+&nbsp;        int rating;
+&nbsp;
+&nbsp;        // Check if the rating field exists and is an integer
+<b class="nc">&nbsp;        if (jsonMessage.has(&quot;rating&quot;)) {</b>
+<b class="nc">&nbsp;            rating = jsonMessage.get(&quot;rating&quot;).asInt();</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            sendMessageToUser(session, createJsonResponse(&quot;error&quot;, &quot;Rating field is missing.&quot;));</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+&nbsp;        // Validate the rating
+<b class="nc">&nbsp;        if (rating &lt; 1 || rating &gt; 5) {</b>
+<b class="nc">&nbsp;            sendMessageToUser(session, createJsonResponse(&quot;error&quot;, &quot;Rating must be between 1 and 5.&quot;));</b>
+&nbsp;            return;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        String userEmail = sessionEmailMap.get(session);</b>
+&nbsp;
+&nbsp;        // Check if the user has already rated this song
+<b class="nc">&nbsp;        Optional&lt;Rating&gt; existingRating = ratingRepository.findByUserEmailAndSongId(userEmail, songId);</b>
+&nbsp;
+<b class="nc">&nbsp;        if (existingRating.isPresent()) {</b>
+&nbsp;            // If a rating exists, update it
+<b class="nc">&nbsp;            Rating ratingToUpdate = existingRating.get();</b>
+<b class="nc">&nbsp;            ratingToUpdate.setRating(rating);</b>
+<b class="nc">&nbsp;            ratingRepository.save(ratingToUpdate);</b>
+&nbsp;
+<b class="nc">&nbsp;            updateAverageRating(songId);</b>
+<b class="nc">&nbsp;            broadcastRatingUpdate(songId);</b>
+&nbsp;
+<b class="nc">&nbsp;            sendMessageToUser(session, createJsonResponse(&quot;success&quot;, &quot;Your rating has been updated successfully.&quot;));</b>
+&nbsp;        } else {
+&nbsp;            // If no rating exists, add a new one
+<b class="nc">&nbsp;            Rating newRating = new Rating(userEmail, songId, rating);</b>
+<b class="nc">&nbsp;            ratingRepository.save(newRating);</b>
+&nbsp;
+<b class="nc">&nbsp;            updateAverageRating(songId);</b>
+<b class="nc">&nbsp;            broadcastRatingUpdate(songId);</b>
+&nbsp;
+<b class="nc">&nbsp;            sendMessageToUser(session, createJsonResponse(&quot;success&quot;, &quot;Your rating has been submitted.&quot;));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // Send song details to the user
+&nbsp;    private void sendSongDetails(Session session, int songId) {
+<b class="nc">&nbsp;        Song song = songRepository.findById(songId).orElse(null);</b>
+<b class="nc">&nbsp;        if (song != null) {</b>
+<b class="nc">&nbsp;            String songDetailsMessage = String.format(</b>
+&nbsp;                    &quot;{\&quot;title\&quot;: \&quot;%s\&quot;, \&quot;artist\&quot;: \&quot;%s\&quot;, \&quot;rating\&quot;: %.1f}&quot;,
+<b class="nc">&nbsp;                    song.getTitle(), song.getArtist(), song.getAverageRating());</b>
+<b class="nc">&nbsp;            sendMessageToUser(session, songDetailsMessage);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            sendMessageToUser(session, createJsonResponse(&quot;error&quot;, &quot;Song not found.&quot;));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // Calculate and update the average rating of the song
+&nbsp;    private void updateAverageRating(int songId) {
+<b class="nc">&nbsp;        List&lt;Rating&gt; ratings = ratingRepository.findBySongId(songId);</b>
+<b class="nc">&nbsp;        double average = ratings.stream().mapToInt(Rating::getRating).average().orElse(0);</b>
+&nbsp;
+<b class="nc">&nbsp;        Song song = songRepository.findById(songId).orElse(null);</b>
+<b class="nc">&nbsp;        if (song != null) {</b>
+<b class="nc">&nbsp;            song.setAverageRating(average);</b>
+<b class="nc">&nbsp;            songRepository.save(song);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // Broadcast updated rating to all WebSocket connections
+&nbsp;    private void broadcastRatingUpdate(int songId) {
+<b class="nc">&nbsp;        List&lt;Session&gt; sessions = sessionEmailMap.keySet().stream().collect(Collectors.toList());</b>
+<b class="nc">&nbsp;        sessions.forEach(session -&gt; {</b>
+&nbsp;            try {
+<b class="nc">&nbsp;                String averageRatingMessage = getAverageRatingMessage(songId);</b>
+<b class="nc">&nbsp;                session.getBasicRemote().sendText(averageRatingMessage);</b>
+<b class="nc">&nbsp;            } catch (IOException e) {</b>
+<b class="nc">&nbsp;                logger.error(&quot;Error broadcasting rating update: &quot;, e);</b>
+&nbsp;            }
+&nbsp;        });
+&nbsp;    }
+&nbsp;
+&nbsp;    // Generate the rating message
+&nbsp;    private String getAverageRatingMessage(int songId) {
+<b class="nc">&nbsp;        Song song = songRepository.findById(songId).orElse(null);</b>
+<b class="nc">&nbsp;        if (song != null) {</b>
+<b class="nc">&nbsp;            return &quot;Updated average rating for &quot; + song.getTitle() + &quot;: &quot; + song.getAverageRating();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return &quot;Song not found.&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @OnClose
+&nbsp;    public void onClose(Session session) {
+<b class="nc">&nbsp;        String email = sessionEmailMap.remove(session);</b>
+<b class="nc">&nbsp;        logger.info(&quot;User disconnected: &quot; + email);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @OnError
+&nbsp;    public void onError(Session session, Throwable throwable) {
+<b class="nc">&nbsp;        logger.error(&quot;WebSocket error&quot;, throwable);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Helper function to send a message to the user
+&nbsp;    private void sendMessageToUser(Session session, String message) {
+&nbsp;        try {
+<b class="nc">&nbsp;            session.getBasicRemote().sendText(message);</b>
+<b class="nc">&nbsp;        } catch (IOException e) {</b>
+<b class="nc">&nbsp;            logger.error(&quot;Error sending message: &quot; + e.getMessage());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // Helper function to create a JSON response message
+&nbsp;    private String createJsonResponse(String status, String message) {
+<b class="nc">&nbsp;        return String.format(&quot;{\&quot;status\&quot;: \&quot;%s\&quot;, \&quot;message\&quot;: \&quot;%s\&quot;}&quot;, status, message);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-12-14 00:07</div>
+</div>
+</body>
+</html>

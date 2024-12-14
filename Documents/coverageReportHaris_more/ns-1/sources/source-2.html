@@ -1,0 +1,204 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > GroupPlaylist</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">onetomany.GroupPlaylist</a>
+</div>
+
+<h1>Coverage Summary for Class: GroupPlaylist (onetomany.GroupPlaylist)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GroupPlaylist</td>
+<td class="coverageStat">
+  <span class="percent">
+    45.5%
+  </span>
+  <span class="absValue">
+    (5/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (7/14)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">GroupPlaylist$HibernateInstantiator$yZu1nJPU</td>
+  </tr>
+  <tr>
+    <td class="name">GroupPlaylist$HibernateProxy$snkG0Dfo</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    45.5%
+  </span>
+  <span class="absValue">
+    (5/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/38)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (7/14)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package onetomany.GroupPlaylist;
+&nbsp;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.Data;
+&nbsp;import onetomany.Song.Song;
+&nbsp;import onetomany.Users.User;
+&nbsp;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.Set;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Table(name = &quot;group_playlists&quot;)
+<b class="nc">&nbsp;@Data</b>
+&nbsp;public class GroupPlaylist {
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+<b class="fc">&nbsp;    private Long id;</b>
+&nbsp;
+&nbsp;    @Column
+<b class="fc">&nbsp;    private String name;  // This field can remain as is, it will be set later</b>
+&nbsp;
+&nbsp;    // Many-to-Many relationship for users
+<b class="fc">&nbsp;    @ManyToMany</b>
+&nbsp;    @JoinTable(
+&nbsp;            name = &quot;playlist_users&quot;,
+&nbsp;            joinColumns = @JoinColumn(name = &quot;playlist_id&quot;),
+&nbsp;            inverseJoinColumns = @JoinColumn(name = &quot;user_id&quot;)
+&nbsp;    )
+<b class="fc">&nbsp;    private Set&lt;User&gt; users = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;    // Many-to-Many relationship for songs
+<b class="fc">&nbsp;    @ManyToMany</b>
+&nbsp;    @JoinTable(
+&nbsp;            name = &quot;playlist_songs&quot;,
+&nbsp;            joinColumns = @JoinColumn(name = &quot;playlist_id&quot;),
+&nbsp;            inverseJoinColumns = @JoinColumn(name = &quot;song_id&quot;)
+&nbsp;    )
+<b class="fc">&nbsp;    private Set&lt;Song&gt; songs = new HashSet&lt;&gt;();</b>
+&nbsp;
+&nbsp;    // Constructor without name
+<b class="fc">&nbsp;    public GroupPlaylist() {}</b>
+&nbsp;
+&nbsp;    // Optional constructor with name
+<b class="nc">&nbsp;    public GroupPlaylist(String name) {</b>
+<b class="nc">&nbsp;        this.name = name;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Add user to the playlist if not already present
+&nbsp;    public boolean addUser(User user) {
+<b class="nc">&nbsp;        return users.add(user); // returns true if the user was added, false if already present</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Check if a specific user is in the playlist
+&nbsp;    public boolean hasUser(User user) {
+<b class="nc">&nbsp;        return users.contains(user);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Add song to the playlist if not already present
+&nbsp;    public boolean addSong(Song song) {
+<b class="nc">&nbsp;        return songs.add(song); // returns true if the song was added, false if already present</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Check if a song is already in the playlist
+&nbsp;    public boolean hasSong(Song song) {
+<b class="nc">&nbsp;        return songs.contains(song);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-12-13 23:56</div>
+</div>
+</body>
+</html>
