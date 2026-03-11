@@ -1,97 +1,228 @@
-# 3_swarna_1
+# 🎵 Music Social Platform – Rate, Share & Discover Music  
+> A CS 309 Project by Team `MK_1_8`
 
-## Visual
+## 📘 Project Description
 
-[Watch demo on YouTube](https://www.youtube.com/watch?v=tyGnnJtLe8M&list=PL6BdlkdKLEB9U0F4VMXt6Ck7DX6TAdupE&index=37)
+**Music Social Platform** is a collaborative music discovery and rating application that allows users to rate songs, create group playlists, chat with friends, and discover new music through integration with the Deezer API. Think **Spotify meets social media** – where music becomes a shared experience.
 
-[![Watch demo on YouTube](https://i.ytimg.com/vi/tyGnnJtLe8M/hqdefault.jpg?sqp=-oaymwFACKgBEF5IWvKriqkDMwgBFQAAiEIYAdgBAeIBCggYEAIYBjgBQAHwAQH4Af4JgALQBYoCDAgAEAEYQyBKKGUwDw==&rs=AOn4CLCH9HOxJYMmU9ZUnlqpZKMAhB866g)](https://www.youtube.com/watch?v=tyGnnJtLe8M&list=PL6BdlkdKLEB9U0F4VMXt6Ck7DX6TAdupE&index=37)
+The app includes:
+- Song rating system (1-5 stars) with real-time updates via WebSockets
+- Friend management and private messaging
+- Group playlist creation and collaboration
+- Music trivia games
+- Profile customization
+- Deezer API integration for song discovery
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 🚀 Features
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### For All Users
+- ✅ Rate songs and see real-time average ratings update
+- ✅ Search for songs by title or artist
+- ✅ Add songs to personal favorites
+- ✅ View top-rated and randomly selected songs
+- ✅ Create and join group playlists with friends
+- ✅ Real-time chat with friends
+- ✅ Play music trivia games (from OpenTDB API)
+- ✅ Customize profile with bio and background color
 
-## Add your files
+### Real-Time Features (WebSockets)
+- ✅ Live rating updates when users rate songs
+- ✅ Instant messaging between friends
+- ✅ Real-time song list updates for all connected users
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+### External API Integrations
+- ✅ **Deezer API** – Fetch songs, charts, and random tracks
+- ✅ **OpenTDB API** – Generate music trivia questions
 
-```
-cd existing_repo
-git remote add origin https://git.las.iastate.edu/cs309/2024fall/3_swarna_1.git
-git branch -M main
-git push -uf origin main
-```
+---
 
-## Integrate with your tools
+## 🎥 Demo
 
-- [ ] [Set up project integrations](https://git.las.iastate.edu/cs309/2024fall/3_swarna_1/-/settings/integrations)
+[Watch demo on YouTube](https://www.youtube.com/watch?v=_e86lyHJ-00&list=WL&index=62&t=9s)
 
-## Collaborate with your team
+[![Watch demo on YouTube](https://img.youtube.com/vi/_e86lyHJ-00/0.jpg)](https://www.youtube.com/watch?v=_e86lyHJ-00&list=WL&index=62&t=9s)
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+---
 
-## Test and Deploy
+## 🧠 Architecture
 
-Use the built-in continuous integration in GitLab.
+### Backend Components
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+| Controller | Purpose | Key Endpoints |
+|------------|---------|---------------|
+| **SongController** | Manage songs, Deezer integration | `/songs`, `/songs/fetch-charts`, `/songs/search` |
+| **RatingController** | Handle song ratings | `/ratings/rate`, `/ratings/{songId}/average` |
+| **SongSocket** | Real-time rating updates | WebSocket: `/rate/{email}` |
+| **RatingSocket** | Per-song rating WebSocket | WebSocket: `/rate/{email}/{songId}` |
+| **ChatSocket** | Real-time messaging | WebSocket: `/chat/{email}/{friendEmail}` |
+| **FriendController** | Manage friendships | `/users/{userId}/addFriend`, `/users/{userId}/friends` |
+| **GroupPlaylistController** | Collaborative playlists | `/users/{userId}/playlists`, `/playlists/{id}/songs` |
+| **ProfileController** | User profiles | `/users/{userId}/profile/bio`, `/users/{userId}/profile/color` |
+| **FavoritesController** | Personal song collections | `/users/{userId}/favorites` |
+| **TriviaController** | Music trivia games | `/trivia/generate`, `/trivia/{id}/submit` |
 
-***
+### Database Entities
+- **User** – User accounts and authentication
+- **Song** – Music tracks with ratings
+- **Rating** – User ratings for songs
+- **Friend** – Friend relationships between users
+- **Message** – Chat messages between friends
+- **GroupPlaylist** – Collaborative playlists with multiple users
+- **Favorites** – User's favorite songs collection
+- **Trivia** – Generated trivia games with questions and answers
+- **Profile** – User profiles with bio and customization
 
-# Editing this README
+---
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## 🛠 Tech Stack
 
-## Suggestions for a good README
+| Layer | Tech Used |
+|-------|-----------|
+| **Backend Framework** | Spring Boot (Java) |
+| **Real-Time Communication** | WebSockets (Jakarta EE) |
+| **Database** | JPA / Hibernate (configurable) |
+| **API Documentation** | Swagger / OpenAPI 3 |
+| **External APIs** | Deezer API, OpenTDB API |
+| **Build Tool** | Maven |
+| **Version Control** | Git & GitLab |
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+## 👤 User Flow
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+1. **User signs up** and creates a profile with bio and color preference
+2. **Discovers music** through:
+   - Deezer charts (fetched hourly)
+   - Random song suggestions
+   - Search by title/artist
+3. **Rates songs** (1-5 stars) – ratings update in real-time for all users
+4. **Adds friends** by email – mutual acceptance required
+5. **Creates group playlists** with friends and collaboratively adds songs
+6. **Chats with friends** in real-time
+7. **Plays trivia games** – 5 music questions per game
+8. **Saves favorites** for quick access to preferred songs
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+---
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## 📊 API Endpoints Summary
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Songs
+- `GET /songs` – Get all songs
+- `GET /songs/top-rated` – Get top-rated songs
+- `GET /songs/random` – Get random songs
+- `GET /songs/search?query=` – Search songs
+- `POST /songs` – Create new song
+- `POST /songs/fetch-random` – Fetch random songs from Deezer
+- `POST /songs/fetch-charts` – Fetch Deezer charts
+- `POST /songs/fetch-from-deezer/{deezerTrackId}` – Fetch specific song from Deezer
+- `GET /songs/fetch/{deezerTrackId}` – Get song by Deezer ID
+- `DELETE /songs/{songId}` – Delete song
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### Ratings
+- `POST /ratings/rate?songId=&userEmail=&rating=` – Rate a song
+- `GET /ratings/{songId}/average` – Get average rating
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### Friends
+- `POST /users/{userId}/addFriend` – Send friend request
+- `GET /users/{userId}/friends` – Get friends list
+- `PUT /users/{userId}/friends/email/{friendEmail}` – Update friend
+- `DELETE /users/{userId}/friends/{friendEmail}` – Remove friend
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Playlists
+- `POST /users/{userId}/playlists` – Create playlist
+- `GET /users/{userId}/playlists/myPlaylists` – Get user's playlists
+- `PUT /users/{userId}/playlists/{playlistId}/updateName` – Update playlist name
+- `POST /users/{userId}/playlists/{playlistId}/addUser` – Add user to playlist
+- `GET /playlists` – Get all playlists
+- `GET /users/{userId}/playlists/{playlistId}/users` – Get users in playlist
+- `GET /users/{userId}/playlists/{playlistId}/songs` – Get songs in playlist
+- `GET /users/{userId}/playlists/{playlistId}` – Get playlist details
+- `POST /users/{userId}/playlists/{playlistId}/songs/{songId}` – Add song to playlist
+- `DELETE /users/{userId}/playlists/{playlistId}/songs/{songId}` – Remove song from playlist
+- `DELETE /users/{userId}/playlists/{playlistId}/remove` – Leave playlist
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### Profile
+- `GET /profiles/users/{userId}/friendCount` – Get friend count
+- `GET /users/{userId}/profile/bio` – Get bio
+- `POST /users/{userId}/profile/bio` – Create bio
+- `PUT /users/{userId}/profile/bio` – Update bio
+- `DELETE /users/{userId}/profile/bio` – Delete bio
+- `GET /users/{userId}/profile/color` – Get background color
+- `PUT /users/{userId}/profile/color` – Update background color
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Favorites
+- `GET /users/{userId}/favorites` – Get favorites
+- `POST /users/{userId}/favorites/songs/{songId}` – Add to favorites
+- `DELETE /users/{userId}/favorites/songs/{songId}` – Remove from favorites
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Trivia
+- `POST /trivia/generate` – Generate trivia game
+- `PUT /trivia/{id}/submit` – Submit answers
+- `GET /trivia/{id}` – Get trivia by ID
+- `GET /trivia/fetch` – Get all trivia
+- `DELETE /trivia/{id}` – Delete trivia
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+### Messages
+- `GET /messages?email=&friendEmail=` – Get chat history between users
 
-## License
-For open source projects, say how it is licensed.
+---
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## 🔌 WebSocket Connections
+
+| Endpoint | Purpose | Message Format |
+|----------|---------|----------------|
+| `ws://server/rate/{email}` | Receive real-time song rating updates | Server sends: `{"id":1,"title":"Song","artist":"Artist","rating":4.5,"cover":"url"}` |
+| `ws://server/rate/{email}/{songId}` | Get updates for specific song | Client sends: `{"rating":5}`<br>Server sends rating updates |
+| `ws://server/chat/{email}/{friendEmail}` | Real-time messaging between friends | Client sends plain text<br>Server sends: `sender@email.com [HH:mm:ss]: message` |
+
+---
+
+## 🧪 Testing the APIs
+
+Base URL: `http://localhost:8080`
+
+### Example Requests
+
+```bash
+# Get all songs
+curl http://localhost:8080/songs
+
+# Rate a song
+curl -X POST "http://localhost:8080/ratings/rate?songId=1&userEmail=test@example.com&rating=5"
+
+# Fetch Deezer charts
+curl -X POST http://localhost:8080/songs/fetch-charts
+
+# Search for songs
+curl "http://localhost:8080/songs/search?query=love"
+
+# Create a playlist
+curl -X POST http://localhost:8080/users/1/playlists \
+  -H "Content-Type: application/json" \
+  -d '{"name":"My Playlist","users":["friend@example.com"]}'
+
+# Generate trivia
+curl -X POST http://localhost:8080/trivia/generate
+
+# Submit trivia answers
+curl -X PUT http://localhost:8080/trivia/1/submit \
+  -H "Content-Type: application/json" \
+  -d '["Answer 1","Answer 2","Answer 3","Answer 4","Answer 5"]'
+
+# Add song to favorites
+curl -X POST http://localhost:8080/users/1/favorites/songs/1
+
+# Update profile color
+curl -X PUT http://localhost:8080/users/1/profile/color \
+  -H "Content-Type: application/json" \
+  -d '{"backgroundColor":"FF5733"}'
+
+# Send friend request
+curl -X POST http://localhost:8080/users/1/addFriend \
+  -H "Content-Type: application/json" \
+  -d '{"friendEmail":"friend@example.com"}'
+
+# Get chat history
+curl "http://localhost:8080/messages?email=user@example.com&friendEmail=friend@example.com"
