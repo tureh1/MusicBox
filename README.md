@@ -4,6 +4,8 @@
 
 [Watch demo on YouTube](https://www.youtube.com/watch?v=tyGnnJtLe8M&list=PL6BdlkdKLEB9U0F4VMXt6Ck7DX6TAdupE&index=37)
 
+[![Watch demo on YouTube](https://i.ytimg.com/vi/tyGnnJtLe8M/hqdefault.jpg?sqp=-oaymwFACKgBEF5IWvKriqkDMwgBFQAAiEIYAdgBAeIBCggYEAIYBjgBQAHwAQH4Af4JgALQBYoCDAgAEAEYQyBKKGUwDw==&rs=AOn4CLCH9HOxJYMmU9ZUnlqpZKMAhB866g)](https://www.youtube.com/watch?v=tyGnnJtLe8M&list=PL6BdlkdKLEB9U0F4VMXt6Ck7DX6TAdupE&index=37)
+
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
