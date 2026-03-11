@@ -40,9 +40,9 @@ The app includes:
 
 ## 🎥 Demo
 
-[Watch demo on YouTube](https://www.youtube.com/watch?v=_e86lyHJ-00&list=WL&index=62&t=9s)
+[Watch demo on YouTube](https://www.youtube.com/watch?v=tyGnnJtLe8M&list=PL6BdlkdKLEB9U0F4VMXt6Ck7DX6TAdupE&index=37)
 
-[![Watch demo on YouTube](https://img.youtube.com/vi/_e86lyHJ-00/0.jpg)](https://www.youtube.com/watch?v=_e86lyHJ-00&list=WL&index=62&t=9s)
+[![Watch demo on YouTube](https://i.ytimg.com/vi/tyGnnJtLe8M/hqdefault.jpg?sqp=-oaymwFACKgBEF5IWvKriqkDMwgBFQAAiEIYAdgBAeIBCggYEAIYBjgBQAHwAQH4Af4JgALQBYoCDAgAEAEYQyBKKGUwDw==&rs=AOn4CLCH9HOxJYMmU9ZUnlqpZKMAhB866g)](https://www.youtube.com/watch?v=tyGnnJtLe8M&list=PL6BdlkdKLEB9U0F4VMXt6Ck7DX6TAdupE&index=37)
 
 ---
 
