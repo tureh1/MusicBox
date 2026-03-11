@@ -1,5 +1,5 @@
 # 🎵 Music Social Platform – Rate, Share & Discover Music  
-> A CS 309 Project by Team `MK_1_8`
+> A CS 309 Project by Team `3_swarna_1`
 
 ## 📘 Project Description
 
